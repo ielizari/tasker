@@ -1,0 +1,26 @@
+[
+    {
+        "id":"1",
+        "title":"Hacer la compra",
+        "description": "Comprar huevos, leche, cebollas",
+        "createdDate": "2020-11-10T10:45:01+0200",
+        "limitDate": "",
+        "author": "Iñaki",
+        "authorId": "1",
+        "status": "Pendiente",
+        "priority": "Alta",
+        "tags": ["compra","casa","comida"]
+    },
+    {
+        "id":"2",
+        "title":"KYB - ID 167: PET",
+        "description": "Eliminar el retardo al imprimir etiquetas",
+        "createdDate": "2020-10-02T09:30:01+0200",
+        "limitDate": "",
+        "author": "Iñaki",
+        "authorId": "1",
+        "status": "Pendiente",
+        "priority": "Alta",
+        "tags": ["KYB","PET","ID-167"]
+    }
+]

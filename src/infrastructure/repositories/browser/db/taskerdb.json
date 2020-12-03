@@ -1,0 +1,56 @@
+{
+    "tasks":[
+        {
+            "id":"1",
+            "parent": "",
+            "title":"Chat Inbenta",
+            "description": "Implementar chat Inbenta",
+            "createdDate": "2020-11-10T10:45:01+0200",
+            "limitDate": "",
+            "author": "Iñaki",
+            "authorId": "1",
+            "status": "Pendiente",
+            "priority": "Alta",
+            "tags": ["Aranzadi","Thomson Reuters","Area cliente", "Chat","Inbenta"]
+        },
+        {
+            "id":"3",
+            "parent":"",
+            "title":"KYBSE",
+            "description": "Tareas de KYB",
+            "createdDate": "2020-09-05T09:30:01+0200",
+            "limitDate": "",
+            "author": "Iñaki",
+            "authorId": "1",
+            "status": "Pendiente",
+            "priority": "Alta",
+            "tags": ["KYB"]
+        },
+        {
+            "id":"2",
+            "parent":"3",
+            "title":"KYB - ID 167: PET",
+            "description": "Eliminar el retardo al imprimir etiquetas",
+            "createdDate": "2020-10-02T09:30:01+0200",
+            "limitDate": "",
+            "author": "Iñaki",
+            "authorId": "1",
+            "status": "Pendiente",
+            "priority": "Alta",
+            "tags": ["KYB","PET","ID-167"]
+        },
+        {
+            "id":"4",
+            "parent":"3",
+            "title":"KYB - ID 155: Inversiones",
+            "description": "Solucionar problema informes",
+            "createdDate": "2020-11-05T09:30:01+0200",
+            "limitDate": "",
+            "author": "Iñaki",
+            "authorId": "1",
+            "status": "Pendiente",
+            "priority": "Alta",
+            "tags": ["KYB","PET","ID-155"]
+        }
+    ]
+}

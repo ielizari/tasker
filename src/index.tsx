@@ -3,10 +3,27 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import { GlobalStyle } from './styles/globalStyles'
+import {
+  BrowserRouter as Router,
+} from "react-router-dom";
+import { initDB } from './infrastructure/repositories/browser/browserdb'
+
+if(process.env.REACT_APP_MOCK){
+  const { worker } = require('./tests/mocks/browser')
+  worker.start()
+}else{
+  const { worker } = require('./infrastructure/repositories/browser/browser')
+  worker.start()
+  initDB()
+}
 
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+    <Router>    
+      <GlobalStyle/>
+      <App />
+    </Router>
   </React.StrictMode>,
   document.getElementById('root')
 );
