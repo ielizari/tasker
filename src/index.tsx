@@ -7,13 +7,13 @@ import { GlobalStyle } from './styles/globalStyles'
 import {
   BrowserRouter as Router,
 } from "react-router-dom";
-import { initDB } from './infrastructure/repositories/browser/browserdb'
+import { initDB } from './api/repositories/browser/browserdb'
 
 if(process.env.REACT_APP_MOCK){
   const { worker } = require('./tests/mocks/browser')
   worker.start()
 }else{
-  const { worker } = require('./infrastructure/repositories/browser/browser')
+  const { worker } = require('./api/repositories/browser/browser')
   worker.start()
   initDB()
 }

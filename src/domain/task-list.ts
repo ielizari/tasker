@@ -2,8 +2,8 @@ export interface TaskList {
     id: string,
     title: string,
     description: string,
-    createdDate: Date,
-    limitDate: Date,    
+    createdDate: string,
+    limitDate: string,    
     author: string,
     authorId: string,
     status: string,
@@ -15,14 +15,14 @@ export interface TaskList {
 export interface TaskItem {
     id: string,
     title: string,
-    limitDate?: Date
+    limitDate?: string
 }
 
 export interface Job{
     id: string,
     parentTask: string,
     description: string,
-    startDatetime: Date,
-    endDatetime: Date,
+    startDatetime: string,
+    endDatetime: string,
     status: string
 }

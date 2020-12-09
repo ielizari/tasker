@@ -1,5 +1,5 @@
 import { css } from 'styled-components';
-import { rem } from 'polished';
+import { rem, rgba } from 'polished';
 
 export const grid = {
   maxWidth: rem(1132),
@@ -89,13 +89,19 @@ export const color = {
   lightBlue: '#00CCFF',
   lightGreen: '#00FF99',
   lightYellow: '#FFF9AA',
+  lightGrey: '#f4f4f4',
+  semiLightGrey: '#eaeaea',
   blue: '#4158D0',
   pink: '#C850C0',
   yellow: '#FFCC70',
   black: '#000000',
   grey: '#999999',
+  darkGrey: '#9b9b9b',
+  veryDarkGrey: '#585858',
   white: '#FFFFFF',
   orange: '#ec9416',
+  darkOrange: '#b36c06',
+  success: '#48b03d',
 };
 
 const radius = {
@@ -142,6 +148,22 @@ export const common = {
       -moz-border-radius: ${rd};
       border-radius: ${rd};
     `
+  },  
+  blur(){
+    return css`
+      -webkit-filter: blur(10px);
+      -moz-filter: blur(10px);
+      -ms-filter: blur(10px);
+      -o-filter: blur(10px);
+      filter: blur(10px);
+    `
+  },
+  shadow(x = '0', y = '0', blur = '16', spread = '1', color = rgba(0,0,0,0.75)){
+    return css`
+      -webkit-box-shadow: ${x}px ${y}px ${blur}px ${spread}px ${color};
+      -moz-box-shadow: ${x}px ${y}px ${blur}px ${spread}px ${color};
+      box-shadow: ${x}px ${y}px ${blur}px ${spread}px ${color};
+    `
   },
   blockTitle(){
     return css`
@@ -152,6 +174,11 @@ export const common = {
       -webkit-border-radius: 5px;
       -moz-border-radius: 5px;
       border-radius: 5px;
+    `
+  },
+  greenButton(){
+    return css`
+      background-color: #48b03d;
     `
   }
 }

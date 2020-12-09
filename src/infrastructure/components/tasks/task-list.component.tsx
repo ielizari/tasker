@@ -1,10 +1,14 @@
 import React from 'react'
 import { TaskItem } from '../../../domain/task-list'
+import { getTaskList } from '../../../application/getTaskList'
 import styled from 'styled-components'
 import { color, common } from '../../../styles/theme';
-import {     
-    Link,
-  } from "react-router-dom";
+import { Link } from "react-router-dom";
+
+import { Spinner } from '../common/spinner'
+
+import { BlockActions } from '../common/block-actions'
+import { FaPlus } from 'react-icons/fa'
 
 const ListItem = styled.li`
     list-style: none;
@@ -31,19 +35,42 @@ const TaskListItem = (props: {task: TaskItem } ) => {
 export const TaskListComponent = () => {
     const [tasks, setTasks] = React.useState<Array<TaskItem>>([])
     const [error, setError] = React.useState<Error | null>(null)
+    const [loading, setLoading] = React.useState<boolean>(false)
+    const [actions, setActions] = React.useState<Array<any>>([])
 
-    React.useEffect(() => {
-        fetch('http://localhost:3000/api/tasks')
-            .then(res => res.json())
+    let actionItems = [
+        {
+            icon: FaPlus,
+            text: 'Nueva tarea',
+            route: `/tasks/new`,
+            type: 'link'
+        }
+    ]
+
+    React.useEffect(() => {        
+        setLoading(true)
+        setActions(actionItems)
+        getTaskList()
             .then(
-                (result) => {setTasks(result); setError(null)},
-                (error) => setError(error)
+                (result) => {
+                    setTasks(result); 
+                    setError(null);
+                    setLoading(false)    
+                },
+                (error) => {
+                    setError(error)
+                    setLoading(false)    
+                }
             )
     },[])    
     
      return (
         <div className="block">
-            <h3 className="section-title">Tareas</h3>            
+             {loading ? <Spinner /> : ''}
+            <h3 className="section-title">Tareas</h3>     
+            <BlockActions 
+                actions={actions}
+            />
             {error!==null ? 
                 <div>Error: {error.message?error.message:'unknown error'}</div> 
                 :

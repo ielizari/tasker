@@ -1,0 +1,406 @@
+div.orzk-dp_contenedor{
+	width: 100%;
+	height: 100%;
+	position: fixed;
+	top: 0;
+	left: 0;
+	z-index: 200;
+	background-color: rgba(0,0,0,0.5);	
+	color: #000;
+}
+
+
+div.orzk-dp_datepicker{
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	-ms-transform: translate(-50%, -50%);
+	transform: translate(-50%,-50%);	
+	width: 320px;
+	margin: 0;
+	background-color: #fff;
+	border-style: solid;
+	border-width: 1px;
+	border-color: #ccc;
+}
+
+div.orzk-dp_contenedor_attach{
+	position: absolute;
+	width: 320px;
+	margin: 0;
+	z-index:200;
+	
+}
+
+div.orzk-dp_datepicker_attach{	
+	margin: 0;
+	background-color: #fff;
+	border-style: solid;
+	border-width: 1px;
+	border-top: 0;
+	border-color: #ccc;
+	-webkit-box-shadow: 10px 10px 5px 0px rgba(0,0,0,0.75);
+	-moz-box-shadow: 10px 10px 5px 0px rgba(0,0,0,0.75);
+	box-shadow: 10px 10px 5px 0px rgba(0,0,0,0.75);	
+}
+
+div.orzk-dp_arrow_attach{	
+	width: 0;
+	height: 0;
+	border-left: 15px solid transparent;
+	border-right: 15px solid transparent;
+	border-bottom: 15px solid #d53535;
+	margin-left: 5px;
+}
+div.orzk-dp_title{
+	text-align: center;
+	font-size: 1.2em;
+	color: #fff;
+	background-color: #464646;
+	padding: 0.5em;
+	word-wrap: break-word;
+}
+
+div.orzk-dp_year{
+	background-color: #d53535;
+	color: #fff;
+	padding: 0.8em 0;
+	margin: 0;
+	text-align: center;
+	display: inline-block;
+	width: 50%;
+	word-wrap: break-word;
+}
+
+div.orzk-dp_year_month_container{
+	background-color: #d53535;
+	color: #fff;
+	padding: 0.8em 0;
+	margin: 0 0 -1px 0;
+	text-align: center;
+	display: inline-block;
+	width: 50%;
+}
+
+div.orzk-dp_year_month {	
+	display: inline-block;
+	cursor: pointer;
+	margin: 0;
+}
+
+div.orzk-dp_dayweek{
+	background-color: #d53535;
+	color: #fff;
+	padding: 0.5em;
+	margin: -1px 0;
+	text-align: center;
+	border-width: 0;
+}
+
+div.orzk-dp_day{
+	background-color: #d53535;
+	font-size: 2.5em;
+	color: #fff;
+	text-align: center;
+	padding: 0 0 0.5em 0;
+	margin: -1px 0;
+}
+
+div.orzk-dp_time{
+	background-color: #d53535;
+	font-size: 1.5em;
+	color: #fff;
+	text-align: center;
+	padding: 0.5em 0;
+	margin: 0;
+}
+
+div.orzk-dp_dayhourcontainer{
+	background-color: #b0b0b0;
+	padding: 0;
+	margin: 0;
+	padding-bottom: 0;
+}
+
+div.orzk-dp_dayhour_button_selected{
+	background-color: #b0b0b0 !important;	
+}
+div.orzk-dp_calendar_button{
+	display: inline-block;	
+	width: 50%;
+	height: 25px;
+	background-position: center;
+	cursor: pointer;
+	background-repeat: no-repeat;
+	background-color: #8c8c8c;
+	padding: 0.5em 0;
+}
+
+div.orzk-dp_hour_button{
+	display: inline-block;	
+	width: 50%;
+	height: 25px;
+	background-position: center;
+	cursor: pointer;
+	background-repeat: no-repeat;
+	background-color: #8c8c8c;
+	padding: 0.5em 0;
+}
+
+div.orzk-dp_msg{
+	padding: 0 0.5em;
+	font-size: 0.9em;
+	text-align: left;
+	background-color: #616161;
+	cursor: pointer;
+}
+div.orzk-dp_error_icon{
+	color: #fff;
+	background-color: #f00;
+	font-weight: bold;
+	font-size: 1em;
+	border-style: solid;
+	border-width: 1px;
+	border-color: #f00;
+	border-radius: 10%;
+	-webkit-border-radius: 10%;
+	-moz-border-radius: 10%;	
+	display: inline-block;
+	padding: 0.3em;	
+	text-align: center;
+	margin: 0.3em;
+}
+div.orzk-dp_msg_error{
+	background-color: #e54242;
+	padding: 0.5em;
+	margin: 0.3em;
+	text-align: center;
+}
+
+div.orzk-dp_warning_icon{
+	color: #fff;
+	background-color: #ff7800;
+	font-weight: bold;
+	font-size: 1em;
+	border-style: solid;
+	border-width: 1px;
+	border-color: #ff7800;
+	border-radius: 10%;
+	-webkit-border-radius: 10%;
+	-moz-border-radius: 10%;	
+	display: inline-block;
+	padding: 0.3em;	
+	text-align: center;	
+	margin: 0.3em;
+}
+div.orzk-dp_msg_warning{
+	background-color: #ff7800;
+	padding: 0.5em;
+	margin: 0.3em;
+	text-align: center;
+}
+
+div.orzk-dp_msg_info{
+	
+}
+
+div.orzk-dp_msg_list{
+	position: absolute;
+	width: 100%;
+	z-index: 100;
+	background-color: #616161;
+	-webkit-box-shadow: 0px 10px 7px -3px rgba(0,0,0,0.75);
+	-moz-box-shadow: 0px 10px 7px -3px rgba(0,0,0,0.75);
+	box-shadow: 0px 10px 7px -3px rgba(0,0,0,0.75);
+	cursor: pointer;
+}
+table.orzk-dp_days{
+	width: 100%;
+}
+
+
+table.orzk-dp_days th{
+	background-color: #fff;
+	color: #000;
+	font-weight: bold;
+	text-align: center;
+	padding: 0.5em;
+}
+
+table.orzk-dp_days td{
+	background-color: #fff;
+	padding:0.5em;
+	text-align: center;	
+}
+table.orzk-dp_days td.orzk-dp_pickable:hover{
+	background-color: #c3e4f9;
+	cursor: pointer;
+}
+
+.orzk-dp_not_pickable{
+	cursor: default;
+	color: #9f9f9f;	
+}
+
+.orzk-dp_calendar_day_selected{
+	background-color: #aad3ed !important;	
+	font-weight: bold;
+	cursor: pointer;
+}
+
+div.orzk-dp_decade_list_container{
+	text-align: center;
+	padding: 0.8em;
+	background-color: #d4d4d4;
+}
+div.orzk-dp_decade_list {
+	text-align: center;	
+	width: 50%;
+	display: inline-block;
+}
+
+div.orzk-dp_table_container{
+	position: relative;
+	margin: 0;
+	padding: 0;
+}
+
+div.orzk-dp_time_container{
+	position: relative;
+	height: 260px;
+	z-index: 2;
+}
+
+div.orzk-dp_time_element{
+	position: absolute;
+	background-color: #cfe6f3;
+	width: 30px;
+	height: 30px;
+	text-align: center;
+	line-height: 30px;
+	border-radius: 50%;
+	-webkit-border-radius: 50%;
+	-moz-border-radius: 50%;
+	cursor: pointer;
+}
+div.orzk-dp_time_element:hover{
+	background-color: #aad3ed;
+}
+div.orzk-dp_time_minutes{
+	
+}
+div.orzk-dp_time_item_selected{
+	background-color: #8bb6cf !important;
+}
+div.orzk-dp_time_min_element{
+	position: absolute;
+	width: 10px;
+	height: 40px;
+	cursor: pointer;	
+}
+span.orzk-dp_time_display_selected{
+	font-weight: bold;
+	color: #ffde25;
+}
+
+div.orzk-dp_prev_button{
+	float: left;
+	padding: 0 0.5em;
+	width: 15px;
+	height: 15px;
+	background-position: center;
+	cursor: pointer;
+	background-repeat: no-repeat;
+}
+div.orzk-dp_next_button{
+	float: right;
+	width: 15px;
+	height: 15px;
+	padding: 0 0.5em;
+	background-position: center;
+	cursor: pointer;
+	background-repeat: no-repeat;
+}
+
+div.orzk-dp_btn_container{
+	text-align: center;	
+}
+div.orzk-dp_button{
+	cursor: pointer;
+	border-style: solid;
+	border-width: 1px;
+	border-color: #3b8abc;
+	display: inline-block;
+	background-color: #e7ecef;
+	padding: 0.5em 0;
+	margin: 4%;
+	width: 40%;
+	text-align: center;
+}
+div.orzk-dp_button:hover{
+	background-color: #aad3ed;
+}
+
+
+svg.orzk-dp_clock_svg{
+	position: absolute;
+	z-index: 1;
+	top: 0;
+	left: 0;
+}
+
+
+
+.orzk-dp_hide{
+	display: none;
+}
+
+.orzk-dp_invisible {
+	visibility: hidden;
+}
+
+.orzk-dp_arrow{	
+	cursor: pointer;
+	border: solid #363636;
+	border-width: 0 3px 3px 0;	
+	width: 10px;
+	height: 10px;
+	padding: 0;
+	margin: 2.5px 1em;
+}
+.orzk-dp_right{
+	float: right;
+	transform: rotate(-45deg);
+	-webkit-transform: rotate(-45deg);
+	margin-left: 0 !important;
+}
+
+.orzk-dp_left{
+	float: left;
+	transform: rotate(135deg);
+	-webkit-transform: rotate(135deg);
+	margin-right: 0 !important;
+}
+
+.orzk-dp_down{
+	float: right;
+	border-left: 10px solid transparent;
+	border-right: 10px solid transparent;  
+	border-top: 10px solid #363636;
+	margin-top: 0.8em;
+	width: 0;
+	height: 0;
+}
+
+.orzk-dp_up{
+	float: right;
+	border-left: 10px solid transparent;
+	border-right: 10px solid transparent;  
+	border-bottom: 10px solid #363636;
+	margin-top: 0.8em;
+	width: 0;
+	height: 0;
+}
+
+.orzk-dp-icon-calendar{background-image:url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgY2xhc3M9ImZlYXRoZXIgZmVhdGhlci1jYWxlbmRhciI+PHJlY3QgeD0iMyIgeT0iNCIgd2lkdGg9IjE4IiBoZWlnaHQ9IjE4IiByeD0iMiIgcnk9IjIiPjwvcmVjdD48bGluZSB4MT0iMTYiIHkxPSIyIiB4Mj0iMTYiIHkyPSI2Ij48L2xpbmU+PGxpbmUgeDE9IjgiIHkxPSIyIiB4Mj0iOCIgeTI9IjYiPjwvbGluZT48bGluZSB4MT0iMyIgeTE9IjEwIiB4Mj0iMjEiIHkyPSIxMCI+PC9saW5lPjwvc3ZnPg==)}
+.orzk-dp-icon-time{background-image:url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgY2xhc3M9ImZlYXRoZXIgZmVhdGhlci1jbG9jayI+PGNpcmNsZSBjeD0iMTIiIGN5PSIxMiIgcj0iMTAiPjwvY2lyY2xlPjxwb2x5bGluZSBwb2ludHM9IjEyIDYgMTIgMTIgMTYgMTQiPjwvcG9seWxpbmU+PC9zdmc+)}
