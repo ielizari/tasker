@@ -1,31 +1,51 @@
 import { rest } from 'msw'
 import taskData from './tasks.json'
-import { TaskDetail } from '../../domain/task-detail'
+import { TaskDetail, TaskObject } from '../../domain/task-detail'
 import { isEmpty } from 'lodash'
 import  {Datepicker}  from '../../lib/orzkDatepicker/datepicker'
+import { ApiResponseBuilder, ApiResponse} from '../../api/domain/api-response'
 
 export const handlers = [
     rest.get('http://localhost:3000/api/tasks',(req, res, ctx) => {        
         return res(
             ctx.status(200),
-            ctx.json(taskData)
+            ctx.json(ApiResponseBuilder(200,taskData,false))
         )
     }),
-    rest.get('http://localhost:3000/api/tasks/:taskid',(req, res, ctx) => {  
-        const taskid = req.params.taskid || '';        
-        const task = taskData.filter((item)=> item.id === taskid)  
-
-        if(task.length){
-            return res(
-                ctx.status(200),
-                ctx.json(task[0])
-            )
-        }else{
-            return res(
-                ctx.status(404, 'La tarea no existe'),
-                ctx.json({errMessage: 'La tarea no existe'})
-            )            
+    // Tarea inexistente
+    rest.get('http://localhost:3000/api/tasks/1111',(req, res, ctx) => {  
+        return res(
+            ctx.status(404, 'La tarea no existe'),
+            ctx.json(ApiResponseBuilder(200,{},true,'La tarea no existe'))
+        )         
+    }),
+    rest.get('http://localhost:3000/api/tasks/1',(req, res, ctx) => {          
+        const task: TaskDetail = {            
+            "id":"1",
+            "parent":"",
+            "title":"Hacer la compra",
+            "description": "Comprar huevos, leche, cebollas",
+            "createdDate": "2020-11-10T10:45:01+0200",
+            "limitDate": "",
+            "author": "Iñaki",
+            "authorId": "1",
+            "status": "1",
+            "priority": "3",
+            "tags": ["compra","casa","comida"]            
         }
+        const parentTask = null
+        const childTasks = []
+
+        const taskObject : TaskObject= {
+            task: task,
+            parentTask: parentTask,
+            childTasks: childTasks
+        }
+        
+        return res(
+            ctx.status(200),
+            ctx.json(ApiResponseBuilder(200,taskObject,false))
+        )        
     }),
     rest.post('http://localhost:3000/api/tasks/add',(req,res,ctx) =>{
         try{
@@ -55,5 +75,28 @@ export const handlers = [
                 ctx.json({errMessage: e.message})
             )
         }
+    }),
+
+    rest.delete('http://localhost:3000/api/tasks/delete/1', (req,res,ctx) => {
+            const task: TaskDetail = {            
+                "id":"1",
+                "parent":"",
+                "title":"Hacer la compra",
+                "description": "Comprar huevos, leche, cebollas",
+                "createdDate": "2020-11-10T10:45:01+0200",
+                "limitDate": "",
+                "author": "Iñaki",
+                "authorId": "1",
+                "status": "1",
+                "priority": "3",
+                "tags": ["compra","casa","comida"]            
+            }
+            
+            return res(
+                    ctx.status(200),
+                    ctx.json(ApiResponseBuilder(200,task,false))
+                )
+            
+        
     })
 ]

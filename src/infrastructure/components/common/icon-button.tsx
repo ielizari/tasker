@@ -51,10 +51,14 @@ export const IconButton = (props) => {
         setText(props.text)
     },[])
 
+    
     return (
         <ButtonWrapper
             className={props.className}
             onClick={props.onClick}
+            role="button"
+            aria-label={props.text}
+            type={props.type}
         >
             <IconWrapper className={props.className}>{icon}</IconWrapper>       
             {text}
@@ -78,6 +82,8 @@ export const IconLink = (props) => {
             to={route} 
             className={props.className}
             onClick={props.onClick}
+            role="button"
+            aria-label={props.text}
             >
             <IconWrapper className={props.className}>{icon}</IconWrapper>       
             {text}

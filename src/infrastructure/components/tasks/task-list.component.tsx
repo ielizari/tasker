@@ -1,4 +1,5 @@
 import React from 'react'
+import { ApiResponse } from '../../../api/domain/api-response'
 import { TaskItem } from '../../../domain/task-list'
 import { getTaskList } from '../../../application/getTaskList'
 import styled from 'styled-components'
@@ -53,8 +54,14 @@ export const TaskListComponent = () => {
         getTaskList()
             .then(
                 (result) => {
-                    setTasks(result); 
-                    setError(null);
+                    if(result.hasError){
+                        setError(new Error(result.error));
+                        setTasks([])
+                    }else{
+                        setTasks(result.data); 
+                        setError(null);
+                    }
+                    
                     setLoading(false)    
                 },
                 (error) => {

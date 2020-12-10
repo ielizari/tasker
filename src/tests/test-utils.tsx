@@ -7,13 +7,18 @@ interface renderOptions {
   route?: string
 }
 
-export const history = createMemoryHistory()
+
 export const renderWithProviders = (
-  ui: React.ReactNode,
-  { route }: renderOptions = {},
+    ui: React.ReactNode,
+    { route }: renderOptions = {},
 ) => {
-  if (route) {
-    history.push(route)
-  }
-  render(<Router history={history}>{ui}</Router>)
+  const history = createMemoryHistory()
+    if (route) {
+      history.push(route)
+    }
+    
+    render(       
+        <Router history={history}>{ui}</Router>
+        
+    )
 }

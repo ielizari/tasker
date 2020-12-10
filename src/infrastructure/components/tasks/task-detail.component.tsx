@@ -2,6 +2,7 @@ import React from 'react'
 import styled from 'styled-components'
 import { color } from '../../../styles/theme'
 import { useParams} from 'react-router-dom'
+import { ApiResponse } from '../../../api/domain/api-response'
 import { TaskDetail } from '../../../domain/task-detail'
 import { TaskPriority, TaskStatus, ConstObjectToSelectOptionsArray } from '../../../domain/task-definitions'
 import { getTask } from '../../../application/getTask'
@@ -50,6 +51,7 @@ export const TaskDetailComponent = () => {
     const [isOpened, setOpened] = React.useState(false)
     const [statusLabel, setStatusLabel ] = React.useState<string>('')
     const [priorityLabel, setPriorityLabel ] = React.useState<string>('')
+    const [confirmedDelete, setConfirmedDelete ] = React.useState<boolean>(false)
     
     const confirmDelete = () =>{
         openModal()        
@@ -57,16 +59,23 @@ export const TaskDetailComponent = () => {
     const handleDelete = () => {
         setOpened(false)
         setLoading(true)
-        deleteTask(taskid)
+        setConfirmedDelete(true)   
+    }
+
+    React.useEffect(() => {
+        let cancelled = false
+        if(confirmedDelete){
+            deleteTask(taskid)
             .then(
                 result => {
-                    if(result){
-                        setDeleteSuccess('La tarea se ha eliminado con éxito')
-                    }else{
-                        setError(new Error('Ha ocurrido un error al eliminar la tarea.'))
+                    if(!cancelled){
+                        if(!result.hasError){
+                            setDeleteSuccess('La tarea se ha eliminado con éxito')
+                        }else{
+                            setError(new Error('Ha ocurrido un error al eliminar la tarea.'))
+                        }
+                        setLoading(false)
                     }
-                    setLoading(false)
-
                 },
                 error => {
                     console.log("Error: ", error)
@@ -74,7 +83,10 @@ export const TaskDetailComponent = () => {
                     setLoading(false)
                 }
             )
-    }
+        }
+
+        return () => cancelled = true;
+    },[confirmedDelete])
 
     const closeModal = () => {  setOpened(false)}
     const openModal = () => { setOpened(true)}
@@ -101,26 +113,39 @@ export const TaskDetailComponent = () => {
     ]
 
     React.useEffect(() => {
+        let cancelled = false;
         setActions(actionItems)
         setLoading(true)
         getTask(taskid)
             .then(
                 (result) => {
-                    let status = ConstObjectToSelectOptionsArray(TaskStatus).filter(i => i.value === result.task.status)
-                    setStatusLabel(status.length ? status[0].label : '')
-                    let priority = ConstObjectToSelectOptionsArray(TaskPriority).filter(i => i.value === result.task.priority)
-                    setPriorityLabel(priority.length ? priority[0].label : '')
-                    
-                    setTask(result.task) 
-                    setError(null)
-                    setLoading(false)  
+                    if(!cancelled){
+                        if(result.hasError){
+                            setError(new Error(result.error))
+                            setTask(null)
+                        }else{
+                            let status = ConstObjectToSelectOptionsArray(TaskStatus).filter(i => i.value === result.data.task.status)
+                            setStatusLabel(status.length ? status[0].label : '')
+                            let priority = ConstObjectToSelectOptionsArray(TaskPriority).filter(i => i.value === result.data.task.priority)
+                            setPriorityLabel(priority.length ? priority[0].label : '')
+                            console.log(statusLabel,priorityLabel)
+                            setTask(result.data.task) 
+                            setError(null)
+                        }
+                        
+                        setLoading(false)  
+                    }
                 },
                 (error) => {
-                    setError(error)
-                    setTask(null)
-                    setLoading(false)
+                    if(!cancelled){
+                        setError(error)
+                        setTask(null)
+                        setLoading(false)
+                    }
                 }
-            )        
+            )
+        
+            return () => cancelled = true
     },[])
     return (        
         <div className="block">

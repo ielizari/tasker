@@ -19,7 +19,7 @@ if(process.env.REACT_APP_MOCK){
 }
 
 ReactDOM.render(
-  <React.StrictMode>
+  <React.StrictMode>    
     <Router>    
       <GlobalStyle/>
       <App />

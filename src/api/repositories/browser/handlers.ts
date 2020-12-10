@@ -2,28 +2,36 @@ import { rest } from 'msw'
 import { isEmpty } from 'lodash'
 import { getTaskerRepository } from '../../application/taskerRepository'
 import { TaskDetail } from '../../../domain/task-detail'
+import { ApiResponse, ApiResponseBuilder } from '../../domain/api-response'
 
 export const handlers = [
     rest.get('http://localhost:3000/api/tasks',(req, res, ctx) => {         
         const tasks = getTaskerRepository().getTasks()
+        
+        const response : ApiResponse = {
+            status: 200,
+            hasError: false,
+            data: tasks
+        } 
         return res(
             ctx.status(200),
-            ctx.json(tasks)
+            ctx.json(response)
         )
     }),
     rest.get('http://localhost:3000/api/tasks/:taskid',(req, res, ctx) => {  
         const taskid = req.params.taskid || '';
 
         const task = getTaskerRepository().getTaskById(taskid)
-        if(task !== undefined){
+        
+        if(task.task){            
             return res(
                 ctx.status(200),
-                ctx.json(task)
+                ctx.json(ApiResponseBuilder(200,task,false))
             )
         }else{
             return res(
                 ctx.status(404, 'La tarea no existe'),
-                ctx.json({errMessage: 'La tarea no existe'})
+                ctx.json(ApiResponseBuilder(404,{},true,'La tarea no existe'))
             )            
         }
     }),
@@ -60,19 +68,19 @@ export const handlers = [
             if(taskid === ''){
                 return res(
                     ctx.status(400),
-                    ctx.json({errMessage: 'Id de tarea no válida'})
+                    ctx.json(ApiResponseBuilder(400,{},true,'Id de tarea no válida'))
                 )
             }else{            
                 let result = getTaskerRepository().deleteTask(taskid)
                 return res(
                     ctx.status(200),
-                    ctx.json(result)
+                    ctx.json(ApiResponseBuilder(200,result,false))
                 )
             }
         }catch(e){
             return res(
                 ctx.status(500),
-                ctx.json({errMessage: e.message})
+                ctx.json(ApiResponseBuilder(500,{},true,e.message))
             )
         }
     })

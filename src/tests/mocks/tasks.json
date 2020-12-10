@@ -8,8 +8,8 @@
         "limitDate": "",
         "author": "Iñaki",
         "authorId": "1",
-        "status": "Pendiente",
-        "priority": "Alta",
+        "status": "1",
+        "priority": "3",
         "tags": ["compra","casa","comida"]
     },
     {
@@ -21,8 +21,8 @@
         "limitDate": "",
         "author": "Iñaki",
         "authorId": "1",
-        "status": "Pendiente",
-        "priority": "Alta",
+        "status": "1",
+        "priority": "3",
         "tags": ["KYB","PET","ID-167"]
     }
 ]

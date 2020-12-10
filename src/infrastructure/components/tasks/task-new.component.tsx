@@ -196,15 +196,21 @@ export const TaskNewComponent = (props) => {
             getTask(taskid)
             .then(
                 (result) => {  
-                    if(mode === 'edit'){    
-                        setTask(result.task) 
+                    if(result.hasError){
+                        setError(new Error(result.error))
+                        setTask(null)
                     }else{
-                        setParentTask(result.task)
-                        emptyTask.parent = result.task.id
-                        setTask(emptyTask)
+                        if(mode === 'edit'){    
+                            setTask(result.data.task) 
+                        }else{
+                            setParentTask(result.data.task)
+                            emptyTask.parent = result.data.task.id
+                            setTask(emptyTask)
+                        }
+                        setError(null)
+                        setSubmitError(null)
                     }
-                    setError(null)
-                    setSubmitError(null)
+                   
                     setLoading(false) 
                 },
                 (error) => {
@@ -241,7 +247,6 @@ export const TaskNewComponent = (props) => {
                 <Formik
                     initialValues={task}               
                     validate = {values => {
-                        console.log(values)
                         const errors : Partial<TaskDetail> = {}
                         
                         if(!values.title){                        
@@ -258,7 +263,7 @@ export const TaskNewComponent = (props) => {
                         }
                         
                         let datetime = values.limitDate.split(" ")
-                        console.log(limitDate,values.limitDate, datetime)
+                        //console.log(limitDate,values.limitDate, datetime)
                         if(datetime.length > 0 && datetime.length !== 11 && datetime[0] !== ''){
                             if(!datetime[0].match(/^(((0[1-9]|[12]\d|3[01])\/(0[13578]|1[02])\/((19|[2-9]\d)\d{2}))|((0[1-9]|[12]\d|30)\/(0[13456789]|1[012])\/((19|[2-9]\d)\d{2}))|((0[1-9]|1\d|2[0-8])\/02\/((19|[2-9]\d)\d{2}))|(29\/02\/((1[6-9]|[2-9]\d)(0[48]|[2468][048]|[13579][26])|(([1][26]|[2468][048]|[3579][26])00))))$/g)){
                                 errors.limitDate = 'Formato de fecha no válido'
@@ -356,6 +361,7 @@ export const TaskNewComponent = (props) => {
                                     route={taskid ? `/tasks/${taskid}` : '/tasks'}
                                     text="Cancelar"
                                     icon={FaTimes}
+                                    type="button"
                                     disabled={props.isSubmitting && !props.isValidating}
                                     className="form-button-cancel button-icon"
                                     />

@@ -5,6 +5,10 @@ import { color, common, font} from '../../../styles/theme'
 import { FaTimes, FaCheck } from 'react-icons/fa'
 import { IconButton } from './icon-button'
 
+const modalRoot = document.createElement('div');
+modalRoot.setAttribute('id', 'modalContainer');
+document.body.append(modalRoot);
+
 const modalContainer = document.querySelector("#modalContainer")
 
 const DialogWrapper = styled.div`
@@ -71,7 +75,7 @@ const DialogButtons = styled.div`
 export const Modal = ({title, isOpened, onClose, action, content, type}) => {
     return(
         <>
-            {isOpened ?
+            {isOpened &&
                 ReactDOM.createPortal(
                     <DialogWrapper role="dialog" onClick={(e: any) => {
                         if(e.target.contains(document.getElementById('modalContent')))
@@ -116,8 +120,7 @@ export const Modal = ({title, isOpened, onClose, action, content, type}) => {
                         </DialogContent>
                     </DialogWrapper>
                     , modalContainer
-                )
-                : null
+                )                
             }
         </>
     )
