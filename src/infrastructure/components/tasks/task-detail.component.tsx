@@ -3,7 +3,8 @@ import styled from 'styled-components'
 import { color } from '../../../styles/theme'
 import { useParams} from 'react-router-dom'
 import { ApiResponse } from '../../../api/domain/api-response'
-import { TaskDetail } from '../../../domain/task-detail'
+import { TaskDetail, TaskObject } from '../../../domain/task-detail'
+import { TaskListComponent } from './task-list.component'
 import { TaskPriority, TaskStatus, ConstObjectToSelectOptionsArray } from '../../../domain/task-definitions'
 import { getTask } from '../../../application/getTask'
 import { deleteTask } from '../../../application/deleteTask'
@@ -12,6 +13,7 @@ import { BlockActions } from '../common/block-actions'
 import { FaEdit, FaTrashAlt, FaPlus } from 'react-icons/fa'
 import { Modal } from '../common/modal'
 import { Link } from 'react-router-dom'
+import { dateToString } from '../../../lib/date.utils'
  
 const TaskDetailContainer = styled.ul`
 `;
@@ -38,12 +40,24 @@ const ErrorMessage = styled.div`
     margin: 0.5rem;
 `;
 
+const TaskChildrenContainer = styled.div`
+
+`
+export const TaskChildren = (props: {childTasks: Array<TaskDetail>, handler: any}) => {
+    return (
+        <TaskChildrenContainer>
+            {}
+        </TaskChildrenContainer>
+    )
+}
+
 export interface TaskProps {
     taskid: string,
 }
-export const TaskDetailComponent = () => {
+export const TaskDetailComponent = (props) => {
     let { taskid } = useParams<TaskProps>()
-    const [task, setTask] = React.useState<TaskDetail | null>(null)
+    const [ taskId, setTaskId ] = React.useState<string>(props.task || taskid)
+    const [task, setTask] = React.useState<TaskObject | null>(null)        
     const [error, setError] = React.useState<Error | null>(null)
     const [deleteSuccess, setDeleteSuccess] = React.useState<string | null>(null)
     const [loading, setLoading] = React.useState<boolean>(false)
@@ -124,12 +138,13 @@ export const TaskDetailComponent = () => {
                             setError(new Error(result.error))
                             setTask(null)
                         }else{
+                            console.log(result)
                             let status = ConstObjectToSelectOptionsArray(TaskStatus).filter(i => i.value === result.data.task.status)
                             setStatusLabel(status.length ? status[0].label : '')
                             let priority = ConstObjectToSelectOptionsArray(TaskPriority).filter(i => i.value === result.data.task.priority)
                             setPriorityLabel(priority.length ? priority[0].label : '')
                             console.log(statusLabel,priorityLabel)
-                            setTask(result.data.task) 
+                            setTask(result.data) 
                             setError(null)
                         }
                         
@@ -146,7 +161,7 @@ export const TaskDetailComponent = () => {
             )
         
             return () => cancelled = true
-    },[])
+    },[taskId])
     return (        
         <div className="block">
             <Modal 
@@ -168,19 +183,19 @@ export const TaskDetailComponent = () => {
                 {error !== null ?
                     <ErrorMessage>{error.message}</ErrorMessage>
                     :
-                    (task !== null)?                
+                    (task && task.task)?                
                         <TaskDetailContainer> 
                             <TaskDetailItem>
                                 <TaskDetailKey>Título:</TaskDetailKey>
-                                <TaskDetailValue>{task.title}</TaskDetailValue>
+                                <TaskDetailValue>{task.task.title}</TaskDetailValue>
                             </TaskDetailItem>
                             <TaskDetailItem>
                                 <TaskDetailKey>Descripción:</TaskDetailKey>
-                                <TaskDetailValue>{task.description}</TaskDetailValue>
+                                <TaskDetailValue>{task.task.description}</TaskDetailValue>
                             </TaskDetailItem>
                             <TaskDetailItem>
                                 <TaskDetailKey>Author:</TaskDetailKey>
-                                <TaskDetailValue>{task.author}</TaskDetailValue>
+                                <TaskDetailValue>{task.task.author}</TaskDetailValue>
                             </TaskDetailItem>
                             <TaskDetailItem>
                                 <TaskDetailKey>Estado:</TaskDetailKey>
@@ -191,10 +206,30 @@ export const TaskDetailComponent = () => {
                                 <TaskDetailValue>{priorityLabel}</TaskDetailValue>
                             </TaskDetailItem>
                             <TaskDetailItem>
-                                <TaskDetailKey>Tags:</TaskDetailKey>
-                                <TaskDetailValue>{task.tags}</TaskDetailValue>
+                                <TaskDetailKey>Creada:</TaskDetailKey>
+                                <TaskDetailValue>{task.task.createdDate ? dateToString(new Date(task.task.createdDate)) : '-'}</TaskDetailValue>
                             </TaskDetailItem>
+                            <TaskDetailItem>
+                                <TaskDetailKey>Fecha límite:</TaskDetailKey>
+                                <TaskDetailValue>{task.task.limitDate ? dateToString(new Date(task.task.limitDate)) : '-'}</TaskDetailValue>
+                            </TaskDetailItem>
+                            <TaskDetailItem>
+                                <TaskDetailKey>Tarea padre:</TaskDetailKey>
+                                <TaskDetailValue>
+                                    {task.parentTask ?
+                                        <Link to={`tasks/${task.parentTask.id}`}>{task.parentTask.title}</Link>
+                                        :
+                                        '-'
+                                    }
+                                </TaskDetailValue>
+                            </TaskDetailItem>
+                            <TaskDetailItem>
+                                <TaskDetailKey>Tags:</TaskDetailKey>
+                                <TaskDetailValue>{task.task.tags}</TaskDetailValue>
+                            </TaskDetailItem>
+                            <TaskChildren children={task.childTasks} handler={childHandler}/>
                         </TaskDetailContainer>
+                        
                     :   
                         <div></div>
                 }

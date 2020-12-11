@@ -30,8 +30,10 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
         console.log('generatedid',id)
         return id
     }
-    getTasks(): Array<TaskItem>  {
-        const tasks = db.get('tasks').take(10).value()
+    getTasks(filter: Partial<TaskDetail> = {}): Array<TaskItem>  {
+        const search = JSON.parse(filter as string)
+        const tasks = db.get('tasks').filter(search).value()
+        console.log(tasks)
         const result : Array<TaskItem>= []
         tasks.map((task: TaskDetail) => {
             result.push({
@@ -63,10 +65,20 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
             throw e
         }
     }
-    addTask (task: TaskDetail): TaskDetail{  
+    addTask (task: TaskDetail): TaskObject{  
         try{      
              db.get('tasks').push(task).write()
-             return task
+             return this.getTaskById(task.id)
+        }catch(e){
+            throw e
+        }
+    }
+
+    updateTask(task: TaskDetail): TaskObject{
+        try{
+            console.log("Editandooo",task)
+            db.get('tasks').find({id: task.id}).assign(task).write()
+            return this.getTaskById(task.id)
         }catch(e){
             throw e
         }

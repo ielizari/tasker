@@ -10,6 +10,7 @@ import { Spinner } from '../common/spinner'
 
 import { BlockActions } from '../common/block-actions'
 import { FaPlus } from 'react-icons/fa'
+import { TaskDetail } from 'src/domain/task-detail'
 
 const ListItem = styled.li`
     list-style: none;
@@ -33,11 +34,12 @@ const TaskListItem = (props: {task: TaskItem } ) => {
         </ul>
     )
 }
-export const TaskListComponent = () => {
+export const TaskListComponent = (props) => {
     const [tasks, setTasks] = React.useState<Array<TaskItem>>([])
     const [error, setError] = React.useState<Error | null>(null)
     const [loading, setLoading] = React.useState<boolean>(false)
     const [actions, setActions] = React.useState<Array<any>>([])
+    const [filters, setFilters ] = React.useState<Partial<TaskDetail>>(props.filter ||{parent: ''})
 
     let actionItems = [
         {
@@ -48,10 +50,10 @@ export const TaskListComponent = () => {
         }
     ]
 
-    React.useEffect(() => {        
+    React.useEffect(() => {  
         setLoading(true)
         setActions(actionItems)
-        getTaskList()
+        getTaskList(filters)
             .then(
                 (result) => {
                     if(result.hasError){
@@ -69,7 +71,7 @@ export const TaskListComponent = () => {
                     setLoading(false)    
                 }
             )
-    },[])    
+    },[filters])    
     
      return (
         <div className="block">

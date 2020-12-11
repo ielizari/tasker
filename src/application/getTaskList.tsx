@@ -1,11 +1,16 @@
 import { TaskList} from './../domain/task-list'
 import { ApiResponse } from '../api/domain/api-response'
+import { TaskDetail } from 'src/domain/task-detail'
  
-export const getTaskList = async (): Promise<ApiResponse> => {
-    return await fetch(`http://localhost:3000/api/tasks`)
+export const getTaskList = async (filters?: Partial<TaskDetail>): Promise<ApiResponse> => {
+    return await fetch(`http://localhost:3000/api/tasks`,{
+        method: 'POST',
+        body: JSON.stringify(filters)
+    })
         .then(res => res.json())        
         .then(
             (result) => {  
+                console.log(result)
                 return result
              },
             (error) => { 

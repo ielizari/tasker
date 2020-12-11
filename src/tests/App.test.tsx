@@ -4,9 +4,6 @@ import App from '../App';
 import { renderWithProviders } from './test-utils'
 import userEvent from '@testing-library/user-event'
 import { act } from 'react-dom/test-utils';
-import { Modal } from '../infrastructure/components/common/modal'
-import { render } from 'react-dom';
-import { getDefaultLibFileName } from 'typescript';
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -126,14 +123,58 @@ describe("Nueva tarea", () => {
       renderWithProviders(<App />, {route: '/tasks/new'})
 
       await act(async () => {
-        userEvent.type(await screen.findByLabelText('title'),'Tarea de prueba')
+        userEvent.type(await screen.findByLabelText('title'),'Add tarea test')
+        userEvent.type(await screen.findByLabelText('description'),'success')
         userEvent.type(await screen.findByLabelText('author'),'DummyUser')
         userEvent.click(screen.getByText(/Guardar/i))
       })
 
-      expect(await screen.findByLabelText('success-message')).toHaveTextContent(/La tarea 'Tarea de prueba' ha sido creada con éxito/i)
+      expect(await screen.findByLabelText('success-message')).toHaveTextContent(/La tarea 'Add tarea test' ha sido creada con éxito/i)
   })
+
+  it("Muestra un mensaje de error si no se ha podido añadir la tarea, manetniendo los datos introducidos", async() => {
+       
+    renderWithProviders(<App />, {route: '/tasks/new'})
+
+    await act(async () => {
+      userEvent.type(await screen.findByLabelText('title'),'Add tarea test')
+      userEvent.type(await screen.findByLabelText('description'),'error')
+      userEvent.type(await screen.findByLabelText('author'),'DummyUser')
+      userEvent.click(screen.getByText(/Guardar/i))
+    })
+
+    expect(await screen.findByLabelText('error-message')).toHaveTextContent(/Error al crear la tarea/i)
+
+    expect(await screen.findByLabelText('title')).toHaveValue("Add tarea test")
+    expect(await screen.findByLabelText('description')).toHaveValue("error")
+    expect(await screen.findByLabelText('author')).toHaveValue("DummyUser")
+    expect(await screen.queryByLabelText('loading')).not.toBeInTheDocument()
+})
   
 })
 
+describe("Editar tarea", () => {
+    it("Muestra el formulario de edición de tareas y carga los datos de la tarea seleccionada", async () => {
+      renderWithProviders(<App />, {route: '/tasks/edit/1'})
+      
+      expect(await screen.findByLabelText('title')).toHaveValue("Hacer la compra")
+      expect(await screen.findByLabelText('description')).toHaveValue("Comprar huevos, leche, cebollas")
+      expect(await screen.findByLabelText('author')).toHaveValue("Iñaki")
+      expect(await screen.findByLabelText('limitDate')).toHaveValue("01/12/2020 09:45")
+      expect(await screen.findByLabelText('status')).toHaveValue("1")
+      expect(await screen.findByLabelText('status')).toHaveTextContent("Pendiente")
+      expect(await screen.findByLabelText('priority')).toHaveValue("3")
+      expect(await screen.findByLabelText('priority')).toHaveTextContent("Alta")
+    })
 
+    it.only("Muestra mensaje de éxito al pulsar el botón 'Guardar' actualizar los datos de la tarea", async () => {
+      renderWithProviders(<App />, {route: '/tasks/edit/1'})
+
+      await act(async () => {
+        userEvent.click(await screen.findByLabelText('Guardar'))
+      })
+
+      expect(await screen.findByLabelText('success-message')).toHaveTextContent(/La tarea 'Hacer la compra' ha sido editada con éxito/i)
+      expect(await screen.queryByLabelText('loading')).not.toBeInTheDocument()
+    })
+})

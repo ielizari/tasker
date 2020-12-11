@@ -5,10 +5,11 @@ let repository: TaskerRepository
 
 export interface TaskerRepository{
     newId(table: string): string
-    getTasks(): Array<TaskItem>
-    addTask(task: TaskDetail): TaskDetail
+    getTasks(filter?: Partial<TaskDetail>): Array<TaskItem>
+    addTask(task: TaskDetail): TaskObject
     getTaskById(id: string): TaskObject
     deleteTask(id: string): boolean 
+    updateTask(task: TaskDetail): TaskObject
 }
 
 export function setTaskerRepository(repo: TaskerRepository){

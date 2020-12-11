@@ -6,6 +6,7 @@ import { TaskDetail } from '../../../domain/task-detail'
 import { TaskStatus, TaskPriority, ConstObjectToSelectOptionsArray } from '../../../domain/task-definitions'
 import { addTask } from '../../../application/addTask'
 import { getTask } from '../../../application/getTask'
+import { updateTask } from '../../../application/updateTask'
 import { Link, useParams } from 'react-router-dom'
 import { FaCheck, FaTimes, FaRedo, FaCalendar} from 'react-icons/fa'
 import { IconButton, IconLink } from '../common/icon-button'
@@ -145,6 +146,18 @@ const FormSelect: React.FC<any> = ({ label, selOptions, ...props }) => {
     ); 
   };
 
+  const ParentTaskReference = styled(Link)`
+        display: flex;
+        background-color: ${color.semiLightGrey};
+        padding: 1rem;
+        margin: 1rem;
+        color: ${color.black} !important;
+        border-style: solid;
+        border-width: 1px;
+        boder-color: ${color.blue};
+        ${common.roundedCorners()};        
+  `
+
   export interface TaskProps {
     taskid: string,
 }
@@ -154,7 +167,7 @@ export const TaskNewComponent = (props) => {
     const [dpLimit,setDpLimit] = React.useState<Datepicker | null>(null)
     const [limitDate, setLimitDate] = React.useState<string>('')
     const [submitSuccess, setSubmitSuccess] = React.useState(null)
-    const [submitError, setSubmitError] = React.useState(null)
+    const [submitError, setSubmitError] = React.useState<Error | null>(null)
     const [mode, setMode] = React.useState(props.mode || 'new')
     const [task, setTask] = React.useState<TaskDetail | null>(null)
     const [error, setError] = React.useState<Error | null>(null)
@@ -167,6 +180,7 @@ export const TaskNewComponent = (props) => {
         else if(mode === 'child') setTitle('Nueva subtarea')
         else setTitle('Nueva tarea')
     },[mode])
+
     React.useEffect(() => {        
         let dp = new Datepicker('limitDate','FechaLimite', {lang:'es'})
         dp.onSubmit = () => {   
@@ -175,43 +189,44 @@ export const TaskNewComponent = (props) => {
          }          
 
         if(task && task.limitDate !== '' && new Date(task.limitDate)){
-            console.log("Carga en datepicker la fecha",task.limitDate,new Date(task.limitDate))       
+            console.log(new Date().toString(),"Carga en datepicker la fecha",task.title,task.limitDate,new Date(task.limitDate))       
             dp.setDate(new Date(task.limitDate))
         }
-        console.log("Carga Datepicker limit")       
         setDpLimit(dp)
 
     },[task])
 
     React.useEffect(() => {   
-        if(dpLimit && dpLimit.getDate() !== null){
-            console.log("Carga limitdate")       
+        if(dpLimit && dpLimit.getDate() !== null){    
             setLimitDate(dpLimit.getFullDateString())
         }
     },[dpLimit])
 
-    React.useEffect(()=> {       
+    React.useEffect(()=> {   
+        let cancelled = false    
         if(taskid){
             setLoading(true)
             getTask(taskid)
             .then(
-                (result) => {  
-                    if(result.hasError){
-                        setError(new Error(result.error))
-                        setTask(null)
-                    }else{
-                        if(mode === 'edit'){    
-                            setTask(result.data.task) 
+                (result) => { 
+                    if(!cancelled){ 
+                        if(result.hasError){
+                            setError(new Error(result.error))
+                            setTask(null)
                         }else{
-                            setParentTask(result.data.task)
-                            emptyTask.parent = result.data.task.id
-                            setTask(emptyTask)
+                            if(mode === 'edit'){    
+                                setTask(result.data.task) 
+                            }else{
+                                setParentTask(result.data.task)
+                                emptyTask.parent = result.data.task.id
+                                setTask(emptyTask)
+                            }
+                            setError(null)
+                            setSubmitError(null)
                         }
-                        setError(null)
-                        setSubmitError(null)
+                    
+                        setLoading(false) 
                     }
-                   
-                    setLoading(false) 
                 },
                 (error) => {
                     setSubmitSuccess(null)
@@ -224,7 +239,8 @@ export const TaskNewComponent = (props) => {
             )        
         }else{
             setTask(emptyTask)
-        }      
+        }  
+        return () => cancelled = true    
     },[])
 
     const dateHandler = () => {
@@ -237,14 +253,22 @@ export const TaskNewComponent = (props) => {
         <div className="block">   
             {loading ? <Spinner /> : ''}  
             <h3 className="section-title">{title}</h3>            
-            {submitSuccess &&
-                <div aria-label='success-message' className='message-success'>La tarea <Link to={'/tasks/'+ submitSuccess.id}>'{submitSuccess.title}'</Link> ha sido creada con éxito.</div>                
+            {submitSuccess &&                
+                <div aria-label='success-message' className='message-success'>                    
+                    La {mode=='child' ? 'subtarea' : 'tarea'} <Link to={'/tasks/'+ submitSuccess.id}>'{submitSuccess.title}'</Link> ha sido {mode === 'new' ? 'creada':'editada'} con éxito.
+                </div>  
             }
             {submitError &&
-                <div aria-label='error-message' className='message-error'>{submitError}</div>
+                <div aria-label='error-message' className='message-error'>{submitError.message}</div>
+            }
+            {parentTask &&
+                <ParentTaskReference to={`/tasks/${parentTask.id}`}>
+                    Parent: {parentTask.title}
+                </ParentTaskReference>
             }
             {task &&
                 <Formik
+                    enableReinitialize
                     initialValues={task}               
                     validate = {values => {
                         const errors : Partial<TaskDetail> = {}
@@ -275,29 +299,60 @@ export const TaskNewComponent = (props) => {
                         return errors
                     }}
                     onSubmit = {(values,{setSubmitting, resetForm}) => {  
-
-                        
                         if(values.limitDate !== ''){
                             values.limitDate = (new Datepicker().createDate(values.limitDate)).toString()
+                            console.log("Fechalimite",(new Datepicker().createDate(values.limitDate)).toString())
                         }
                         
                         setLoading(true)
-                        addTask(values)
-                        .then(                            
-                            (result) => {
-                                setSubmitting(false);
-                                setSubmitSuccess(result);
-                                setSubmitError(null);
-                                resetForm({})
-                                setLoading(false)
-                            },
-                            (error) => {
-                                setSubmitting(false);
-                                setSubmitSuccess(null);
-                                setSubmitError(error);
-                                setLoading(false)
-                            }
-                        )      
+                        if(mode === 'new' || mode=='child'){
+                            addTask(values)
+                            .then(                            
+                                (result) => {
+                                    if(!result.hasError){
+                                        setSubmitSuccess(result.data.task);                                        
+                                        setSubmitError(null);
+                                        resetForm({})
+                                    }else{
+                                        setSubmitSuccess(null);
+                                        setSubmitError(new Error(result.error));                                      
+                                    }
+                                    setSubmitting(false); 
+                                    setLoading(false)
+                                },
+                                (error) => {
+                                    console.log(error)
+                                    setSubmitting(false);
+                                    setSubmitSuccess(null);
+                                    setSubmitError(error);
+                                    setLoading(false)
+                                }
+                            )
+                        }else if(mode === 'edit'){
+                            updateTask(values)
+                            .then(                            
+                                (result) => {
+                                    if(!result.hasError){                                        
+                                        setSubmitSuccess(result.data.task); 
+                                        setTask(null)                                     
+                                        setTask(result.data.task)                                        
+                                        setSubmitError(null);
+                                    }else{
+                                        setSubmitSuccess(null);
+                                        setSubmitError(new Error(result.error));                                      
+                                    }
+                                    setSubmitting(false); 
+                                    setLoading(false)
+                                },
+                                (error) => {
+                                    console.log(error)
+                                    setSubmitting(false);
+                                    setSubmitSuccess(null);
+                                    setSubmitError(error);
+                                    setLoading(false)
+                                }
+                            )
+                        }      
                     }}
                 >                 
                     {props =>  {

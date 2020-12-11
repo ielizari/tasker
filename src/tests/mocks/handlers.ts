@@ -6,7 +6,7 @@ import  {Datepicker}  from '../../lib/orzkDatepicker/datepicker'
 import { ApiResponseBuilder, ApiResponse} from '../../api/domain/api-response'
 
 export const handlers = [
-    rest.get('http://localhost:3000/api/tasks',(req, res, ctx) => {        
+    rest.post('http://localhost:3000/api/tasks',(req, res, ctx) => {        
         return res(
             ctx.status(200),
             ctx.json(ApiResponseBuilder(200,taskData,false))
@@ -26,7 +26,7 @@ export const handlers = [
             "title":"Hacer la compra",
             "description": "Comprar huevos, leche, cebollas",
             "createdDate": "2020-11-10T10:45:01+0200",
-            "limitDate": "",
+            "limitDate": "2020-12-01T10:45+0200",
             "author": "Iñaki",
             "authorId": "1",
             "status": "1",
@@ -48,33 +48,37 @@ export const handlers = [
         )        
     }),
     rest.post('http://localhost:3000/api/tasks/add',(req,res,ctx) =>{
-        try{
-            const task: TaskDetail | null = req.body ? req.body as TaskDetail : null
-
-            let lastid = taskData.sort((a,b)=>{
-                if(a.id > b.id) return 1
-                else return -1
-            })[0].id
-
-            if(isEmpty(task.id)) {
-                task.id = lastid? (parseInt(lastid)+1).toString() : '1'
-            }
-
-            //let dp = new Datepicker()
-            //dp.setDate(new Date())
-            //task.createdDate = dp.getFullDateString()
-            task.createdDate = new Date().toString()
-            
+        const task: TaskDetail = req.body as TaskDetail        
+        
+        task.createdDate = "2000-01-01T00:00:00+0200"
+        if(task.description === 'success'){
             return res(
                 ctx.status(200),
-                ctx.json(task)
+                ctx.json(ApiResponseBuilder(200,task,false))
             )
-        }catch(e){
+        }else if(task.description == 'error'){
             return res(
                 ctx.status(500),
-                ctx.json({errMessage: e.message})
+                ctx.json(ApiResponseBuilder(500,task,true,'Error al crear la tarea'))
             )
         }
+        
+    }),
+    
+    rest.put('http://localhost:3000/api/tasks/update', (req, res, ctx) => {
+        
+        const taskobject: TaskObject = {
+            task: null,
+            childTasks: [],
+            parentTask: null
+        }
+        taskobject.task = req.body as TaskDetail                                     
+        
+        return res(                
+            ctx.status(200),
+            ctx.json(ApiResponseBuilder(200,taskobject,false))            
+        )
+        
     }),
 
     rest.delete('http://localhost:3000/api/tasks/delete/1', (req,res,ctx) => {
@@ -84,7 +88,7 @@ export const handlers = [
                 "title":"Hacer la compra",
                 "description": "Comprar huevos, leche, cebollas",
                 "createdDate": "2020-11-10T10:45:01+0200",
-                "limitDate": "",
+                "limitDate": "2020-12-01T10:45:01+0200",
                 "author": "Iñaki",
                 "authorId": "1",
                 "status": "1",

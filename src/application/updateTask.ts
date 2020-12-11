@@ -1,10 +1,10 @@
 import { TaskDetail } from '../domain/task-detail'
 import { ApiResponse } from '../api/domain/api-response'
 
-export const addTask = async (task: TaskDetail): Promise<ApiResponse> => {
+export const updateTask = async (task: TaskDetail): Promise<ApiResponse> => {
 
-    return await fetch('http://localhost:3000/api/tasks/add',{
-        method: 'POST',
+    return await fetch('http://localhost:3000/api/tasks/update',{
+        method: 'PUT',
         headers: {'Content-type': 'application/json'},
         body: JSON.stringify(task)
     })
