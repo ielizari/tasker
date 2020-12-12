@@ -100,6 +100,7 @@ export const color = {
   veryDarkGrey: '#585858',
   white: '#FFFFFF',
   orange: '#ec9416',
+  lightOrange: '#fba72f',
   darkOrange: '#b36c06',
   success: '#48b03d',
 };

@@ -46,11 +46,10 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
     }
     getTaskById(id: string): TaskObject {    
         try{    
-            let task = db.get('tasks').find({id: id}).value() || null
-            console.log("Tarea",task)
+            let task = db.get('tasks').find({id: id}).value() || null            
             let parentTask = null;
             let childTasks = [];
-            childTasks = childTasks.concat(db.get('tasks').find({parent: id}).value() || []);
+            childTasks = childTasks.concat(db.get('tasks').filter({parent: id}).value() || []);
             if(task && task.parent !== ''){
                 parentTask = db.get('tasks').find({id: task.parent}).value()
             }
@@ -60,6 +59,7 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
                 parentTask: parentTask,
                 childTasks: childTasks
             }
+            console.log("Tarea",taskObject)
             return taskObject
         }catch (e){
             throw e

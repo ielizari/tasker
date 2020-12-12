@@ -1,6 +1,6 @@
-import React from 'react'
+import React, { Children } from 'react'
 import styled from 'styled-components'
-import { color } from '../../../styles/theme'
+import { color, common } from '../../../styles/theme'
 import { useParams} from 'react-router-dom'
 import { ApiResponse } from '../../../api/domain/api-response'
 import { TaskDetail, TaskObject } from '../../../domain/task-detail'
@@ -41,22 +41,42 @@ const ErrorMessage = styled.div`
 `;
 
 const TaskChildrenContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
 
+    & a{
+        display: inline-flex;
+        background-color: ${color.orange};
+        ${common.roundedCorners()};
+        padding: 0.5rem;
+    }
+
+    & a:hover {
+        background-color: ${color.lightOrange};
+    }    
 `
-export const TaskChildren = (props: {childTasks: Array<TaskDetail>, handler: any}) => {
-    return (
-        <TaskChildrenContainer>
-            {}
-        </TaskChildrenContainer>
-    )
-}
+
+const TaskTagsContainer = styled.div`
+    display: flex;
+    flex-direction: row;
+    gap: 0.5rem;
+
+    & div{
+        display: inline-flex;
+        background-color: rgba(0,0,0,0.7);
+        color: ${color.white};        
+        ${common.roundedCorners()};
+        padding: 0.5rem;
+    }
+`
 
 export interface TaskProps {
     taskid: string,
 }
 export const TaskDetailComponent = (props) => {
     let { taskid } = useParams<TaskProps>()
-    const [ taskId, setTaskId ] = React.useState<string>(props.task || taskid)
+   
     const [task, setTask] = React.useState<TaskObject | null>(null)        
     const [error, setError] = React.useState<Error | null>(null)
     const [deleteSuccess, setDeleteSuccess] = React.useState<string | null>(null)
@@ -74,6 +94,10 @@ export const TaskDetailComponent = (props) => {
         setOpened(false)
         setLoading(true)
         setConfirmedDelete(true)   
+    }
+
+    const childHandler = () => {
+
     }
 
     React.useEffect(() => {
@@ -161,7 +185,7 @@ export const TaskDetailComponent = (props) => {
             )
         
             return () => cancelled = true
-    },[taskId])
+    },[taskid])
     return (        
         <div className="block">
             <Modal 
@@ -212,22 +236,51 @@ export const TaskDetailComponent = (props) => {
                             <TaskDetailItem>
                                 <TaskDetailKey>Fecha límite:</TaskDetailKey>
                                 <TaskDetailValue>{task.task.limitDate ? dateToString(new Date(task.task.limitDate)) : '-'}</TaskDetailValue>
+                            </TaskDetailItem>                            
+                            <TaskDetailItem>
+                                <TaskDetailKey>Tags:</TaskDetailKey>
+                                <TaskDetailValue>
+                                {task.task.tags.length ?
+                                    <TaskTagsContainer>
+                                    {
+                                        task.task.tags.map((tag) => {
+                                            return <div key={tag}>{tag}</div>
+                                        })
+                                    }
+                                    </TaskTagsContainer> 
+                                    :
+                                    '-'
+                                }               
+                                </TaskDetailValue>
                             </TaskDetailItem>
                             <TaskDetailItem>
                                 <TaskDetailKey>Tarea padre:</TaskDetailKey>
                                 <TaskDetailValue>
                                     {task.parentTask ?
-                                        <Link to={`tasks/${task.parentTask.id}`}>{task.parentTask.title}</Link>
+                                        <TaskChildrenContainer>
+                                            <Link to={`${task.parentTask.id}`}>{task.parentTask.title}</Link>
+                                        </TaskChildrenContainer>
                                         :
                                         '-'
                                     }
                                 </TaskDetailValue>
                             </TaskDetailItem>
                             <TaskDetailItem>
-                                <TaskDetailKey>Tags:</TaskDetailKey>
-                                <TaskDetailValue>{task.task.tags}</TaskDetailValue>
-                            </TaskDetailItem>
-                            <TaskChildren children={task.childTasks} handler={childHandler}/>
+                                <TaskDetailKey>Subtareas:</TaskDetailKey>
+                                <TaskDetailValue>
+                                {task.childTasks.length ?
+                                    <TaskChildrenContainer>
+                                    {
+                                        task.childTasks.map((child) => {
+                                            return <Link to={`${child.id}`} key={child.title}>{child.title}</Link>
+                                        })
+                                    }
+                                    </TaskChildrenContainer> 
+                                    :
+                                    '-'
+                                }                                
+                                </TaskDetailValue>
+                            </TaskDetailItem>                           
                         </TaskDetailContainer>
                         
                     :   
