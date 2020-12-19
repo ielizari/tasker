@@ -51,15 +51,20 @@ export const handlers = [
         const task: TaskDetail = req.body as TaskDetail        
         
         task.createdDate = "2000-01-01T00:00:00+0200"
+        const taskresponse: TaskObject = {
+            task: task,
+            childTasks: [],
+            parentTask: null
+        }
         if(task.description === 'success'){
             return res(
                 ctx.status(200),
-                ctx.json(ApiResponseBuilder(200,task,false))
+                ctx.json(ApiResponseBuilder(200,taskresponse,false))
             )
         }else if(task.description == 'error'){
             return res(
                 ctx.status(500),
-                ctx.json(ApiResponseBuilder(500,task,true,'Error al crear la tarea'))
+                ctx.json(ApiResponseBuilder(500,taskresponse,true,'Error al crear la tarea'))
             )
         }
         

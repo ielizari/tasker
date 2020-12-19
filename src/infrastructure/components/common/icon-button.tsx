@@ -9,9 +9,9 @@ const LinkWrapper = styled(Link)`
     justify-content: space-between;
     background-color: ${color.lightGrey};
     ${common.roundedCorners()};
-    padding: 1rem;
-    color: ${color.veryDarkGrey} !important;
-    margin: 0.5rem;
+    padding: 0.5rem;
+    flex-wrap: wrap;
+    color: ${color.veryDarkGrey} !important;    
     transition: background-color .3s;
 
     :hover, :hover span{
@@ -25,9 +25,8 @@ const ButtonWrapper = styled.button`
     justify-content: space-between;
     background-color: ${color.lightGrey};
     ${common.roundedCorners()};
-    padding: 1rem;
+    padding: 0.5rem;
     color: ${color.veryDarkGrey} !important;
-    margin: 0.5rem;
     transition: background-color .3s;
 
     :hover, :hover span{

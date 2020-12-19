@@ -1,6 +1,7 @@
 import React from 'react'
 import styled from 'styled-components'
 import { color, common } from '../../../styles/theme';
+import { FormWrapper, FormDateInput,FormSelect,FormTextInput, FormButtons} from '../common/form/form'
 import { Formik, Form, Field, useField } from 'formik'
 import { TaskDetail } from '../../../domain/task-detail'
 import { TaskStatus, TaskPriority, ConstObjectToSelectOptionsArray } from '../../../domain/task-definitions'
@@ -11,6 +12,7 @@ import { Link, useParams } from 'react-router-dom'
 import { FaCheck, FaTimes, FaRedo, FaCalendar} from 'react-icons/fa'
 import { IconButton, IconLink } from '../common/icon-button'
 import { Spinner } from '../common/spinner'
+import { BlockContainer, BlockHeaderComponent} from '../common/block'
 
 import  {Datepicker}  from '../../../lib/orzkDatepicker/datepicker'
 import '../../../lib/orzkDatepicker/datepicker.css'
@@ -29,122 +31,7 @@ const emptyTask: TaskDetail = {
     priority: TaskPriority.low.value,
     tags: []
 }
-const FormWrapper = styled(Form)`
-    display: flex;
-    flex-direction: column;
-    color: ${color.black};
-    margin: 1rem;
-`
-const FormItemWrapper = styled.div`
-    display: flex;
-    flex-direction: column;
-    margin: 0.5rem;
-`
-const FormButtons = styled.div`
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
 
-`
-
-const FormInputWithIconWrapper = styled.div`
-    display: flex;
-    flex-direction: row;
-    border-width: 1px;
-    border-color: ${color.grey};
-    border-style: solid;
-    ${common.roundedCorners()};
-    
-    & > input {
-        width: 100%;
-        border-style: none !important;
-        padding: 0.5rem;
-        ${common.roundedCorners()};
-        margin: 0;
-    }
-`
-const FormInputIcon = styled.span`
-    display: inline-flex;
-    align-items: center;
-    padding: 0 .5rem;
-    transition: background-color .3s;
-    color: ${color.darkGrey} !important;
-    background-color: ${color.lightGrey};
-    ${common.roundedCornersLeft()}  
-    cursor: pointer;
-
-    :hover {
-        background-color: ${color.semiLightGrey};
-    }
-`
-
-const FormTextInput :React.FC<any> = ({label, ...props}) => {
-    const [field, meta] = useField(props)
-   
-    return (
-        <FormItemWrapper>
-            <label htmlFor={props.id || props.name}>{label}</label>
-            <Field {...field} {...props} aria-label={props.id || props.name}/>
-            {meta.touched && meta.error ? (
-                <div aria-label={'validate_' + (props.id || props.name)} className="form-item-error">{meta.error}</div>
-            ): null}
-        </FormItemWrapper>
-    )
-}
-
-const FormDateInput :React.FC<any> = ({label, icon, handler, dateText, ...props}) => {
-    const [field, meta, {setValue, setTouched}] = useField(props)
-    const [inputIcon, setInputIcon] = React.useState(null)
-
-    React.useEffect(()=> {
-        setInputIcon(icon)
-    },[])
-    React.useEffect(()=>{
-        console.log("Carga dateText",dateText)       
-        setValue(dateText)
-        setTouched(true)
-    },[dateText])
-
-    return (
-        <FormItemWrapper>
-            <label htmlFor={props.id || props.name}>{label}</label>
-            <FormInputWithIconWrapper >
-                {inputIcon ?
-                    <FormInputIcon key={props.id || props.name + '_icon'} onClick={handler}>{inputIcon}</FormInputIcon>
-                    :
-                    ''
-                }
-                <Field 
-                    {...field} 
-                    {...props}    
-                    aria-label={props.id || props.name}
-                />
-            </FormInputWithIconWrapper>
-            {meta.touched && meta.error ? (
-                <div aria-label={'validate_' + (props.id || props.name)} className="form-item-error">{meta.error}</div>
-            ): null}
-        </FormItemWrapper>
-    )
-}
-
-const FormSelect: React.FC<any> = ({ label, selOptions, ...props }) => {
-    const [field, meta] = useField(props);     
-    return ( 
-        <FormItemWrapper>
-            <label htmlFor={props.id || props.name}>{label}</label> 
-            <Field as="select" {...field} {...props} aria-label={props.id || props.name}>
-                {
-                    selOptions.map((item) =>
-                        <option key={item.value} value={item.value}>{item.label}</option>
-                    )
-                }
-            </Field> 
-            {meta.touched && meta.error ? ( 
-                <div aria-label={'validate_' + (props.id || props.name)} className="form-item-error">{meta.error}</div> 
-            ) : null} 
-        </FormItemWrapper>
-    ); 
-  };
 
   const ParentTaskReference = styled(Link)`
         display: flex;
@@ -250,9 +137,11 @@ export const TaskNewComponent = (props) => {
     const statusItems = ConstObjectToSelectOptionsArray(TaskStatus)
     const priorityItems = ConstObjectToSelectOptionsArray(TaskPriority)
     return (        
-        <div className="block">   
-            {loading ? <Spinner /> : ''}  
-            <h3 className="section-title">{title}</h3>            
+        <BlockContainer> 
+            <BlockHeaderComponent 
+                title={title}
+            />  
+            {loading ? <Spinner /> : ''}            
             {submitSuccess &&                
                 <div aria-label='success-message' className='message-success'>                    
                     La {mode=='child' ? 'subtarea' : 'tarea'} <Link to={'/tasks/'+ submitSuccess.id}>'{submitSuccess.title}'</Link> ha sido {mode === 'new' ? 'creada':'editada'} con éxito.
@@ -310,6 +199,7 @@ export const TaskNewComponent = (props) => {
                             .then(                            
                                 (result) => {
                                     if(!result.hasError){
+                                        console.log(result.data.task)
                                         setSubmitSuccess(result.data.task);                                        
                                         setSubmitError(null);
                                         resetForm({})
@@ -385,8 +275,7 @@ export const TaskNewComponent = (props) => {
                             <FormSelect
                                 label="Estado"
                                 selOptions={statusItems}
-                                name="status"
-                                type="text"                       
+                                name="status"                  
                             />   
                             <FormSelect
                                 label="Prioridad"
@@ -425,6 +314,6 @@ export const TaskNewComponent = (props) => {
                     )}}  
                 </Formik>
             }
-        </div>
+        </BlockContainer>
     )
 }

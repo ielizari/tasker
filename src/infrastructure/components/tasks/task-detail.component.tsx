@@ -2,9 +2,7 @@ import React, { Children } from 'react'
 import styled from 'styled-components'
 import { color, common } from '../../../styles/theme'
 import { useParams} from 'react-router-dom'
-import { ApiResponse } from '../../../api/domain/api-response'
 import { TaskDetail, TaskObject } from '../../../domain/task-detail'
-import { TaskListComponent } from './task-list.component'
 import { TaskPriority, TaskStatus, ConstObjectToSelectOptionsArray } from '../../../domain/task-definitions'
 import { getTask } from '../../../application/getTask'
 import { deleteTask } from '../../../application/deleteTask'
@@ -14,6 +12,7 @@ import { FaEdit, FaTrashAlt, FaPlus } from 'react-icons/fa'
 import { Modal } from '../common/modal'
 import { Link } from 'react-router-dom'
 import { dateToString } from '../../../lib/date.utils'
+import { BlockContainer, BlockHeaderComponent } from '../common/block'
  
 const TaskDetailContainer = styled.ul`
 `;
@@ -187,7 +186,7 @@ export const TaskDetailComponent = (props) => {
             return () => cancelled = true
     },[taskid])
     return (        
-        <div className="block">
+        <BlockContainer>
             <Modal 
                 title="Eliminar tarea" 
                 isOpened={isOpened} 
@@ -289,6 +288,6 @@ export const TaskDetailComponent = (props) => {
                 </>
             }    
                 
-        </div>
+        </BlockContainer>
     )   
 }

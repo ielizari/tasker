@@ -2,6 +2,7 @@ import { rest } from 'msw'
 import { isEmpty } from 'lodash'
 import { getTaskerRepository } from '../../application/taskerRepository'
 import { TaskDetail, TaskObject } from '../../../domain/task-detail'
+import { Worklog } from '../../../domain/worklog'
 import { ApiResponse, ApiResponseBuilder } from '../../domain/api-response'
 
 export const handlers = [
@@ -103,5 +104,20 @@ export const handlers = [
                 ctx.json(ApiResponseBuilder(500,{},true,e.message))
             )
         }
-    })
+    }),
+
+    rest.post('http://localhost:3000/api/worklogs',(req, res, ctx) => { 
+        const filters = req.body ? req.body as Partial<Worklog> : {}  
+        const worklogs = getTaskerRepository().getWorklogs(filters)
+        
+        const response : ApiResponse = {
+            status: 200,
+            hasError: false,
+            data: worklogs
+        } 
+        return res(
+            ctx.status(200),
+            ctx.json(response)
+        )
+    }),
 ]

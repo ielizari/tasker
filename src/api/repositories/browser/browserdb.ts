@@ -3,10 +3,15 @@ import lowdb from 'lowdb'
 import LocalStorage from 'lowdb/adapters/LocalStorage'
 import { TaskDetail, TaskObject } from '../../../domain/task-detail'
 import { TaskItem } from '../../../domain/task-list'
+import { Worklog, WorklogObject } from '../../../domain/worklog'
+import { Job, JobObject } from '../../../domain/job'
+
 import { TaskerRepository, setTaskerRepository } from '../../application/taskerRepository'
 
 type Schema = {
     tasks: Array<TaskDetail>
+    worklogs: Array<Worklog>
+    jobs: Array<Job>
 }
 const data :Schema = require('./db/taskerdb.json')
 
@@ -96,17 +101,160 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
             throw e
         }
     }
+
+    getWorklogs(filter: Partial<Worklog> = {}): Array<Worklog>  {
+        const search = JSON.parse(filter as string)
+        const worklogs = db.get('worklogs').filter(search).value()
+        const result : Array<Worklog>= []
+        worklogs.map((worklog: Worklog) => {
+            result.push({
+                id: worklog.id || '',
+                title: worklog.title || '',
+                startDatetime: worklog.startDatetime || '',
+                endDatetime: worklog.endDatetime || '',
+                tags: worklog.tags || []
+            })
+        })
+        return result
+    }
+    getWorklogById(id: string): WorklogObject {    
+        try{    
+            let worklog = db.get('worklogs').find({id: id}).value() || null    
+            let childJobs = [];
+            childJobs = childJobs.concat(db.get('jobs').filter({worklog: id}).value() || []);
+            
+
+            const WorklogObject : WorklogObject= {
+                worklog: worklog,
+                childJobs: childJobs
+            }
+            return WorklogObject
+        }catch (e){
+            throw e
+        }
+    }
+    addWorklog (worklog: Worklog): WorklogObject{  
+        try{      
+             db.get('worklogs').push(worklog).write()
+             return this.getWorklogById(worklog.id)
+        }catch(e){
+            throw e
+        }
+    }
+
+    updateWorklog(worklog: Worklog): WorklogObject{
+        try{
+            db.get('worklogs').find({id: worklog.id}).assign(worklog).write()
+            return this.getWorklogById(worklog.id)
+        }catch(e){
+            throw e
+        }
+    }
+    deleteWorklog(worklogid: string): boolean{
+        try{
+            const worklog = db.get('worklogs').find({id: worklogid}).value()
+            if(worklog){
+                db.get('worklogs').remove({id: worklogid}).write()
+            }else{
+                return false
+            }
+            return true
+        }catch(e){
+            throw e
+        }
+    }
+
+    getJobs(filter: Partial<Job> = {}): Array<Job>  {
+        const search = JSON.parse(filter as string)
+        const jobs = db.get('jobs').filter(search).value()
+        const result : Array<Job>= []
+        jobs.map((job: Job) => {
+            result.push({
+                id: job.id || '',
+                task: job.task || '',
+                worklog: job.worklog || '',
+                title: job.title || '',
+                description: job.description || '',
+                startDatetime: job.startDatetime || '',
+                endDatetime: job.endDatetime || '',
+                type: job.type || '',
+                tags: job.tags || []
+            })
+        })
+        return result
+    }
+    getJobById(id: string): JobObject {    
+        try{    
+            let job = db.get('jobs').find({id: id}).value() || null    
+            let task = null
+            let worklog = null
+            
+            if(job && job.task !== ''){
+                task = db.get('tasks').find({id: job.task}).value()
+            }
+
+            if(job && job.worklog !== ''){
+                worklog = db.get('worklogs').find({id: job.worklog}).value()
+            }
+
+            const JobObject : JobObject= {
+                job: job,
+                worklog: worklog,
+                task: task
+            }
+            return JobObject
+        }catch (e){
+            throw e
+        }
+    }
+    addJob (job: Job): JobObject{  
+        try{      
+             db.get('jobs').push(job).write()
+             return this.getJobById(job.id)
+        }catch(e){
+            throw e
+        }
+    }
+
+    updateJob(job: Job): JobObject{
+        try{
+            db.get('jobs').find({id: job.id}).assign(job).write()
+            return this.getJobById(job.id)
+        }catch(e){
+            throw e
+        }
+    }
+    deleteJob(jobid: string): boolean{
+        try{
+            const job = db.get('jobs').find({id: jobid}).value()
+            if(job){
+                db.get('jobs').remove({id: jobid}).write()
+            }else{
+                return false
+            }
+            return true
+        }catch(e){
+            throw e
+        }
+    }
 }
 export const initDB = () => {
     if(!db.has('tasks').value()){
         console.log("DB vacía")
-        db.defaults({ tasks: [] }).write()
+        db.defaults({ tasks: [], worklogs: [], jobs: [] }).write()
 
         const tasks : Array<TaskDetail> = data.tasks
-        for(let i=0; i< tasks.length; i++){         
-            console.log(tasks[i])   
+        for(let i=0; i< tasks.length; i++){     
             db.get('tasks').push(tasks[i]).write()
         }        
+        const worklogs: Array<Worklog> = data.worklogs
+        for(let i=0; i< worklogs.length; i++){      
+            db.get('worklogs').push(worklogs[i]).write()
+        }     
+        const jobs: Array<Job> = data.jobs
+        for(let i=0; i< jobs.length; i++){      
+            db.get('jobs').push(jobs[i]).write()
+        }     
     }else{
         console.log("DB con registros")
     }

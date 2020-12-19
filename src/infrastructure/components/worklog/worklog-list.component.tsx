@@ -1,16 +1,12 @@
 import React from 'react'
-import { TaskItem } from '../../../domain/task-list'
-import { getTaskList } from '../../../application/getTaskList'
-import styled from 'styled-components'
-import { color, common } from '../../../styles/theme';
-import { Link } from "react-router-dom";
-
-import { Spinner } from '../common/spinner'
-
-import { BlockHeaderComponent, BlockContainer } from '../common/block'
 import { FaPlus, FaFilter } from 'react-icons/fa'
-import { TaskDetail } from 'src/domain/task-detail'
-
+import { BlockContainer, BlockHeaderComponent, BlockEmptyComponent} from '../common/block'
+import { Spinner } from '../common/spinner'
+import { getWorklogList} from '../../../application/getWorklogList'
+import { Worklog } from '../../../domain/worklog'
+import { Link } from 'react-router-dom'
+import { common, color } from '../../../styles/theme'
+import styled from 'styled-components'
 
 const ListItem = styled.li`
     list-style: none;
@@ -24,29 +20,51 @@ const ListItem = styled.li`
     ${common.roundedCorners()};
 `
 
-const TaskListItem = (props: {task: TaskItem } ) => {    
+const WorklogListItem = (props: {worklog: Worklog } ) => {    
     
     return(
         <ul>
-            <Link to={`/tasks/${props.task.id}`}>
-                <ListItem>{props.task.title}</ListItem>
+            <Link to={`/tasks/${props.worklog.id}`}>
+                <ListItem>{props.worklog.title}</ListItem>
             </Link>
         </ul>
     )
 }
-export const TaskListComponent = (props) => {
-    const [tasks, setTasks] = React.useState<Array<TaskItem>>([])
+
+export const WorklogListComponent = ( props ) => {
+    const [worklogs, setWorklogs] = React.useState<Array<any>>([])
     const [error, setError] = React.useState<Error | null>(null)
     const [loading, setLoading] = React.useState<boolean>(false)
     const [actions, setActions] = React.useState<Array<any>>([])
-    const [filters, setFilters ] = React.useState<Partial<TaskDetail>>(props.filter ||{parent: ''})
+    const [filters, setFilters ] = React.useState<Partial<any>>(props.filter ||{})
 
     
+    React.useEffect(() => {
+        setLoading(true)
+        setActions(actionItems)
+        getWorklogList(filters)
+            .then(
+                (result) => {
+                    console.log()
+                    if(result.hasError){
+                        setError(new Error(result.error));
+                        setWorklogs([])
+                    }else{
+                        setWorklogs(result.data); 
+                        setError(null);
+                    }
+                    
+                    setLoading(false)    
+                },
+                (error) => {
+                    setError(error)
+                    setLoading(false)    
+                }
+            )
+    },[filters])
 
     const searchHandler = (values) => {
-        const filter: Partial<TaskDetail> = {
-            parent: ''
-        }
+        const filter: Partial<any> = {}
         if(values.actionBarSearch){
             filter.title = values.actionBarSearch
         }
@@ -58,35 +76,11 @@ export const TaskListComponent = (props) => {
         const errors = []
         return errors
     }
-
-    React.useEffect(() => {  
-        setLoading(true)
-        setActions(actionItems)
-        getTaskList(filters)
-            .then(
-                (result) => {
-                    if(result.hasError){
-                        setError(new Error(result.error));
-                        setTasks([])
-                    }else{
-                        setTasks(result.data); 
-                        setError(null);
-                    }
-                    
-                    setLoading(false)    
-                },
-                (error) => {
-                    setError(error)
-                    setLoading(false)    
-                }
-            )
-    },[filters])    
-    
     let actionItems = [
         {
             icon: FaPlus,
-            text: 'Nueva tarea',
-            route: `/tasks/new`,
+            text: 'Nuevo registro',
+            route: `/worklogs/new`,
             type: 'link'
         },
         {
@@ -114,22 +108,24 @@ export const TaskListComponent = (props) => {
         },
         
     ]
-     return (
+    return (
         <BlockContainer>
             <BlockHeaderComponent 
-                title='Tareas'
+                title='Partes de trabajo'
                 actions={actions}
             />
-             {loading && <Spinner />}            
-            
-            {error!==null ? 
-                <div>Error: {error.message?error.message:'unknown error'}</div> 
+            {loading && <Spinner />}
+            {worklogs.length ? 
+                (error!==null ? 
+                    <div>Error: {error.message?error.message:'unknown error'}</div> 
+                    :
+                    worklogs.map((item: Worklog) => (
+                        <WorklogListItem key={item.id} worklog={item} />
+                    ))
+                )
                 :
-                tasks.map((item: TaskItem) => (
-                    <TaskListItem key={item.id} task={item} />
-                ))
+                <BlockEmptyComponent />
             }
         </BlockContainer>
-        )
-    
+    )
 }

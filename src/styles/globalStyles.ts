@@ -65,10 +65,9 @@ export const GlobalStyle = createGlobalStyle`
     button{
         display: inline-flex;
         align-items: center;
-        padding: 1rem;
+        padding: 0.5rem;
         ${common.roundedCorners()} 
         text-align: center;
-        margin: 0.5rem;
         border-style: none;
         ${font.h4()}
         cursor: pointer;

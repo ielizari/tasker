@@ -1,3 +1,5 @@
+import { Job } from './job'
+
 export interface TaskList {
     id: string,
     title: string,
@@ -16,13 +18,4 @@ export interface TaskItem {
     id: string,
     title: string,
     limitDate?: string
-}
-
-export interface Job{
-    id: string,
-    parentTask: string,
-    description: string,
-    startDatetime: string,
-    endDatetime: string,
-    status: string
 }

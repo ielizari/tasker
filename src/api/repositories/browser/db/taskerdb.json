@@ -9,8 +9,8 @@
             "limitDate": "",
             "author": "Iñaki",
             "authorId": "1",
-            "status": "Pendiente",
-            "priority": "Alta",
+            "status": "1",
+            "priority": "3",
             "tags": ["Aranzadi","Thomson Reuters","Area cliente", "Chat","Inbenta"]
         },
         {
@@ -22,8 +22,8 @@
             "limitDate": "",
             "author": "Iñaki",
             "authorId": "1",
-            "status": "Pendiente",
-            "priority": "Alta",
+            "status": "1",
+            "priority": "3",
             "tags": ["KYB"]
         },
         {
@@ -35,8 +35,8 @@
             "limitDate": "",
             "author": "Iñaki",
             "authorId": "1",
-            "status": "Pendiente",
-            "priority": "Alta",
+            "status": "1",
+            "priority": "3",
             "tags": ["KYB","PET","ID-167"]
         },
         {
@@ -48,9 +48,42 @@
             "limitDate": "",
             "author": "Iñaki",
             "authorId": "1",
-            "status": "Pendiente",
-            "priority": "Alta",
+            "status": "1",
+            "priority": "3",
             "tags": ["KYB","PET","ID-155"]
+        }
+    ],
+    "worklogs":[
+        {
+            "id":"1",
+            "startDatetime":"2020-11-05T08:00:00+0200",
+            "endDatetime":"2020-11-05T015:30:00+0200",
+            "title":"CONASA",
+            "tags": []
+        }
+    ],
+    "jobs":[
+        {
+            "id":"1",
+            "worklog":"1",
+            "task":"2",
+            "startDatetime":"2020-11-05T08:00:00+0200",
+            "endDatetime":"2020-11-05T09:30:00+0200",
+            "title":"Revisar opción SQL Job",
+            "description":"",
+            "type":"Análisis",
+            "tags": []
+        },
+        {
+            "id":"2",
+            "worklog":"1",
+            "task":"2",
+            "startDatetime":"2020-11-05T09:30:00+0200",
+            "endDatetime":"2020-11-05T10:30:00+0200",
+            "title":"Revisar opción PHP endpoint",
+            "description":"",
+            "type":"Análisis",
+            "tags": []
         }
     ]
 }

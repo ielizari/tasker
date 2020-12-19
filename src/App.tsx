@@ -8,6 +8,7 @@ import {
 import { Home } from './infrastructure/views/home.component'
 import { Header } from './infrastructure/components/common/header'
 import { TasksView } from './infrastructure/views/tasks.view.component'
+import { WorklogView } from './infrastructure/views/worklog.view.component'
 
 function App() {
   return (
@@ -19,6 +20,9 @@ function App() {
           </Route>          
           <Route path="/tasks">
             <TasksView />
+          </Route>
+          <Route path="/worklogs">
+            <WorklogView />
           </Route>
           <Route path="/">
             <Home />

@@ -55,8 +55,11 @@ export const Header = () =>{
                 <Menu>                        
                     <MenuItem>
                         <Link to="/tasks">Tareas</Link>
-                        </MenuItem>
-                        <MenuItem>
+                    </MenuItem>
+                    <MenuItem>
+                        <Link to="/worklogs">Partes de trabajo</Link>
+                    </MenuItem>
+                    <MenuItem>
                         <Link to="/about">About</Link>
                     </MenuItem>                    
                 </Menu>               

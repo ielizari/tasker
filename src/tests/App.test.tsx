@@ -118,7 +118,7 @@ describe("Nueva tarea", () => {
     expect(await screen.queryByLabelText('validate_limitDate')).not.toBeInTheDocument()
 })
 
-  it("Guarda una tarea nueva correctamente", async() => {
+  it.only("Guarda una tarea nueva correctamente", async() => {
        
       renderWithProviders(<App />, {route: '/tasks/new'})
 
@@ -167,7 +167,7 @@ describe("Editar tarea", () => {
       expect(await screen.findByLabelText('priority')).toHaveTextContent("Alta")
     })
 
-    it.only("Muestra mensaje de éxito al pulsar el botón 'Guardar' actualizar los datos de la tarea", async () => {
+    it("Muestra mensaje de éxito al pulsar el botón 'Guardar' actualizar los datos de la tarea", async () => {
       renderWithProviders(<App />, {route: '/tasks/edit/1'})
 
       await act(async () => {

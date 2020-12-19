@@ -3,20 +3,27 @@ import styled from 'styled-components'
 import { color, font, common } from '../../../styles/theme'
 import { IconLink, IconButton } from '../common/icon-button'
 import { IconType} from 'react-icons'
+import { FormBuilder } from '../common/form/form'
 
 const BlockActionsContainer = styled.div`
     display: flex;
     background-color: ${color.lightGrey};
     padding: 0.5rem;
+    flex-wrap: wrap;
     flex-direction: row;
 `
 export interface Action {
-    key: string,
-    route: string,
-    text: string,
-    icon: IconType | null,
-    handler: any,
+    key: string
+    route: string
+    text: string
+    icon: IconType | null
+    handler: any
     type?: string
+    view?: string
+    items?: Array<Action>
+    initValues?: Partial<Action>
+    validation?: object
+    onSubmit?: object
 }
 
 export const BlockActions = (props) => {
@@ -49,7 +56,18 @@ export const BlockActions = (props) => {
                                     onClick={action.handler}
                                 />
                             )
-                        }
+                        }else if(action.type === 'form'){
+                            return (
+                                <FormBuilder 
+                                    key = {action.key }
+                                    formView = {action.view}
+                                    formItems = {action.items}
+                                    initValues = {action.initValues}
+                                    validation = {action.validation}
+                                    onSubmit = {action.onSubmit}
+                                />
+                            )
+                        }                        
                     })
                     :
                     ''
