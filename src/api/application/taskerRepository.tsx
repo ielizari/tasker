@@ -1,12 +1,22 @@
-import { TaskDetail, TaskObject } from '../../domain/task-detail'
-import { TaskItem } from '../../domain/task-list'
-import { Worklog, WorklogObject} from '../../domain/worklog'
-import { Job, JobObject } from '../../domain/job'
+import { TaskDetail, TaskObject } from '../../front/domain/task-detail'
+import { TaskItem } from '../../front/domain/task-list'
+import { Worklog, WorklogObject} from '../../front/domain/worklog'
+import { Job, JobObject } from '../../front/domain/job'
+import { Schema } from '../infrastructure/repositories/browser/browserdb'
 
 let repository: TaskerRepository
 
+export interface FileDownload {
+    blob: string,
+    filename: string
+}
 export interface TaskerRepository{
     newId(table: string): string
+    
+    newDb(): boolean
+    importDb(db: Schema): boolean    
+    exportDb(): FileDownload
+
     getTasks(filter?: Partial<TaskDetail>): Array<TaskItem>
     addTask(task: TaskDetail): TaskObject
     getTaskById(id: string): TaskObject
