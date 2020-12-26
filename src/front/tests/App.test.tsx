@@ -20,8 +20,8 @@ describe("Lista de tareas", () =>{
     expect(await screen.findByLabelText(/Filtrar/i)).toBeInTheDocument()
     expect(await screen.findByPlaceholderText(/Buscar.../i)).toBeInTheDocument()
 
-    expect(await screen.findByText(/Hacer la compra/i)).toBeInTheDocument();
-    expect(await screen.findByText(/KYB - ID 167: PET/i)).toBeInTheDocument();
+    expect(await screen.findByText(/Hacer la compra/i)).toBeInTheDocument()
+    expect(await screen.findByText(/KYB - ID 167: PET/i)).toBeInTheDocument()
   }) 
 
   it("Muestra el botón de 'Nueva tarea' que redirige al formulario de crear nueva tarea", async()=>{
