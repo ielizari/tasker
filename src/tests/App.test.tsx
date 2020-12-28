@@ -1,10 +1,9 @@
 import React from 'react';
 import { screen } from '@testing-library/react';
-import App from '../App';
+import App from '../front/App';
 import { renderWithProviders } from './test-utils'
 import userEvent from '@testing-library/user-event'
 import { act } from 'react-dom/test-utils';
-import { debug } from 'console';
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -244,8 +243,10 @@ describe("Editar tarea", () => {
 
 describe("Lista de partes de trabajo", () =>{
   beforeEach(()=>{
-    jest.resetAllMocks();
+    jest.clearAllMocks()
+    jest.resetAllMocks()
   });
+  
   it("Muestra lista de partes de trabajo", async()=>{
     renderWithProviders(<App />, {route: '/worklogs'})
 
@@ -255,26 +256,11 @@ describe("Lista de partes de trabajo", () =>{
     expect(await screen.findByPlaceholderText(/Buscar.../i)).toBeInTheDocument()
 
     expect(await screen.findByText(/Compra 05-11-20/i)).toBeInTheDocument();
-    expect(await screen.findByText(/Compra 15-11-20/i)).toBeInTheDocument();
+    expect(await screen.findByText(/Compra 15-11-20/i)).toBeInTheDocument();    
   }) 
-  
-  it("Introduce el texto 'Compra 15-11-20' en el buscador y filtra la lista de partes para que solo aparezca ese parte", async()=>{
-    renderWithProviders(<App />, {route: '/worklogs'})
-    await act(async () => {
-      userEvent.type(await screen.findByPlaceholderText(/Buscar.../i),"Compra 15-11-20")
-    })    
-    
-    await act(async() => {
-      userEvent.click(await screen.queryByLabelText(/Filtrar/i))
-    })
-    
-    expect(await screen.findByText(/Compra 15-11-20/i)).toBeInTheDocument()
-    expect(await screen.findByText(/Compra 05-11-20/i)).not.toBeInTheDocument()    
-  })
 
   it("Cuando se elimina el contenido del buscador y se vuelve a pulsar el botón 'Filtrar', se muestra la lista de partes sin filtrar", async()=>{
     renderWithProviders(<App />, {route: '/worklogs'})
-
     await act(async () => {
       userEvent.type(await screen.findByPlaceholderText(/Buscar.../i),"Compra 15-11-20")
     })    
@@ -284,7 +270,7 @@ describe("Lista de partes de trabajo", () =>{
     })
     
     expect(await screen.findByText(/Compra 15-11-20/i)).toBeInTheDocument()
-    expect(await screen.findByText(/Compra 05-11-20/i)).not.toBeInTheDocument()    
+    expect(await screen.findByText(/Compra 05-11-20/i)).not.toBeInTheDocument()
 
     await act(async () => {
       userEvent.clear(await screen.findByPlaceholderText(/Buscar.../i))
@@ -295,7 +281,7 @@ describe("Lista de partes de trabajo", () =>{
     })
 
     expect(await screen.findByText(/Compra 15-11-20/i)).toBeInTheDocument()
-    expect(await screen.findByText(/Compra 05-11-20/i)).toBeInTheDocument()     
+    expect(await screen.findByText(/Compra 05-11-20/i)).toBeInTheDocument()
   })
 
   it("Cuando no existen partes o no existen resultados para los filtros introducidos, la lista de partes muestra mensaje indicándolo", async() => {
@@ -312,10 +298,10 @@ describe("Lista de partes de trabajo", () =>{
   })
 })
 
-describe.only("Nuevo parte", () => {
+describe("Nuevo parte", () => {
  
   it("Muestra los campos del nuevo parte con los valores por defecto", async() =>{            
-      renderWithProviders(<App />, {route: '/worklogs/new'})      
+      renderWithProviders(<App />, {route: '/worklogs/new'})
 
       expect(await screen.findByLabelText('title')).toHaveValue("")
       expect(await screen.findByLabelText('startDatetime')).toHaveValue("")
@@ -403,4 +389,85 @@ describe.only("Nuevo parte", () => {
     expect(await screen.queryByLabelText('loading')).not.toBeInTheDocument()
   })
   
+})
+
+describe("Detalle de parte", () => {
+  beforeEach(()=>{
+    jest.resetAllMocks();
+  });
+  it("Muestra todos los campos de un parte", async() => {
+    renderWithProviders(<App />, {route: '/worklogs/1'})
+    expect(await screen.findByText(/Compra 05-11-20/i)).toBeInTheDocument();
+    expect(await screen.findByText(/05\/11\/2020 08:00/i)).toBeInTheDocument();
+    expect(await screen.findByText(/05\/11\/2020 09:00/i)).toBeInTheDocument();
+    expect(await screen.findByText(/05\/11\/2020 16:30/i)).toBeInTheDocument();
+
+    expect(await screen.queryByText(/Esta acción es irreversible. ¿Desea continuar?/i)).not.toBeInTheDocument()
+  })
+
+  it("Muestra mensaje 'El parte no existe' si se busca un id que no existe", async() => {
+    renderWithProviders(<App />, {route: '/worklogs/1111'})
+    expect(await screen.findByText(/El parte no existe/i)).toBeInTheDocument();
+  })
+
+  it("Muestra los botones de editar, borrar y añadir trabajo al ver el detalle de un parte", async () => {
+    renderWithProviders(<App />, {route: '/worklogs/1'})
+    expect(await screen.findByLabelText(/Editar/i)).toBeInTheDocument()
+    expect(await screen.findByLabelText(/Borrar/i)).toBeInTheDocument()
+    expect(await screen.findByLabelText(/Añadir trabajo/i)).toBeInTheDocument()
+  })
+
+  it("El botón 'Editar' carga la url worklogs/edit/1", async() => {
+    renderWithProviders(<App />, {route: 'worklogs/1'})
+    expect(await screen.findByLabelText(/Editar/i)).toHaveAttribute('href','/worklogs/edit/1')
+  })
+/*
+  it("El botón 'Añadir trabajo' carga la url jobs/new/1", async() => {
+    renderWithProviders(<App />, {route: 'worklogs/1'})
+    expect(await screen.findByLabelText(/Añadir trabajo/i)).toHaveAttribute('href','/worklogs/new/1')
+  })*/
+
+  it("El botón 'Borrar' muestra diálogo de confirmación", async() => {   
+    await renderWithProviders(<App />, {route: 'worklogs/1'})  
+    userEvent.click(await screen.findByLabelText(/Borrar/i))
+    expect(await screen.queryByText(/Esta acción es irreversible. ¿Desea continuar?/i)).toBeInTheDocument()
+    expect(await screen.queryByLabelText(/Aceptar/i)).toBeInTheDocument()
+    expect(await screen.queryByLabelText(/Cancelar/i)).toBeInTheDocument()
+  })
+
+  it("Al pulsar 'Aceptar' en el diálogo de confirmación de la acción 'Borrar', se borra el parte", async() => {   
+    await renderWithProviders(<App />, {route: 'worklogs/1'})  
+    await act(async () => {
+      userEvent.click(await screen.findByLabelText(/Borrar/i))
+    })    
+    
+    await act(async() => {
+      userEvent.click(await screen.queryByLabelText(/Aceptar/i))
+    })
+    
+    expect(await screen.findByLabelText("success-message")).toHaveTextContent(/El parte se ha eliminado con éxito/i)
+
+  })
+})
+
+describe.only("Editar parte de trabajo", async () => {
+  it("Muestra el formulario de edición de parte y carga los datos del parte seleccionado", async () => {
+    renderWithProviders(<App />, {route: '/worklogs/edit/1'})
+    
+    expect(await screen.findByLabelText('title')).toHaveValue("Compra 05-11-20")
+    expect(await screen.findByLabelText('starttDatetime')).toHaveValue("05/11/2020 09:00")
+    screen.debug()
+  })
+
+/*
+  it("Muestra mensaje de éxito al pulsar el botón 'Guardar' y actualizar los datos del parte", async () => {
+    renderWithProviders(<App />, {route: '/worklogs/edit/1'})
+
+    await act(async () => {
+      userEvent.click(await screen.findByLabelText('Guardar'))
+    })
+
+    expect(await screen.findByLabelText('success-message')).toHaveTextContent(/El parte 'Compra 05-11-20' ha sido editado con éxito/i)
+    expect(await screen.queryByLabelText('loading')).not.toBeInTheDocument()
+  })*/
 })

@@ -40,30 +40,39 @@ export const WorklogListComponent = ( props ) => {
 
     
     React.useEffect(() => {
+        let cancelled = false
         setLoading(true)
         setActions(actionItems)
         getWorklogList(filters)
             .then(
                 (result) => {
-                    if(result.hasError){
-                        setError(new Error(result.error));
-                        setWorklogs([])
-                    }else{
-                        setWorklogs(result.data); 
-                        setError(null);
+                    if(!cancelled){
+                        if(result.hasError){
+                            console.log("Noooooooooooooooooooooo")
+                            setError(new Error(result.error));
+                            setWorklogs([])
+                        }else{
+                            console.log(result.data)
+                            setWorklogs(result.data); 
+                            setError(null);
+                        }
+                        
+                        setLoading(false)
                     }
-                    
-                    setLoading(false)    
                 },
                 (error) => {
-                    setError(error)
-                    setLoading(false)    
+                    if(!cancelled){
+                        setError(error)
+                        setLoading(false)
+                    }
                 }
             )
+
+        return () => cancelled = true
     },[filters])
 
     const searchHandler = (values) => {
-        const filter: Partial<any> = {}
+        const filter: Partial<Worklog> = {}
         if(values.actionBarSearch){
             filter.title = values.actionBarSearch
         }

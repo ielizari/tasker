@@ -1,7 +1,6 @@
-import { TaskDetail, TaskObject } from '../../front/domain/task-detail'
-import { TaskItem } from '../../front/domain/task-list'
-import { Worklog, WorklogObject} from '../../front/domain/worklog'
-import { Job, JobObject } from '../../front/domain/job'
+import { TaskDetail, TaskItem, TaskObject } from '../domain/task'
+import { Worklog, WorklogObject } from '../domain/worklog'
+import { Job, JobObject } from '../domain/job'
 import { Schema } from '../infrastructure/repositories/browser/browserdb'
 
 let repository: TaskerRepository
@@ -16,6 +15,10 @@ export interface TaskerRepository{
     newDb(): boolean
     importDb(db: Schema): boolean    
     exportDb(): FileDownload
+    hasDB(): boolean
+    initDB(): void
+    emptyDbObject(): Schema
+    setDbLastModified(date: string): boolean    
 
     getTasks(filter?: Partial<TaskDetail>): Array<TaskItem>
     addTask(task: TaskDetail): TaskObject

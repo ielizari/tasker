@@ -14,7 +14,7 @@ import { FormBuilder } from '../common/form/form'
 
 import  {Datepicker}  from '../../../../lib/orzkDatepicker/datepicker'
 import '../../../../lib/orzkDatepicker/datepicker.css'
-import { isValidDateTime, dateToString } from '../../../../lib/date.utils'
+import { isValidDateTime, dateToFormattedDate, formattedDateToISOString } from '../../../../lib/date.utils'
 
 
 const emptyWorklog: Worklog = {
@@ -93,8 +93,6 @@ export const WorklogNewComponent = (props) => {
     }
 
     const onSubmit = (values: Worklog, helpers) => {
-        
-        values.startDatetime = (new Datepicker().createDate(values.startDatetime)).toString()
                         
         setLoading(true)
             if(mode === 'new'){
@@ -102,7 +100,6 @@ export const WorklogNewComponent = (props) => {
                 .then(                            
                     (result) => {
                         if(!result.hasError){
-                            console.log(result)
                             setSubmitSuccess(result.data.worklog);                                        
                             setSubmitError(null);
                             helpers.resetForm({})
@@ -174,9 +171,9 @@ export const WorklogNewComponent = (props) => {
         }
     },[dpStart])
 
-    React.useEffect(()=> {   
+    React.useEffect(()=> {           
         let cancelled = false    
-        if(worklogid){
+        if(worklogid){            
             setLoading(true)
             getWorklog(worklogid)
             .then(
@@ -186,7 +183,8 @@ export const WorklogNewComponent = (props) => {
                             setError(new Error(result.error))
                             setWorklog(null)
                         }else{
-                            if(mode === 'edit'){                                    
+                            if(mode === 'edit'){        
+                                console.log(result.data)                            
                                 setWorklog(result.data.worklog) 
                             }else{                                
                                 setWorklog(emptyWorklog)
@@ -208,6 +206,7 @@ export const WorklogNewComponent = (props) => {
                 }
             )        
         }else{
+            console.log("Vamoooooooooooooooooooooooos5")
             setWorklog(emptyWorklog)
         }  
         return () => cancelled = true    

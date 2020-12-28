@@ -34,7 +34,7 @@ const LogoImg = styled(Logo)`
     margin-right: 1.5rem;
 `
 
-export const SetupApp = () => {
+export const SetupApp = ( props ) => {
     return (
         <>
             <Head>                

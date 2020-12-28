@@ -82,10 +82,11 @@ export const FormTextInput :React.FC<any> = ({label, ...props}) => {
 export const FormDateInput2 :React.FC<any> = ({label, ...props}) => {
     const [field, meta, {setValue, setTouched}] = useField(props)
     const [dp, setDp] = React.useState(null)
-
+    
     const showDp = () => {
         dp.show()
     }
+    
     React.useEffect(()=> {
         let picker : Datepicker = new Datepicker(props.id,label,{lang:'es'})
         picker.onSubmit = function(){
@@ -97,12 +98,12 @@ export const FormDateInput2 :React.FC<any> = ({label, ...props}) => {
     
     return (
         <FormItemWrapper>
-            <label htmlFor={props.id || props.name}>{label}</label>
+            <label htmlFor={props.id || props.name} >{label}</label>
             <FormInputWithIconWrapper >                
-                <FormInputIcon key={props.id || props.name + '_icon'} onClick={showDp}><FaCalendar/></FormInputIcon>
+                <FormInputIcon onClick={showDp}><FaCalendar/></FormInputIcon>
                 <Field 
                     {...field} 
-                    {...props}    
+                    {...props}
                     aria-label={props.id || props.name}
                 />
             </FormInputWithIconWrapper>
@@ -384,7 +385,7 @@ export const FormBuilder: React.FC<any> = (props) => {
                                         )
                                     }else if(item.type === 'buttons'){
                                         return (
-                                            <FormButtons>
+                                            <FormButtons key="form_buttons">
                                             {
                                                 item.buttons.map((button) => {
                                                     if(button.type === 'submit'){

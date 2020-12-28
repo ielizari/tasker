@@ -81,7 +81,6 @@ export const TaskNewComponent = (props) => {
          }          
 
         if(task && task.limitDate !== '' && new Date(task.limitDate)){
-            console.log(new Date().toString(),"Carga en datepicker la fecha",task.title,task.limitDate,new Date(task.limitDate))       
             dp.setDate(new Date(task.limitDate))
         }
         setDpLimit(dp)
@@ -181,7 +180,6 @@ export const TaskNewComponent = (props) => {
                         }
                         
                         let datetime = values.limitDate.split(" ")
-                        //console.log(limitDate,values.limitDate, datetime)
                         if(datetime.length > 0 && datetime.length !== 11 && datetime[0] !== ''){
                             if(!datetime[0].match(/^(((0[1-9]|[12]\d|3[01])\/(0[13578]|1[02])\/((19|[2-9]\d)\d{2}))|((0[1-9]|[12]\d|30)\/(0[13456789]|1[012])\/((19|[2-9]\d)\d{2}))|((0[1-9]|1\d|2[0-8])\/02\/((19|[2-9]\d)\d{2}))|(29\/02\/((1[6-9]|[2-9]\d)(0[48]|[2468][048]|[13579][26])|(([1][26]|[2468][048]|[3579][26])00))))$/g)){
                                 errors.limitDate = 'Formato de fecha no válido'
@@ -195,7 +193,6 @@ export const TaskNewComponent = (props) => {
                     onSubmit = {(values,{setSubmitting, resetForm}) => {  
                         if(values.limitDate !== ''){
                             values.limitDate = (new Datepicker().createDate(values.limitDate)).toString()
-                            console.log("Fechalimite",(new Datepicker().createDate(values.limitDate)).toString())
                         }
                         
                         setLoading(true)
@@ -207,7 +204,7 @@ export const TaskNewComponent = (props) => {
                                         setSubmitSuccess(result.data.task)
                                         setSubmitError(null)
                                         resetForm({})
-                                        setSync(false)
+                                        setSync({sync: false})
                                     }else{
                                         setSubmitSuccess(null);
                                         setSubmitError(new Error(result.error));                                      
@@ -232,7 +229,7 @@ export const TaskNewComponent = (props) => {
                                         setTask(null)                                     
                                         setTask(result.data.task)                                        
                                         setSubmitError(null);
-                                        setSync(false)
+                                        setSync({sync: false})
                                     }else{
                                         setSubmitSuccess(null);
                                         setSubmitError(new Error(result.error));                                      

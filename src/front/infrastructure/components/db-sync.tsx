@@ -14,7 +14,6 @@ const exportDB = () => {
     
     exportDb().then(
         (result) => {
-            console.log(result)
             if(!result.hasError){
                 let blob = new Blob([JSON.parse(result.data.blob)], { type: 'text/plain;charset=utf-8;' })
                 let exportedFilename = result.data.filename
@@ -53,17 +52,21 @@ export const DbSync = () => {
     const {sync, setSync} = syncCtx
   
     React.useEffect(()=>{
-        setSync(true)
+        setSync({sync:true})
     },[])
     
     const handleExport = () => {
         exportDB()
-        setSync(true)
+        setSync({sync:true})
     }
     
+    React.useEffect(()=>{
+        console.log(sync)
+    },[sync])
+
     return (
         <>
-        {!sync &&
+        {!sync.sync &&
             <SyncWarningContainer>
                 Necesita sincronización
                 <button onClick={handleExport}>Download</button>

@@ -1,0 +1,16 @@
+<html>
+    <body>
+        <script type="text/javascript">
+            var d = new Date(Date.parse("2020-12-26T16:56:00.000Z"))
+            console.log(d)
+            console.log(d.toUTCString())
+            console.log(d.toDateString())
+            console.log(d.toLocaleString())
+            var d2 = new Date(Date.parse(d.toISOString()))
+            console.log(d2)
+            var d3 = new Date()
+            console.log(d3)
+            console.log(d3.toISOString())
+        </script>
+    </body>
+</html>

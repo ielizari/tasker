@@ -1,6 +1,6 @@
 import { rest } from 'msw'
 import { isEmpty } from 'lodash'
-import { TaskDetail, TaskObject } from '../../../../../front/domain/task-detail'
+import { TaskDetail, TaskObject } from '../../../../domain/task'
 import { getTaskerRepository, FileDownload } from '../../../../application/taskerRepository'
 import { ApiResponse, ApiResponseBuilder } from '../../../../domain/api-response'
 

@@ -1,21 +1,26 @@
 import lowdb from 'lowdb'
-//import FileSync from 'lowdb/adapters/FileSync'
 import LocalStorage from 'lowdb/adapters/LocalStorage'
-import { TaskDetail, TaskObject } from '../../../../front/domain/task-detail'
-import { TaskItem } from '../../../../front/domain/task-list'
-import { Worklog, WorklogObject } from '../../../../front/domain/worklog'
-import { Job, JobObject } from '../../../../front/domain/job'
+
+import { TaskDetail, TaskObject, TaskItem } from '../../../domain/task'
+import { WorklogObject, Worklog, WorklogDB } from '../../../domain/worklog'
+import { Job, JobObject } from '../../../domain/job'
+import { mapWorklogToApiWorklog, mapApiWorklogToWorklogDb } from '../../../application/dtos/dbToApiDto'
 
 import { TaskerRepository, setTaskerRepository, FileDownload } from '../../../application/taskerRepository'
+
+export type metadataDB = {
+        created: string,
+        lastModified: string,    
+}
 
 export type Schema = {
     tasks: Array<TaskDetail>
     worklogs: Array<Worklog>
     jobs: Array<Job>
+    metadata: Array<metadataDB>
 }
 const exampleData :Schema = require('./db/taskerdb.json')
 
-//const adapter = new FileSync<schema>('./db/taskerdb.json')
 const adapter = new LocalStorage<Schema>('db')
 
 export const db = lowdb(adapter)
@@ -45,7 +50,8 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
 
     newDb(): boolean {
         try{
-            clearDB()
+            this.clearDB()
+            this.initDB('empty')
             return true
         }catch(e){
             return false
@@ -54,10 +60,10 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
 
     importDb(db: Schema): boolean{        
         try{
-            if(hasDB()){
+            if(this.hasDB()){
                 localStorage.removeItem('db')
             }
-            initDB('import',db)
+            this.initDB('import',db)
         }catch(e){
             console.log(e)
             return false
@@ -116,6 +122,7 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
     addTask (task: TaskDetail): TaskObject{  
         try{      
              db.get('tasks').push(task).write()
+             this.setDbLastModified()
              return this.getTaskById(task.id)
         }catch(e){
             throw e
@@ -125,6 +132,7 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
     updateTask(task: TaskDetail): TaskObject{
         try{
             db.get('tasks').find({id: task.id}).assign(task).write()
+            this.setDbLastModified()
             return this.getTaskById(task.id)
         }catch(e){
             throw e
@@ -135,6 +143,7 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
             const task = db.get('tasks').find({id: taskid}).value()
             if(task){
                 db.get('tasks').remove({id: taskid}).write()
+                this.setDbLastModified()
             }else{
                 return false
             }
@@ -160,11 +169,10 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
         })
         return result
     }
+    
     getWorklogById(id: string): WorklogObject {    
-        try{    
-            console.log(id)
-            let worklog = db.get('worklogs').find({id: id}).value() || null    
-            console.log(worklog)
+        try{
+            let worklog : Worklog = mapWorklogToApiWorklog(db.get('worklogs').find({id: id}).value()) || null  
             let childJobs = [];
             childJobs = childJobs.concat(db.get('jobs').filter({worklog: id}).value() || []);
             
@@ -179,9 +187,13 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
         }
     }
     addWorklog (worklog: Worklog): WorklogObject{  
-        try{      
-             db.get('worklogs').push(worklog).write()
-             return this.getWorklogById(worklog.id)
+        try{   
+            console.log(worklog)
+             let wl: WorklogDB = mapApiWorklogToWorklogDb(worklog) 
+             console.log(wl)
+             db.get('worklogs').push(wl).write()
+             this.setDbLastModified()
+             return this.getWorklogById(wl.id)
         }catch(e){
             throw e
         }
@@ -190,6 +202,7 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
     updateWorklog(worklog: Worklog): WorklogObject{
         try{
             db.get('worklogs').find({id: worklog.id}).assign(worklog).write()
+            this.setDbLastModified()
             return this.getWorklogById(worklog.id)
         }catch(e){
             throw e
@@ -197,9 +210,11 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
     }
     deleteWorklog(worklogid: string): boolean{
         try{
+            console.log(worklogid)
             const worklog = db.get('worklogs').find({id: worklogid}).value()
             if(worklog){
                 db.get('worklogs').remove({id: worklogid}).write()
+                this.setDbLastModified()
             }else{
                 return false
             }
@@ -255,6 +270,7 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
     addJob (job: Job): JobObject{  
         try{      
              db.get('jobs').push(job).write()
+             this.setDbLastModified()
              return this.getJobById(job.id)
         }catch(e){
             throw e
@@ -264,6 +280,7 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
     updateJob(job: Job): JobObject{
         try{
             db.get('jobs').find({id: job.id}).assign(job).write()
+            this.setDbLastModified()
             return this.getJobById(job.id)
         }catch(e){
             throw e
@@ -274,6 +291,7 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
             const job = db.get('jobs').find({id: jobid}).value()
             if(job){
                 db.get('jobs').remove({id: jobid}).write()
+                this.setDbLastModified()
             }else{
                 return false
             }
@@ -282,56 +300,97 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
             throw e
         }
     }
-}
 
-export const hasDB = (): boolean => {
-    if(localStorage.getItem('db') ){
-        return true
-    }
-    return false
-}
-export const initDB = (type: string = 'empty', dbfile?: Schema) => {
-    console.log("INICIANDO",type)
-    if(!hasDB()){        
-        console.log("DB vacía")
-        db.defaults({ tasks: [], worklogs: [], jobs: [] }).write()
-
-        if(type === 'example'){
-            loadDataToDB(exampleData)
-        }else if(type === 'import'){
-            loadDataToDB(dbfile)
-        }else if(type === 'empty'){
-            // Nothing to do here        
-        }else{
-            // Nothing to do here
+    hasDB = (): boolean => {
+        if(localStorage.getItem('db') && db.get('metadata').value() && db.get('metadata').value().length ){
+            return true
         }
-    }else{
-        console.log("DB con registros")
+        return false
     }
 
+    initDB = (type: string = 'default', dbfile?: Schema) => {
+        if(!this.hasDB()){        
+            console.log("DB vacía")
+            
+            db.defaults({ tasks: [], worklogs: [], jobs: [], metadata: [] }).write()
+    
+            if(type === 'example'){
+                this.loadDataToDB(exampleData)
+            }else if(type === 'import'){
+                this.loadDataToDB(dbfile)
+            }else if(type === 'empty'){
+                this.loadDataToDB(this.emptyDbObject())
+            }else{
+                // Nothing to do here
+            }
+        }else{
+            console.log("DB con registros")
+        }  
+    }
+    
+    emptyDbObject = () : Schema => {
+        let now = new Date().toISOString()
+        let metadata : metadataDB = {created: now, lastModified: ''}
+    
+        return {
+            tasks: [],
+            worklogs: [],
+            jobs: [],
+            metadata: [metadata]
+        }
+    }
+
+    setDbLastModified = (date: string = ''): boolean => {
+        try{
+            if(date === ''){
+                date = new Date().toISOString()
+            }
+            const metadata = db.get('metadata').value()
+            if(metadata.length){
+                let md : metadataDB = metadata[0]
+                md.lastModified = date
+                db.get('metadata')[0].assign(md).write()
+                return true
+            }
+            return false
+        }catch(e){
+            throw e
+        }
+    }
+
+    // Es necesario borrar todos los items del objeto lowdb ya que guarda los registros en memoria, por lo que aunque borremos el localstorage
+    // los volverá a cargar
+    clearDB = () => {
+        db.get('tasks').remove().write()      
+        db.get('worklogs').remove().write()  
+        db.get('jobs').remove().write()
+        db.get('metadata').remove().write()
+    }
+    
+    loadDataToDB = (data: Schema) => {
+        this.clearDB()
+        console.log(data)
+        const tasks : Array<TaskDetail> = data.tasks
+        for(let i=0; i< tasks.length; i++){     
+            db.get('tasks').push(tasks[i]).write()
+        }        
+        const worklogs: Array<Worklog> = data.worklogs
+        for(let i=0; i< worklogs.length; i++){      
+            db.get('worklogs').push(worklogs[i]).write()
+        }     
+        const jobs: Array<Job> = data.jobs
+        for(let i=0; i< jobs.length; i++){      
+            db.get('jobs').push(jobs[i]).write()
+        } 
+        const metadata : Array<metadataDB> = data.metadata
+        for(let i=0; i<metadata.length; i++){
+            db.get('metadata').push(metadata[i]).write()
+        }
+        
+    }
+}
+
+export const startDb = () => {
     setTaskerRepository(new LowdbLocalstorageRepository())
 }
 
-// Es necesario borrar todos los items del objeto lowdb ya que guarda los registros en memoria, por lo que aunque borremos el localstorage
-// los volverá a cargar
-const clearDB = () => {
-    db.get('tasks').remove().write()      
-    db.get('worklogs').remove().write()  
-    db.get('jobs').remove().write()  
-}
-
-const loadDataToDB = (data: Schema) => {
-    clearDB()
-    const tasks : Array<TaskDetail> = data.tasks
-    for(let i=0; i< tasks.length; i++){     
-        db.get('tasks').push(tasks[i]).write()
-    }        
-    const worklogs: Array<Worklog> = data.worklogs
-    for(let i=0; i< worklogs.length; i++){      
-        db.get('worklogs').push(worklogs[i]).write()
-    }     
-    const jobs: Array<Job> = data.jobs
-    for(let i=0; i< jobs.length; i++){      
-        db.get('jobs').push(jobs[i]).write()
-    }     
-}

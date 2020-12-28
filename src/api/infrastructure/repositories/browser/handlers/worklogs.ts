@@ -1,8 +1,9 @@
 import { rest } from 'msw'
 import { isEmpty, throttle } from 'lodash'
-import { Worklog } from '../../../../../front/domain/worklog'
+import { Worklog, WorklogObject } from '../../../../domain/worklog'
 import { getTaskerRepository, FileDownload } from '../../../../application/taskerRepository'
 import { ApiResponse, ApiResponseBuilder } from '../../../../domain/api-response'
+import { mapApiWorklogToWorklogDb } from '../../../../application/dtos/dbToApiDto'
 
 export const worklogHandlers = [
     rest.post('http://localhost:3000/api/worklogs',(req, res, ctx) => { 
@@ -47,12 +48,53 @@ export const worklogHandlers = [
             }else{
                 throw new Error('Un parte nuevo no puede contener un valor en el campo "id"')
             }
-            return res(
-                ctx.status(500),
-                ctx.json(ApiResponseBuilder(500,{},true,"ni de coña"))
-            )
+            
             worklog.createdDate = new Date().toString()
             let result = getTaskerRepository().addWorklog(worklog)
+            return res(
+                ctx.status(200),
+                ctx.json(ApiResponseBuilder(200,result,false))
+            )
+        }catch(e){
+            return res(
+                ctx.status(500),
+                ctx.json(ApiResponseBuilder(500,{},true,e.message))
+            )
+        }
+    }),
+
+    rest.delete('http://localhost:3000/api/worklogs/delete/:worklogid', (req,res,ctx) => {
+        try{
+            const worklogid = req.params.worklogid || '';
+            if(worklogid === ''){
+                return res(
+                    ctx.status(400),
+                    ctx.json(ApiResponseBuilder(400,{},true,'Id de parte no válido'))
+                )
+            }else{            
+                let result = getTaskerRepository().deleteWorklog(worklogid)
+                return res(
+                    ctx.status(200),
+                    ctx.json(ApiResponseBuilder(200,result,false))
+                )
+            }
+        }catch(e){
+            return res(
+                ctx.status(500),
+                ctx.json(ApiResponseBuilder(500,{},true,e.message))
+            )
+        }
+    }),
+
+    rest.put('http://localhost:3000/api/worklogs/update', (req, res, ctx) => {
+        try{
+            const worklog: Worklog | null = req.body ? req.body as Worklog : null
+            
+            if(isEmpty(worklog.id)) {
+                throw new Error('Es necesario proporcionar el id del parte a editar')
+            }
+                        
+            let result: WorklogObject = getTaskerRepository().updateWorklog(mapApiWorklogToWorklogDb(worklog))
             return res(
                 ctx.status(200),
                 ctx.json(ApiResponseBuilder(200,result,false))

@@ -11,7 +11,7 @@ import { BlockActions } from '../common/block-actions'
 import { FaEdit, FaTrashAlt, FaPlus } from 'react-icons/fa'
 import { Modal } from '../common/modal'
 import { Link } from 'react-router-dom'
-import { dateToString } from '../../../../lib/date.utils'
+import { dateToFormattedDate } from '../../../../lib/date.utils'
 import { BlockContainer, BlockHeaderComponent } from '../common/block'
  
 const TaskDetailContainer = styled.ul`
@@ -230,11 +230,11 @@ export const TaskDetailComponent = (props) => {
                             </TaskDetailItem>
                             <TaskDetailItem>
                                 <TaskDetailKey>Creada:</TaskDetailKey>
-                                <TaskDetailValue>{task.task.createdDate ? dateToString(new Date(task.task.createdDate)) : '-'}</TaskDetailValue>
+                                <TaskDetailValue>{task.task.createdDate ? dateToFormattedDate(new Date(task.task.createdDate)) : '-'}</TaskDetailValue>
                             </TaskDetailItem>
                             <TaskDetailItem>
                                 <TaskDetailKey>Fecha límite:</TaskDetailKey>
-                                <TaskDetailValue>{task.task.limitDate ? dateToString(new Date(task.task.limitDate)) : '-'}</TaskDetailValue>
+                                <TaskDetailValue>{task.task.limitDate ? dateToFormattedDate(new Date(task.task.limitDate)) : '-'}</TaskDetailValue>
                             </TaskDetailItem>                            
                             <TaskDetailItem>
                                 <TaskDetailKey>Tags:</TaskDetailKey>

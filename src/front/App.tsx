@@ -5,19 +5,53 @@ import {
   Route,
 } from "react-router-dom";
 
+import { SyncStateContext } from './application/contexts/dbSyncContext'
+
+import { Spinner } from './infrastructure/components/common/spinner'
 import { Home } from './infrastructure/views/home.component'
 import { Header } from './infrastructure/components/common/header'
 import { DbSync } from './infrastructure/components/db-sync'
 import { TasksView } from './infrastructure/views/tasks.view.component'
 import { WorklogView } from './infrastructure/views/worklog.view.component'
-import { hasDB } from '../api/infrastructure/repositories/browser/browserdb'
 import { SetupApp } from './infrastructure/views/setup-app.component'
 import { Settings } from './infrastructure/views/settings.component'
 
+import { existsDb } from './application/existsDatabase'
+
+
 function App() {
+  const syncCtx = React.useContext(SyncStateContext)
+  const {sync, setSync} = syncCtx
+  const [loading, setLoading] = React.useState<boolean>(false)
+  
+  React.useEffect(()=>{
+    console.log(sync)
+  },[sync])
+
+  React.useEffect(()=>{
+      setLoading(true)
+      existsDb().then(
+          result => {
+              if(!result.hasError){
+                  setSync({sync:true, existsDb: result.data})
+              }else{
+                  setSync({sync:true, existsDb: false})
+              }
+              setLoading(false)
+          },
+          error => {
+            console.log(error)
+            setSync({sync:true, existsDb: false})
+            setLoading(false)
+          }
+      )
+  }, [])
+
   return (
     <>
-    {!hasDB() ?
+    {loading ? <Spinner /> : ''}     
+
+    {!sync.existsDb ?
       <SetupApp />
     :
       <>

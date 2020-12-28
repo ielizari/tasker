@@ -8,6 +8,7 @@ import { FormBuilder } from '../components/common/form/form'
 import { FaCheck, FaArrowLeft} from 'react-icons/fa'
 import { importDb, importForm } from '../../application/importDatabase'
 import { newDb } from '../../application/newDatabase'
+import { SyncStateContext } from '../../application/contexts/dbSyncContext'
 
 const SetupButtons = styled.div`
     display: flex;
@@ -25,6 +26,9 @@ const Button = styled.button`
     min-width: 30%;
 `
 export const LoadDB = () => {
+    const syncCtx = React.useContext(SyncStateContext)
+    const {setSync} = syncCtx
+
     const [title, setTitle] = React.useState<string>('Base de datos')
     const [error, setError] = React.useState<Error | null>(null)
     const [loading, setLoading] = React.useState<boolean>(false)
@@ -50,12 +54,14 @@ export const LoadDB = () => {
         setLoading(true)
         newDb().then(
             result => {
+                setLoading(false)
                 if(result.hasError){
-                    setSubmitError(error)
+                    setSubmitError(error)                    
                 }else{
                     setSubmitSuccess(true)
-                }
-                setLoading(false)
+                    setSync({existsDb: true})
+                    
+                }                
             },
             error => {
                 setSubmitError(error)
@@ -108,12 +114,13 @@ export const LoadDB = () => {
         setLoading(true)
         importDb(values).then(
             result => {
+                setLoading(false)
                 if(result.hasError){
                     setSubmitError(error)
                 }else{
                     setSubmitSuccess(true)
-                }
-                setLoading(false)
+                    setSync({existsDb: true})
+                }                
             },
             error => {
                 setSubmitError(error)

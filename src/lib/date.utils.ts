@@ -1,9 +1,44 @@
 import  {Datepicker}  from './orzkDatepicker/datepicker'
 
-export const dateToString = (d: Date, dateFormat: string = 'dmy/', timeFormat : string = 'hm') : string => {
-    let dp = new Datepicker(null,null,{lang: 'es',dateFormat: dateFormat, timeFormat: timeFormat});
-    dp.setDate(d);
-    return dp.getFullDateString()
+export const dateToFormattedDate = (d: Date, dateFormat: string = 'dmy/', timeFormat : string = 'hm') : string => {
+    try{
+        let dp = new Datepicker(null,null,{lang: 'es',dateFormat: dateFormat, timeFormat: timeFormat});
+        dp.setDate(d);
+        return dp.getFullDateString()
+    }catch(e){
+        console.log(e)
+        return ''
+    }
+}
+
+export const ISOStringToFormatedDate = (d: string, dateFormat: string = 'dmy/', timeFormat : string = 'hm'): string => {
+    try{
+        if(d.length > 0){
+            let dp : Datepicker = new Datepicker(null,null,{lang:'es', dateFormat: dateFormat, timeFormat: timeFormat})
+            dp.setDate(new Date(Date.parse(d)))
+            return dp.getFullDateString()
+        }else{
+            return ''
+        }
+    }catch(e){
+        throw e
+    }
+}
+export const formattedDateToISOString = (d: string, dateFormat: string = 'dmy/', timeFormat : string = 'hm'): string => {
+    try{
+        if(d.length > 0){
+            let date = (new Datepicker(null,null,{lang:'es', dateFormat: dateFormat, timeFormat: timeFormat})).createDate(d)
+            if(date){
+                return (date as Date).toISOString()
+            }else{
+                throw new Error(`La fecha ${d} tiene un formato no válido.`)
+            }            
+        }else{
+            return ''
+        }
+    }catch(e){
+        throw e
+    }
 }
 
 export const isValidDate = (date: string): boolean => {

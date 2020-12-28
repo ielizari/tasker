@@ -10,7 +10,7 @@ import { BlockActions } from '../common/block-actions'
 import { FaEdit, FaTrashAlt, FaPlus } from 'react-icons/fa'
 import { Modal } from '../common/modal'
 import { Link } from 'react-router-dom'
-import { dateToString } from '../../../../lib/date.utils'
+import { ISOStringToFormatedDate } from '../../../../lib/date.utils'
 import { BlockContainer, BlockHeaderComponent } from '../common/block'
  
 const WorklogDetailContainer = styled.ul`
@@ -205,12 +205,16 @@ export const WorklogDetailComponent = (props) => {
                             </WorklogDetailItem>      
                             <WorklogDetailItem>
                                 <WorklogDetailKey>Creada:</WorklogDetailKey>
-                                <WorklogDetailValue>{worklog.worklog.createdDate ? dateToString(new Date(worklog.worklog.createdDate)) : '-'}</WorklogDetailValue>
+                                <WorklogDetailValue>{worklog.worklog.createdDate ? ISOStringToFormatedDate(worklog.worklog.createdDate) : '-'}</WorklogDetailValue>
                             </WorklogDetailItem>
                             <WorklogDetailItem>
                                 <WorklogDetailKey>Inicio:</WorklogDetailKey>
-                                <WorklogDetailValue>{worklog.worklog.startDatetime ? dateToString(new Date(worklog.worklog.startDatetime)) : '-'}</WorklogDetailValue>
-                            </WorklogDetailItem>                            
+                                <WorklogDetailValue>{worklog.worklog.startDatetime ? ISOStringToFormatedDate(worklog.worklog.startDatetime) : '-'}</WorklogDetailValue>
+                            </WorklogDetailItem>
+                            <WorklogDetailItem>
+                                <WorklogDetailKey>Fin:</WorklogDetailKey>
+                                <WorklogDetailValue>{worklog.worklog.endDatetime ? ISOStringToFormatedDate(worklog.worklog.endDatetime) : '-'}</WorklogDetailValue>
+                            </WorklogDetailItem>    
                             <WorklogDetailItem>
                                 <WorklogDetailKey>Tags:</WorklogDetailKey>
                                 <WorklogDetailValue>

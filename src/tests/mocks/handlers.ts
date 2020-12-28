@@ -1,10 +1,10 @@
 import { rest } from 'msw'
 import taskData from './tasks.json'
-import { TaskDetail, TaskObject } from '../../domain/task-detail'
-import { Worklog, WorklogObject} from '../../domain/worklog'
+import { TaskDetail, TaskObject } from '../../front/domain/task-detail'
+import { Worklog, WorklogObject} from '../../front/domain/worklog'
 import { isEmpty } from 'lodash'
-import  {Datepicker}  from '../../../lib/orzkDatepicker/datepicker'
-import { ApiResponseBuilder, ApiResponse} from '../../../api/domain/api-response'
+import  {Datepicker}  from '../../lib/orzkDatepicker/datepicker'
+import { ApiResponseBuilder, ApiResponse} from '../../api/domain/api-response'
 
 export const handlers = [
     rest.post('http://localhost:3000/api/tasks',(req, res, ctx) => {       
@@ -125,9 +125,9 @@ export const handlers = [
     }),
 
     rest.post('http://localhost:3000/api/worklogs',(req, res, ctx) => {       
-        const filters : Partial<TaskDetail> = req.body ? JSON.parse(req.body as string) : {}
-         
-        if(filters.title === 'Compra 15-11-20'){   
+        const filters : Partial<Worklog> = req.body ? JSON.parse(req.body as string) : {}
+        console.log(filters) 
+        if(filters.title === 'Compra 15-11-20'){
             return res(
                 ctx.status(200),
                 ctx.json(ApiResponseBuilder(200,taskData.worklogs.filter((worklog)=>worklog.title === filters.title),false))
@@ -137,13 +137,82 @@ export const handlers = [
                 ctx.status(200),
                 ctx.json(ApiResponseBuilder(200,[],false))
             )
-        }else{ 
+        }else{
             return res(
                 ctx.status(200),
                 ctx.json(ApiResponseBuilder(200,taskData.worklogs,false))
             )        
         }
     }),
+
+    rest.get('http://localhost:3000/api/worklogs/1',(req, res, ctx) => {          
+        const worklog: Worklog = {            
+            "id":"1",
+            "createdDate": "2020-11-05T07:00:00.000Z",
+            "startDatetime":"2020-11-05T08:00:00.000Z",
+            "endDatetime":"2020-11-05T15:30:00.000Z",
+            "title":"Compra 05-11-20",
+            "tags": []
+        }
+        const childJobs = [
+            {
+                "id":"1",
+                "worklog":"1",
+                "task":"1",
+                "startDatetime":"2020-11-05T08:00:00.000Z",
+                "endDatetime":"2020-11-05T09:30:00.000Z",
+                "title":"Carnicería",
+                "description":"Jamón serrano, pechugas de pollo",
+                "type":"Análisis",
+                "tags": ["Jamón serrano", "pechugas de pollo"]
+            },
+            {
+                "id":"2",
+                "worklog":"1",
+                "task":"1",
+                "startDatetime":"2020-11-05T09:30:00.000Z",
+                "endDatetime":"2020-11-05T10:30:00.000Z",
+                "title":"Frutería",
+                "description":"Manzanas, Plátanos, Mandarinas",
+                "type":"Análisis",
+                "tags": ["Manzanas", "Plátanos", "Mandarinas"]
+            }
+        ]
+
+        const worklogObject : WorklogObject= {
+            worklog: worklog,
+            childJobs: childJobs
+        }
+        
+        return res(
+            ctx.status(200),
+            ctx.json(ApiResponseBuilder(200,worklogObject,false))
+        )        
+    }),
+
+    rest.get('http://localhost:3000/api/worklogs/1111',(req, res, ctx) => {  
+        return res(
+            ctx.status(404, 'El parte no existe'),
+            ctx.json(ApiResponseBuilder(200,{},true,'El parte no existe'))
+        )         
+    }),
+
+    rest.delete('http://localhost:3000/api/worklogs/delete/1', (req,res,ctx) => {
+        const worklog: Worklog = {            
+            "id":"1",
+            "createdDate": "2020-11-05T07:00:00.000Z",
+            "startDatetime":"2020-11-05T08:00:00.000Z",
+            "endDatetime":"2020-11-05T15:30:00.000Z",
+            "title":"Compra 05-11-20",
+            "tags": []
+        }
+        
+        return res(
+                ctx.status(200),
+                ctx.json(ApiResponseBuilder(200,worklog,false))
+            )
+    }),
+
     rest.post('http://localhost:3000/api/worklogs/add',(req,res,ctx) =>{
         const worklog: Worklog = req.body as Worklog
         
@@ -163,6 +232,21 @@ export const handlers = [
                 ctx.json(ApiResponseBuilder(500,worklog,true,'Error al crear el parte'))
             )
         }        
+    }),
+
+    rest.put('http://localhost:3000/api/worklogs/update', (req, res, ctx) => {
+        
+        const worklogobject: WorklogObject = {
+            worklog: null,
+            childJobs: [],
+        }
+        worklogobject.worklog = req.body as Worklog                                     
+        
+        return res(                
+            ctx.status(200),
+            ctx.json(ApiResponseBuilder(200,worklogobject,false))            
+        )
+        
     }),
 /*
     rest.get('http://localhost:3000/api/db/export', (req,res,ctx) => {

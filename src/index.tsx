@@ -1,25 +1,24 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
+import { SyncProvider} from './front/application/contexts/dbSyncContext'
 import App from './front/App';
 import reportWebVitals from './reportWebVitals';
 import { GlobalStyle } from './front/styles/globalStyles'
 import {
   BrowserRouter as Router,
 } from "react-router-dom";
-import { initDB } from './api/infrastructure/repositories/browser/browserdb'
-import { SyncProvider} from './front/application/contexts/dbSyncContext'
+
+import { startDb } from './api/infrastructure/repositories/browser/browserdb'
 
 if(process.env.REACT_APP_MOCK){
-  const { worker } = require('./front/tests/mocks/browser')
+  const { worker } = require('./tests/mocks/browser')
   worker.start()
 }else{
   const { worker } = require('./api/infrastructure/repositories/browser/browser')
   worker.start()
-  initDB()
+  startDb()
 }
-
-
 
 ReactDOM.render(
   <React.StrictMode>    
