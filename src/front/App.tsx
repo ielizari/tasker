@@ -25,10 +25,6 @@ function App() {
   const [loading, setLoading] = React.useState<boolean>(false)
   
   React.useEffect(()=>{
-    console.log(sync)
-  },[sync])
-
-  React.useEffect(()=>{
       setLoading(true)
       existsDb().then(
           result => {

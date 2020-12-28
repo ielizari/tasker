@@ -9,7 +9,7 @@ export interface Job{
     description: string,
     startDatetime: string,
     endDatetime: string,
-    type: string
+    type: string,
     tags: Array<any>
    
 }

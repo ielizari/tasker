@@ -147,8 +147,12 @@ export const WorklogNewComponent = (props) => {
     }
 
     React.useEffect(()=> {
-        if(mode === 'edit') setTitle('Editar parte')
-        else setTitle('Nuevo parte')
+        console.log(mode)
+        if(mode === 'edit'){
+            setTitle('Editar parte')
+        } else {
+            setTitle('Nuevo parte')
+        }
     },[mode])
 
     React.useEffect(() => {      
@@ -171,9 +175,9 @@ export const WorklogNewComponent = (props) => {
         }
     },[dpStart])
 
-    React.useEffect(()=> {           
+    React.useEffect(()=> {          
         let cancelled = false    
-        if(worklogid){            
+        if(worklogid){       
             setLoading(true)
             getWorklog(worklogid)
             .then(
@@ -183,8 +187,7 @@ export const WorklogNewComponent = (props) => {
                             setError(new Error(result.error))
                             setWorklog(null)
                         }else{
-                            if(mode === 'edit'){        
-                                console.log(result.data)                            
+                            if(mode === 'edit'){                      
                                 setWorklog(result.data.worklog) 
                             }else{                                
                                 setWorklog(emptyWorklog)
@@ -197,6 +200,7 @@ export const WorklogNewComponent = (props) => {
                     }
                 },
                 (error) => {
+                    console.log("error",error)
                     setSubmitSuccess(null)
                     setSubmitError(null)
                     setError(error)
@@ -206,7 +210,6 @@ export const WorklogNewComponent = (props) => {
                 }
             )        
         }else{
-            console.log("Vamoooooooooooooooooooooooos5")
             setWorklog(emptyWorklog)
         }  
         return () => cancelled = true    

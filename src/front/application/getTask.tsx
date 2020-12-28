@@ -4,8 +4,7 @@ export const getTask = async (taskid: string): Promise<ApiResponse> => {
     return await fetch(`http://localhost:3000/api/tasks/${taskid}`)
         .then(res => res.json())        
         .then(
-            (result) => {  
-                console.log(result) 
+            (result) => {
                 return result
              },
             (error) => { 

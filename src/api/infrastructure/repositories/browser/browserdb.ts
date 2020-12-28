@@ -188,9 +188,7 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
     }
     addWorklog (worklog: Worklog): WorklogObject{  
         try{   
-            console.log(worklog)
              let wl: WorklogDB = mapApiWorklogToWorklogDb(worklog) 
-             console.log(wl)
              db.get('worklogs').push(wl).write()
              this.setDbLastModified()
              return this.getWorklogById(wl.id)
@@ -210,7 +208,6 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
     }
     deleteWorklog(worklogid: string): boolean{
         try{
-            console.log(worklogid)
             const worklog = db.get('worklogs').find({id: worklogid}).value()
             if(worklog){
                 db.get('worklogs').remove({id: worklogid}).write()
@@ -347,9 +344,11 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
             }
             const metadata = db.get('metadata').value()
             if(metadata.length){
-                let md : metadataDB = metadata[0]
-                md.lastModified = date
-                db.get('metadata')[0].assign(md).write()
+                let md = metadata[0]
+                md.lastModified = date;
+                console.log(metadata)
+                db.get('metadata').find().assign(md).write()
+                //metadata[0].assign(md).write()
                 return true
             }
             return false

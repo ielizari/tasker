@@ -161,12 +161,10 @@ export const TaskDetailComponent = (props) => {
                             setError(new Error(result.error))
                             setTask(null)
                         }else{
-                            console.log(result)
                             let status = ConstObjectToSelectOptionsArray(TaskStatus).filter(i => i.value === result.data.task.status)
                             setStatusLabel(status.length ? status[0].label : '')
                             let priority = ConstObjectToSelectOptionsArray(TaskPriority).filter(i => i.value === result.data.task.priority)
                             setPriorityLabel(priority.length ? priority[0].label : '')
-                            console.log(statusLabel,priorityLabel)
                             setTask(result.data) 
                             setError(null)
                         }

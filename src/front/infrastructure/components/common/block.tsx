@@ -44,7 +44,7 @@ export const BlockHeaderComponent = (props) => {
 
     React.useEffect(() => {
         setTitle(props.title)
-    },[title])
+    },[props.title])
 
     return (
         <>

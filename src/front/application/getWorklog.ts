@@ -5,12 +5,9 @@ export const getWorklog = async (worklogid: string): Promise<ApiResponse> => {
         .then(res => res.json())        
         .then(
             (result) => {
-                console.log("Vamoooooooooooooooooooooooos2")
-                console.log(result)
                 return result
              },
             (error) => { 
-                console.log("hoy no")
                 throw new Error(error)
             }
         )

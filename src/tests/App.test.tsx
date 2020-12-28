@@ -4,6 +4,7 @@ import App from '../front/App';
 import { renderWithProviders } from './test-utils'
 import userEvent from '@testing-library/user-event'
 import { act } from 'react-dom/test-utils';
+import { doesNotReject } from 'assert';
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -397,12 +398,14 @@ describe("Detalle de parte", () => {
   });
   it("Muestra todos los campos de un parte", async() => {
     renderWithProviders(<App />, {route: '/worklogs/1'})
-    expect(await screen.findByText(/Compra 05-11-20/i)).toBeInTheDocument();
-    expect(await screen.findByText(/05\/11\/2020 08:00/i)).toBeInTheDocument();
-    expect(await screen.findByText(/05\/11\/2020 09:00/i)).toBeInTheDocument();
-    expect(await screen.findByText(/05\/11\/2020 16:30/i)).toBeInTheDocument();
 
-    expect(await screen.queryByText(/Esta acción es irreversible. ¿Desea continuar?/i)).not.toBeInTheDocument()
+      expect(await screen.findByText(/Compra 05-11-20/i)).toBeInTheDocument();
+      expect(await screen.findByText(/05\/11\/2020 08:00/i)).toBeInTheDocument();
+      expect(await screen.findByText(/05\/11\/2020 09:00/i)).toBeInTheDocument();
+      expect(await screen.findByText(/05\/11\/2020 16:30/i)).toBeInTheDocument();
+
+      expect(await screen.queryByText(/Esta acción es irreversible. ¿Desea continuar?/i)).not.toBeInTheDocument()
+    
   })
 
   it("Muestra mensaje 'El parte no existe' si se busca un id que no existe", async() => {
@@ -450,18 +453,23 @@ describe("Detalle de parte", () => {
   })
 })
 
-describe.only("Editar parte de trabajo", async () => {
-  it("Muestra el formulario de edición de parte y carga los datos del parte seleccionado", async () => {
+describe("Editar parte de trabajo", () => {
+  it("Muestra el formulario de edición de parte y carga los datos del parte seleccionado",  async () => {
     renderWithProviders(<App />, {route: '/worklogs/edit/1'})
     
-    expect(await screen.findByLabelText('title')).toHaveValue("Compra 05-11-20")
-    expect(await screen.findByLabelText('starttDatetime')).toHaveValue("05/11/2020 09:00")
-    screen.debug()
+    expect(await screen.findByDisplayValue(/Compra 05-11-20/i)).toBeInTheDocument()
+    expect(await screen.findByDisplayValue('05/11/2020 09:00')).toBeInTheDocument()
+    expect(await screen.findByLabelText('title')).toHaveValue('Compra 05-11-20')
+    expect(await screen.findByLabelText('startDatetime')).toHaveValue('05/11/2020 09:00')
   })
+  
 
-/*
-  it("Muestra mensaje de éxito al pulsar el botón 'Guardar' y actualizar los datos del parte", async () => {
+
+  it.only("Muestra mensaje de éxito al pulsar el botón 'Guardar' y actualizar los datos del parte", async () => {
     renderWithProviders(<App />, {route: '/worklogs/edit/1'})
+
+    expect(await screen.findByDisplayValue(/Compra 05-11-20/i)).toBeInTheDocument()
+    expect(await screen.findByText(/Editar parte/i)).toBeInTheDocument()
 
     await act(async () => {
       userEvent.click(await screen.findByLabelText('Guardar'))
@@ -469,5 +477,5 @@ describe.only("Editar parte de trabajo", async () => {
 
     expect(await screen.findByLabelText('success-message')).toHaveTextContent(/El parte 'Compra 05-11-20' ha sido editado con éxito/i)
     expect(await screen.queryByLabelText('loading')).not.toBeInTheDocument()
-  })*/
+  })
 })

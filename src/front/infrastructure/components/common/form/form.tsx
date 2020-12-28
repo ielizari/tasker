@@ -121,8 +121,7 @@ export const FormDateInput :React.FC<any> = ({label, icon, handler, dateText, ..
     React.useEffect(()=> {
         setInputIcon(icon)
     },[])
-    React.useEffect(()=>{
-        console.log("Carga dateText",dateText)       
+    React.useEffect(()=>{ 
         setValue(dateText)
         setTouched(true)
     },[dateText])

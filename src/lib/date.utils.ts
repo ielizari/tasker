@@ -61,7 +61,7 @@ export const isValidTime = (time: string) : boolean => {
 
 export const isValidDateTime = (input: string): boolean => {
     let datetime = input.split(" ")
-    if(datetime.length == 2){
+    if(datetime.length === 2){
         let date = datetime[0]
         let time = datetime[1]
         if(isValidDate(date) && isValidTime(time)){

@@ -2,6 +2,7 @@ import { rest } from 'msw'
 import taskData from './tasks.json'
 import { TaskDetail, TaskObject } from '../../front/domain/task-detail'
 import { Worklog, WorklogObject} from '../../front/domain/worklog'
+import { Job } from '../../front/domain/job'
 import { isEmpty } from 'lodash'
 import  {Datepicker}  from '../../lib/orzkDatepicker/datepicker'
 import { ApiResponseBuilder, ApiResponse} from '../../api/domain/api-response'
@@ -126,7 +127,7 @@ export const handlers = [
 
     rest.post('http://localhost:3000/api/worklogs',(req, res, ctx) => {       
         const filters : Partial<Worklog> = req.body ? JSON.parse(req.body as string) : {}
-        console.log(filters) 
+        
         if(filters.title === 'Compra 15-11-20'){
             return res(
                 ctx.status(200),
@@ -145,45 +146,45 @@ export const handlers = [
         }
     }),
 
-    rest.get('http://localhost:3000/api/worklogs/1',(req, res, ctx) => {          
+    rest.get('http://localhost:3000/api/worklogs/1',(req, res, ctx) => {     
         const worklog: Worklog = {            
             "id":"1",
-            "createdDate": "2020-11-05T07:00:00.000Z",
-            "startDatetime":"2020-11-05T08:00:00.000Z",
-            "endDatetime":"2020-11-05T15:30:00.000Z",
+            "createdDate": "05/11/2020 08:00",
+            "startDatetime":"05/11/2020 09:00",
+            "endDatetime":"05/11/2020 16:30",
             "title":"Compra 05-11-20",
             "tags": []
         }
-        const childJobs = [
-            {
-                "id":"1",
-                "worklog":"1",
-                "task":"1",
-                "startDatetime":"2020-11-05T08:00:00.000Z",
-                "endDatetime":"2020-11-05T09:30:00.000Z",
-                "title":"Carnicería",
-                "description":"Jamón serrano, pechugas de pollo",
-                "type":"Análisis",
-                "tags": ["Jamón serrano", "pechugas de pollo"]
-            },
-            {
-                "id":"2",
-                "worklog":"1",
-                "task":"1",
-                "startDatetime":"2020-11-05T09:30:00.000Z",
-                "endDatetime":"2020-11-05T10:30:00.000Z",
-                "title":"Frutería",
-                "description":"Manzanas, Plátanos, Mandarinas",
-                "type":"Análisis",
-                "tags": ["Manzanas", "Plátanos", "Mandarinas"]
-            }
+        const childJobs: Array<Job> = [
+            // {
+            //     "id":"1",
+            //     "worklog":"1",
+            //     "task":"1",
+            //     "startDatetime":"2020-11-05T08:00:00.000Z",
+            //     "endDatetime":"2020-11-05T09:30:00.000Z",
+            //     "title":"Carnicería",
+            //     "description":"Jamón serrano, pechugas de pollo",
+            //     "type":"Análisis",
+            //     "tags": ["Jamón serrano", "pechugas de pollo"]
+            // },
+            // {
+            //     "id":"2",
+            //     "worklog":"1",
+            //     "task":"1",
+            //     "startDatetime":"2020-11-05T09:30:00.000Z",
+            //     "endDatetime":"2020-11-05T10:30:00.000Z",
+            //     "title":"Frutería",
+            //     "description":"Manzanas, Plátanos, Mandarinas",
+            //     "type":"Análisis",
+            //     "tags": ["Manzanas", "Plátanos", "Mandarinas"]
+            // }
         ]
 
         const worklogObject : WorklogObject= {
             worklog: worklog,
             childJobs: childJobs
         }
-        
+
         return res(
             ctx.status(200),
             ctx.json(ApiResponseBuilder(200,worklogObject,false))
@@ -240,7 +241,7 @@ export const handlers = [
             worklog: null,
             childJobs: [],
         }
-        worklogobject.worklog = req.body as Worklog                                     
+        worklogobject.worklog = req.body as Worklog         
         
         return res(                
             ctx.status(200),
@@ -248,6 +249,13 @@ export const handlers = [
         )
         
     }),
+
+    rest.get('http://localhost:3000/api/db/exists', (req, res, ctx) => {
+        return res(
+            ctx.status(200),
+            ctx.json(ApiResponseBuilder(200,true,false))
+        )
+    })
 /*
     rest.get('http://localhost:3000/api/db/export', (req,res,ctx) => {
         try{

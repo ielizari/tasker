@@ -7,6 +7,7 @@ export const mapWorklogToApiWorklog = (worklog: WorklogDB): Worklog => {
         return null
     }
     const dates = {
+        createdDate: ISOStringToFormatedDate(worklog.createdDate),
         startDatetime: ISOStringToFormatedDate(worklog.startDatetime),
         endDatetime: ISOStringToFormatedDate(worklog.endDatetime)
     }
@@ -17,8 +18,8 @@ export const mapWorklogToApiWorklog = (worklog: WorklogDB): Worklog => {
 }
 
 export const mapApiWorklogToWorklogDb = (worklog: Worklog): WorklogDB => {
-    console.log(worklog)
     const dates = {
+        createdDate: formattedDateToISOString(worklog.createdDate),
         startDatetime: formattedDateToISOString(worklog.startDatetime),
         endDatetime: formattedDateToISOString(worklog.endDatetime)
     }

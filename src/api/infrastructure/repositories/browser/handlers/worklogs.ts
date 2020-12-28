@@ -49,7 +49,7 @@ export const worklogHandlers = [
                 throw new Error('Un parte nuevo no puede contener un valor en el campo "id"')
             }
             
-            worklog.createdDate = new Date().toString()
+            worklog.createdDate = new Date().toISOString()
             let result = getTaskerRepository().addWorklog(worklog)
             return res(
                 ctx.status(200),
@@ -93,7 +93,7 @@ export const worklogHandlers = [
             if(isEmpty(worklog.id)) {
                 throw new Error('Es necesario proporcionar el id del parte a editar')
             }
-                        
+                  
             let result: WorklogObject = getTaskerRepository().updateWorklog(mapApiWorklogToWorklogDb(worklog))
             return res(
                 ctx.status(200),

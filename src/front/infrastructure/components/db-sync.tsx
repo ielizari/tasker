@@ -61,7 +61,7 @@ export const DbSync = () => {
     }
     
     React.useEffect(()=>{
-        console.log(sync)
+        //console.log(sync)
     },[sync])
 
     return (

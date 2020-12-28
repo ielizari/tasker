@@ -48,11 +48,9 @@ export const WorklogListComponent = ( props ) => {
                 (result) => {
                     if(!cancelled){
                         if(result.hasError){
-                            console.log("Noooooooooooooooooooooo")
                             setError(new Error(result.error));
                             setWorklogs([])
                         }else{
-                            console.log(result.data)
                             setWorklogs(result.data); 
                             setError(null);
                         }
