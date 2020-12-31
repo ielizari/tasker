@@ -12,6 +12,7 @@ import { Modal } from '../common/modal'
 import { Link } from 'react-router-dom'
 import { ISOStringToFormatedDate } from '../../../../lib/date.utils'
 import { BlockContainer, BlockHeaderComponent } from '../common/block'
+import { WorklogSequence } from './worklog-sequence.component'
  
 const WorklogDetailContainer = styled.ul`
 `;
@@ -230,23 +231,11 @@ export const WorklogDetailComponent = (props) => {
                                     '-'
                                 }               
                                 </WorklogDetailValue>
-                            </WorklogDetailItem>                            
-                            <WorklogDetailItem>
-                                <WorklogDetailKey>Subtareas:</WorklogDetailKey>
-                                <WorklogDetailValue>
-                                {worklog.childJobs.length ?
-                                    <WorklogChildrenContainer>
-                                    {
-                                        worklog.childJobs.map((child) => {
-                                            return <Link to={`${child.id}`} key={child.title}>{child.title}</Link>
-                                        })
-                                    }
-                                    </WorklogChildrenContainer> 
-                                    :
-                                    '-'
-                                }                                
-                                </WorklogDetailValue>
-                            </WorklogDetailItem>                           
+                            </WorklogDetailItem>    
+                            
+                            {worklog &&
+                                <WorklogSequence worklog={worklog} />  
+                            }                      
                         </WorklogDetailContainer>
                         
                     :   

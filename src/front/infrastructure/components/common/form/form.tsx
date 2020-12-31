@@ -79,7 +79,7 @@ export const FormTextInput :React.FC<any> = ({label, ...props}) => {
     )
 }
 
-export const FormDateInput2 :React.FC<any> = ({label, ...props}) => {
+export const FormDateInput2 :React.FC<any> = ({label, minDate, maxDate, ...props}) => {
     const [field, meta, {setValue, setTouched}] = useField(props)
     const [dp, setDp] = React.useState(null)
     
@@ -88,7 +88,16 @@ export const FormDateInput2 :React.FC<any> = ({label, ...props}) => {
     }
     
     React.useEffect(()=> {
-        let picker : Datepicker = new Datepicker(props.id,label,{lang:'es'})
+        let options : any = {
+            lang: 'es'
+        }
+        if(props.minDate){
+            options.minDate = props.minDate
+        }
+        if(props.maxDate){
+            options.maxDate = props.maxDate
+        }
+        let picker : Datepicker = new Datepicker(props.id,label,options)
         picker.onSubmit = function(){
             setValue(this.getFullDateString())
             setTouched(true)

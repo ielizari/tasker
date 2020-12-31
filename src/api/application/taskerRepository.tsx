@@ -32,7 +32,7 @@ export interface TaskerRepository{
     deleteWorklog(id: string): boolean 
     updateWorklog(worklog: Worklog): WorklogObject
 
-    getJobs(filter?: Partial<Job>): Array<Job>
+    getJobs(filter?: Partial<Job>): Array<JobObject>
     addJob(job:Job): JobObject
     getJobById(id: string): JobObject
     deleteJob(id: string): boolean 

@@ -27,19 +27,19 @@ export interface Action {
 }
 
 export const BlockActions = (props) => {
-    const [actions,setActions] = React.useState<Array<Action>>([])
-    
+    const [actions,setActions] = React.useState<Array<Action>>(props.actions || [])    
+  
     React.useEffect(() => {
         setActions(props.actions)
-    },[actions])
+    },[props.actions])
 
     return (
         <BlockActionsContainer>
             {
                 (actions && actions.length > 0) ?
-                    actions.map((action: Action) => {                        
+                    actions.map((action: Action) => {                
                         if(!action.type || action.type === 'link'){
-                            return (
+                            return (                                
                                 <IconLink 
                                     key={action.text}
                                     route={action.route}

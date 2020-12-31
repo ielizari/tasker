@@ -1,4 +1,4 @@
-import {Job} from './job'
+import {Job, JobObject} from './job'
 
 export interface Worklog {    
     id: string,
@@ -11,5 +11,5 @@ export interface Worklog {
 
 export interface WorklogObject {
     worklog: Worklog
-    childJobs: Array<Job>
+    childJobs: Array<JobObject>
 }

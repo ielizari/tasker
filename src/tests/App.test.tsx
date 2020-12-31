@@ -271,7 +271,7 @@ describe("Lista de partes de trabajo", () =>{
     })
     
     expect(await screen.findByText(/Compra 15-11-20/i)).toBeInTheDocument()
-    expect(await screen.findByText(/Compra 05-11-20/i)).not.toBeInTheDocument()
+    expect(await screen.queryByText(/Compra 05-11-20/i)).not.toBeInTheDocument()
 
     await act(async () => {
       userEvent.clear(await screen.findByPlaceholderText(/Buscar.../i))
@@ -465,7 +465,7 @@ describe("Editar parte de trabajo", () => {
   
 
 
-  it.only("Muestra mensaje de éxito al pulsar el botón 'Guardar' y actualizar los datos del parte", async () => {
+  it("Muestra mensaje de éxito al pulsar el botón 'Guardar' y actualizar los datos del parte", async () => {
     renderWithProviders(<App />, {route: '/worklogs/edit/1'})
 
     expect(await screen.findByDisplayValue(/Compra 05-11-20/i)).toBeInTheDocument()

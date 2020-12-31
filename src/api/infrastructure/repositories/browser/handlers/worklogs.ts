@@ -4,6 +4,7 @@ import { Worklog, WorklogObject } from '../../../../domain/worklog'
 import { getTaskerRepository, FileDownload } from '../../../../application/taskerRepository'
 import { ApiResponse, ApiResponseBuilder } from '../../../../domain/api-response'
 import { mapApiWorklogToWorklogDb } from '../../../../application/dtos/dbToApiDto'
+import { ISOStringToFormatedDate } from '../../../../../lib/date.utils'
 
 export const worklogHandlers = [
     rest.post('http://localhost:3000/api/worklogs',(req, res, ctx) => { 
@@ -49,7 +50,7 @@ export const worklogHandlers = [
                 throw new Error('Un parte nuevo no puede contener un valor en el campo "id"')
             }
             
-            worklog.createdDate = new Date().toISOString()
+            worklog.createdDate = ISOStringToFormatedDate(new Date().toISOString())
             let result = getTaskerRepository().addWorklog(worklog)
             return res(
                 ctx.status(200),

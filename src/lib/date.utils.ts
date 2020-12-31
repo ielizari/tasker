@@ -2,12 +2,21 @@ import  {Datepicker}  from './orzkDatepicker/datepicker'
 
 export const dateToFormattedDate = (d: Date, dateFormat: string = 'dmy/', timeFormat : string = 'hm') : string => {
     try{
-        let dp = new Datepicker(null,null,{lang: 'es',dateFormat: dateFormat, timeFormat: timeFormat});
+        let dp = new Datepicker(null,null,{lang: 'es',dateFormat: dateFormat, timeFormat: timeFormat})
         dp.setDate(d);
         return dp.getFullDateString()
     }catch(e){
         console.log(e)
         return ''
+    }
+}
+
+export const formattedDateToDate = (d: string, dateFormat: string = 'dmy/', timeFormat : string = 'hm'): Date => {
+    try {
+        let dp = new Datepicker(null,null,{lang: 'es',dateFormat: dateFormat, timeFormat: timeFormat})
+        return dp.createDate(d) as Date
+    }catch(e){
+        throw e
     }
 }
 
@@ -69,4 +78,33 @@ export const isValidDateTime = (input: string): boolean => {
         }
     }
     return false
+}
+
+export const elapsedTime = ( from: string, to: string): number => {
+    let t0 = formattedDateToDate(from,'dmy/','hms')
+    let t1 = formattedDateToDate(to,'dmy/','hms')
+    let diff: number = (t1.getTime() - t0.getTime())
+
+    return diff
+}
+
+export const formatElapsedTime = (seconds: number) : string => {
+    let hora = Math.floor(seconds/3600000)
+	let resto = seconds%3600000
+	let minuto = Math.floor(resto / 60000)
+	resto = resto%60000
+	let segundo = resto / 1000
+	resto = resto % 1000
+    
+    let timeString = padNumber(hora) + ":" + padNumber(minuto) + ":" + padNumber(segundo)
+    return timeString
+}
+
+export const padNumber = (num: number): string => {
+    let res = num.toString()
+    if(num < 10){
+        res = '0'+res
+    }
+
+    return res
 }

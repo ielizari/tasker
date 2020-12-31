@@ -2,7 +2,7 @@ import { rest } from 'msw'
 import taskData from './tasks.json'
 import { TaskDetail, TaskObject } from '../../front/domain/task-detail'
 import { Worklog, WorklogObject} from '../../front/domain/worklog'
-import { Job } from '../../front/domain/job'
+import { Job, JobObject } from '../../front/domain/job'
 import { isEmpty } from 'lodash'
 import  {Datepicker}  from '../../lib/orzkDatepicker/datepicker'
 import { ApiResponseBuilder, ApiResponse} from '../../api/domain/api-response'
@@ -155,7 +155,7 @@ export const handlers = [
             "title":"Compra 05-11-20",
             "tags": []
         }
-        const childJobs: Array<Job> = [
+        const childJobs: Array<JobObject> = [
             // {
             //     "id":"1",
             //     "worklog":"1",

@@ -1,5 +1,5 @@
-import { TaskDetail, TaskObject } from './task-detail'
-import { WorklogObject } from './worklog'
+import { TaskDetail } from './task-detail'
+import { Worklog } from './worklog'
 
 export interface Job{
     id: string,
@@ -16,6 +16,6 @@ export interface Job{
 
 export interface JobObject {
     job: Job
-    task: TaskObject | null
-    worklog: WorklogObject | null
+    task: TaskDetail | null
+    worklog: Worklog | null
 }

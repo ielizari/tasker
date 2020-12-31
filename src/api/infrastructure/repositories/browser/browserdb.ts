@@ -7,6 +7,7 @@ import { Job, JobObject } from '../../../domain/job'
 import { mapWorklogToApiWorklog, mapApiWorklogToWorklogDb } from '../../../application/dtos/dbToApiDto'
 
 import { TaskerRepository, setTaskerRepository, FileDownload } from '../../../application/taskerRepository'
+import { isEmpty } from 'lodash'
 
 export type metadataDB = {
         created: string,
@@ -113,7 +114,6 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
                 parentTask: parentTask,
                 childTasks: childTasks
             }
-            console.log("Tarea",taskObject)
             return taskObject
         }catch (e){
             throw e
@@ -174,14 +174,15 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
         try{
             let worklog : Worklog = mapWorklogToApiWorklog(db.get('worklogs').find({id: id}).value()) || null  
             let childJobs = [];
-            childJobs = childJobs.concat(db.get('jobs').filter({worklog: id}).value() || []);
-            
+            //childJobs = childJobs.concat(db.get('jobs').filter({worklog: id}).value() || []);
+            childJobs = this.getJobs({worklog: id})
 
-            const WorklogObject : WorklogObject= {
+            const worklogObject : WorklogObject= {
                 worklog: worklog,
                 childJobs: childJobs
             }
-            return WorklogObject
+            console.log(worklogObject)
+            return worklogObject
         }catch (e){
             throw e
         }
@@ -221,22 +222,40 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
         }
     }
 
-    getJobs(filter: Partial<Job> = {}): Array<Job>  {
-        const search = JSON.parse(filter as string)
+    getJobs(filter: Partial<Job> = {}): Array<JobObject>  {
+        let search = {}
+        if(typeof filter === 'string'){
+            search = JSON.parse(filter as string)
+        }else{
+            search = filter
+        }
         const jobs = db.get('jobs').filter(search).value()
-        const result : Array<Job>= []
+        const result : Array<JobObject>= []
         jobs.map((job: Job) => {
-            result.push({
-                id: job.id || '',
-                task: job.task || '',
-                worklog: job.worklog || '',
-                title: job.title || '',
-                description: job.description || '',
-                startDatetime: job.startDatetime || '',
-                endDatetime: job.endDatetime || '',
-                type: job.type || '',
-                tags: job.tags || []
-            })
+            let jobobject: JobObject = {
+                job: job,
+                task: null,
+                worklog: null
+            }
+            if(!isEmpty(job.task)){
+                jobobject.task = db.get('tasks').find({id: job.task}).value() || null
+            }
+
+            if(!isEmpty(job.worklog)){
+                jobobject.worklog = db.get('worklogs').find({id: job.worklog}).value() || null
+            }
+            result.push(jobobject)
+            // result.push({
+            //     id: job.id || '',
+            //     task: job.task || '',
+            //     worklog: job.worklog || '',
+            //     title: job.title || '',
+            //     description: job.description || '',
+            //     startDatetime: job.startDatetime || '',
+            //     endDatetime: job.endDatetime || '',
+            //     type: job.type || '',
+            //     tags: job.tags || []
+            // })
         })
         return result
     }
