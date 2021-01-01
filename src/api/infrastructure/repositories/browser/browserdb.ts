@@ -285,6 +285,7 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
     }
     addJob (job: Job): JobObject{  
         try{      
+            console.log(job)
              db.get('jobs').push(job).write()
              this.setDbLastModified()
              return this.getJobById(job.id)

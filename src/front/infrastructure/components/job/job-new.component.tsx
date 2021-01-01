@@ -9,6 +9,7 @@ import { FormBuilder } from '../common/form/form'
 import { isValidDateTime } from '../../../../lib/date.utils'
 import { BlockContainer, BlockHeaderComponent} from '../common/block'
 import { Spinner } from '../common/spinner'
+import { addJob } from 'src/front/application/addJob'
 
 const emptyJob: Job = {    
         id: '',
@@ -27,6 +28,7 @@ export const JobNewComponent = (props) => {
     const [job, setJob] = React.useState<Job>(emptyJob)    
     const [loading, setLoading] = React.useState<boolean>(false)
     const [title, setTitle] = React.useState<string>('Nuevo trabajo')
+    const [submitError, setSubmitError] = React.useState<Error | null>(null)
 
     let formItems = [
         {
@@ -84,8 +86,32 @@ export const JobNewComponent = (props) => {
 
         return errors
     }
-    const onSubmit = (values: Worklog, helpers) => {
+    const onSubmit = (values: Job, helpers) => {
         console.log(values)
+        values.worklog = worklog.id
+        setLoading(true)
+        addJob(values).then(
+            (result) => {
+                if(!result.hasError){
+                    //setSubmitSuccess(result.data.worklog);                                        
+                    setSubmitError(null);
+                    helpers.resetForm({})
+                }else{
+
+                    //setSubmitSuccess(null);
+                    setSubmitError(new Error(result.error));                                      
+                }
+                helpers.setSubmitting(false); 
+                setLoading(false)
+            },
+            (error) => {
+                console.log(error)
+                helpers.setSubmitting(false);
+                //setSubmitSuccess(null);
+                setSubmitError(error);
+                setLoading(false)
+            }
+        )
     }
     return (
         <BlockContainer> 

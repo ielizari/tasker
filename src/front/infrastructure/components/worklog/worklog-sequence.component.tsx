@@ -113,6 +113,7 @@ export const WorklogSequence = (props) => {
                     <tbody>
                     {worklogObj.childJobs.length &&            
                         worklogObj.childJobs.map((child: JobObject) => {
+                            console.log(child)
                             return (
                                 <tr>
                                     <td>{ISOStringToFormatedDate(child.job.startDatetime)}</td>
@@ -124,7 +125,7 @@ export const WorklogSequence = (props) => {
                                         <RunningElapsedTime start={child.job.startDatetime}/>
                                         }                                        
                                     </td>
-                                    <td>{child.task.title}</td>
+                                    <td>{child.task && child.task.title}</td>
                                     <td>{child.job.title}</td>
                                 </tr>
                             )
