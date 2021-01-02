@@ -9,6 +9,7 @@ import { Link, useParams } from 'react-router-dom'
 import { FaCheck, FaTimes} from 'react-icons/fa'
 import { Spinner } from '../common/spinner'
 import { BlockContainer, BlockHeaderComponent} from '../common/block'
+import { SyncStateContext} from '../../../application/contexts/dbSyncContext'
 
 import { FormBuilder } from '../common/form/form'
 
@@ -33,6 +34,9 @@ export interface WorklogProps {
 
 export const WorklogNewComponent = (props) => {
     let { worklogid } = useParams<WorklogProps>()
+    const syncCtx = React.useContext(SyncStateContext)
+    const {setSync} = syncCtx
+
     const [submitSuccess, setSubmitSuccess] = React.useState(null)
     const [submitError, setSubmitError] = React.useState<Error | null>(null)
     const [mode, setMode] = React.useState(props.mode || 'new')
@@ -98,6 +102,7 @@ export const WorklogNewComponent = (props) => {
                 .then(                            
                     (result) => {
                         if(!result.hasError){
+                            setSync({sync: false})
                             setSubmitSuccess(result.data.worklog);                                        
                             setSubmitError(null);
                             helpers.resetForm({})
@@ -121,7 +126,8 @@ export const WorklogNewComponent = (props) => {
                 updateWorklog(values)
                 .then(                            
                     (result) => {
-                        if(!result.hasError){                                        
+                        if(!result.hasError){              
+                            setSync({sync: false})                          
                             setSubmitSuccess(result.data.worklog); 
                             setWorklog(null)                                     
                             setWorklog(result.data.worklog)                                        

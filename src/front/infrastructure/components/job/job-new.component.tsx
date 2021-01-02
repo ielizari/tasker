@@ -10,6 +10,7 @@ import { isValidDateTime } from '../../../../lib/date.utils'
 import { BlockContainer, BlockHeaderComponent} from '../common/block'
 import { Spinner } from '../common/spinner'
 import { addJob } from 'src/front/application/addJob'
+import { SyncStateContext} from '../../../application/contexts/dbSyncContext'
 
 const emptyJob: Job = {    
         id: '',
@@ -24,6 +25,9 @@ const emptyJob: Job = {
 }
 
 export const JobNewComponent = (props) => {
+    const syncCtx = React.useContext(SyncStateContext)
+    const {setSync} = syncCtx
+
     const [worklog, setWorklog] = React.useState<Worklog>(props.worklog)
     const [job, setJob] = React.useState<Job>(emptyJob)    
     const [loading, setLoading] = React.useState<boolean>(false)
@@ -100,7 +104,8 @@ export const JobNewComponent = (props) => {
                 helpers.setSubmitting(false); 
                 setLoading(false)
 
-                if(!result.hasError){                                 
+                if(!result.hasError){    
+                    setSync({sync: false})                             
                     setSubmitError(null)
                     helpers.resetForm({})
                     props.submit()

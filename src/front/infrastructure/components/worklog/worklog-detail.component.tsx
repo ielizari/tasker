@@ -13,6 +13,7 @@ import { Link } from 'react-router-dom'
 import { ISOStringToFormatedDate } from '../../../../lib/date.utils'
 import { BlockContainer, BlockHeaderComponent } from '../common/block'
 import { WorklogSequence } from './worklog-sequence.component'
+import { SyncStateContext} from '../../../application/contexts/dbSyncContext'
  
 const WorklogDetailContainer = styled.ul`
 `;
@@ -75,7 +76,9 @@ export interface WorklogProps {
 }
 export const WorklogDetailComponent = (props) => {
     let { worklogid } = useParams<WorklogProps>()
-   
+    const syncCtx = React.useContext(SyncStateContext)
+    const {setSync} = syncCtx
+
     const [worklog, setWorklog] = React.useState<WorklogObject | null>(null)        
     const [error, setError] = React.useState<Error | null>(null)
     const [deleteSuccess, setDeleteSuccess] = React.useState<string | null>(null)
@@ -105,6 +108,7 @@ export const WorklogDetailComponent = (props) => {
                 result => {
                     if(!cancelled){
                         if(!result.hasError){
+                            setSync({sync: false})
                             setDeleteSuccess('El parte se ha eliminado con éxito')
                         }else{
                             setError(new Error('Ha ocurrido un error al eliminar el parte.'))

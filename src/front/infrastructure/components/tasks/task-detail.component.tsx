@@ -13,6 +13,7 @@ import { Modal } from '../common/modal'
 import { Link } from 'react-router-dom'
 import { dateToFormattedDate } from '../../../../lib/date.utils'
 import { BlockContainer, BlockHeaderComponent } from '../common/block'
+import { SyncStateContext} from '../../../application/contexts/dbSyncContext'
  
 const TaskDetailContainer = styled.ul`
 `;
@@ -75,7 +76,9 @@ export interface TaskProps {
 }
 export const TaskDetailComponent = (props) => {
     let { taskid } = useParams<TaskProps>()
-   
+    const syncCtx = React.useContext(SyncStateContext)
+    const {setSync} = syncCtx
+
     const [task, setTask] = React.useState<TaskObject | null>(null)        
     const [error, setError] = React.useState<Error | null>(null)
     const [deleteSuccess, setDeleteSuccess] = React.useState<string | null>(null)
@@ -107,6 +110,7 @@ export const TaskDetailComponent = (props) => {
                 result => {
                     if(!cancelled){
                         if(!result.hasError){
+                            setSync({sync: false})
                             setDeleteSuccess('La tarea se ha eliminado con éxito')
                         }else{
                             setError(new Error('Ha ocurrido un error al eliminar la tarea.'))

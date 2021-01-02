@@ -2,6 +2,9 @@ import React from 'react'
 import styled from 'styled-components'
 import { SyncStateContext } from '../../application/contexts/dbSyncContext'
 import { exportDb } from '../../application/exportDatabase'
+import { isSyncedDb } from '../../application/isSyncedDatabase'
+import { FaSave } from 'react-icons/fa'
+import { IconButton } from './common/icon-button'
 
 const SyncWarningContainer = styled.div`
     background-color: red;
@@ -50,6 +53,7 @@ const importDB = () => {
 export const DbSync = () => {
     const syncCtx = React.useContext(SyncStateContext)
     const {sync, setSync} = syncCtx
+    const [syncFail, setSyncFail] = React.useState<boolean>(false)
   
     React.useEffect(()=>{
         setSync({sync:true})
@@ -61,7 +65,20 @@ export const DbSync = () => {
     }
     
     React.useEffect(()=>{
-        //console.log(sync)
+        isSyncedDb().then(
+            result => {
+                if(!result.hasError){
+                    if(sync.sync === true && result.data === false){
+                        setSync({sync: false})
+                    }
+                }else{
+                    console.log(result.error)
+                }
+            },
+            error => {
+                console.log(error)
+            }
+        )
     },[sync])
 
     return (
@@ -70,6 +87,12 @@ export const DbSync = () => {
             <SyncWarningContainer>
                 Necesita sincronización
                 <button onClick={handleExport}>Download</button>
+                <IconButton 
+                    id='exportDb'
+                    text=''
+                    icon={FaSave}
+                    onClick={handleExport}
+                />
             </SyncWarningContainer>
         }
         </>

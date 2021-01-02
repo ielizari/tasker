@@ -11,7 +11,8 @@ import { isEmpty } from 'lodash'
 
 export type metadataDB = {
         created: string,
-        lastModified: string,    
+        lastModified: string,
+        lastExported: string,    
 }
 
 export type Schema = {
@@ -78,6 +79,7 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
             let jsonObject = JSON.stringify(data)
             let exportedFilename = `taskerdb_${new Date().getTime()}.txt`
             
+            this.setDbLastExported()
             return {blob: jsonObject, filename: exportedFilename}
 
         }catch(e){
@@ -353,7 +355,7 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
     
     emptyDbObject = () : Schema => {
         let now = new Date().toISOString()
-        let metadata : metadataDB = {created: now, lastModified: ''}
+        let metadata : metadataDB = {created: now, lastModified: '', lastExported: ''}
     
         return {
             tasks: [],
@@ -378,6 +380,46 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
                 return true
             }
             return false
+        }catch(e){
+            throw e
+        }
+    }
+
+    setDbLastExported = (date: string = ''): boolean => {
+        try{
+            if(date === ''){
+                date = new Date().toISOString()
+            }
+            const metadata = db.get('metadata').value()
+            if(metadata.length){
+                let md = metadata[0]
+                md.lastExported = date;
+                db.get('metadata').find().assign(md).write()
+                return true
+            }
+            return false
+        }catch(e){
+            throw e
+        }
+    }
+
+    isDbSynced = () : boolean => {
+        try{
+            let metadata = db.get('metadata').value()
+            let lastModified = metadata[0].lastModified
+            let lastExported = metadata[0].lastExported
+
+            if(isEmpty(lastModified)){
+                return true
+            }else if(isEmpty(lastExported)){
+                return false
+            }else {
+                if(new Date(Date.parse(lastModified)) > new Date(Date.parse(lastExported))){
+                    return false
+                }else{
+                    return true
+                }
+            }
         }catch(e){
             throw e
         }

@@ -63,5 +63,20 @@ export const databaseHandlers = [
                 ctx.json(ApiResponseBuilder(500,{},true,e.message))
             )
         }
+    }),
+
+    rest.get('http://localhost:3000/api/db/synced', (req,res,ctx) => {
+        try{
+            const db: boolean = getTaskerRepository().isDbSynced()
+            return res(
+                ctx.status(200),
+                ctx.json(ApiResponseBuilder(200,db,false))
+            )
+        }catch(e){
+            return res(
+                ctx.status(500),
+                ctx.json(ApiResponseBuilder(500,{},true,e.message))
+            )
+        }
     })
 ]

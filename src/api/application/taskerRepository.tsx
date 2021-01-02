@@ -18,7 +18,9 @@ export interface TaskerRepository{
     hasDB(): boolean
     initDB(): void
     emptyDbObject(): Schema
-    setDbLastModified(date: string): boolean    
+    setDbLastModified(date: string): boolean
+    setDbLastExported(date: string): boolean
+    isDbSynced(): boolean
 
     getTasks(filter?: Partial<TaskDetail>): Array<TaskItem>
     addTask(task: TaskDetail): TaskObject
