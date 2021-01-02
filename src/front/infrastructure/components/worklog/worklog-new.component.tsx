@@ -33,8 +33,6 @@ export interface WorklogProps {
 
 export const WorklogNewComponent = (props) => {
     let { worklogid } = useParams<WorklogProps>()
-    const [dpStart,setDpStart] = React.useState<Datepicker | null>(null)
-    const [startDate, setStartDate] = React.useState<string>('')
     const [submitSuccess, setSubmitSuccess] = React.useState(null)
     const [submitError, setSubmitError] = React.useState<Error | null>(null)
     const [mode, setMode] = React.useState(props.mode || 'new')
@@ -147,33 +145,12 @@ export const WorklogNewComponent = (props) => {
     }
 
     React.useEffect(()=> {
-        console.log(mode)
         if(mode === 'edit'){
             setTitle('Editar parte')
         } else {
             setTitle('Nuevo parte')
         }
     },[mode])
-
-    React.useEffect(() => {      
-        let dp = new Datepicker('startDatetime','StartDate', {lang:'es'})
-        dp.onSubmit = () => {   
-            setStartDate(dp.getFullDateString())         
-            dp.printDate()
-         }          
-
-        if(worklog && worklog.startDatetime !== '' && new Date(worklog.startDatetime)){
-            dp.setDate(new Date(worklog.startDatetime))
-        }
-        setDpStart(dp)
-
-    },[worklog])
-
-    React.useEffect(() => {   
-        if(dpStart && dpStart.getDate() !== null){    
-            setStartDate(dpStart.getFullDateString())
-        }
-    },[dpStart])
 
     React.useEffect(()=> {          
         let cancelled = false    
@@ -205,7 +182,6 @@ export const WorklogNewComponent = (props) => {
                     setSubmitError(null)
                     setError(error)
                     setWorklog(null)
-                    setStartDate('')
                     setLoading(false)
                 }
             )        

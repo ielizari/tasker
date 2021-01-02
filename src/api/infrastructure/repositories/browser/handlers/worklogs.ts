@@ -1,8 +1,7 @@
 import { rest } from 'msw'
-import { isEmpty, throttle } from 'lodash'
+import { isEmpty } from 'lodash'
 import { Worklog, WorklogObject } from '../../../../domain/worklog'
-import { Job } from '../../../../domain/job'
-import { getTaskerRepository, FileDownload } from '../../../../application/taskerRepository'
+import { getTaskerRepository } from '../../../../application/taskerRepository'
 import { ApiResponse, ApiResponseBuilder } from '../../../../domain/api-response'
 import { mapApiWorklogToWorklogDb } from '../../../../application/dtos/dbToApiDto'
 import { ISOStringToFormatedDate } from '../../../../../lib/date.utils'
@@ -108,28 +107,5 @@ export const worklogHandlers = [
             )
         }
     }),
-
-    rest.post('http://localhost:3000/api/jobs/add', (req, res,ctx) => {
-        try{
-            const job: Job  | null = req.body ? req.body as Job : null
-
-            if(isEmpty(job.id)) {
-                job.id = getTaskerRepository().newId('jobs')
-            }else{
-                throw new Error('Un trabajo nuevo no puede contener un valor en el campo "id"')
-            }
-            
-            //job.createdDate = ISOStringToFormatedDate(new Date().toISOString())
-            let result = getTaskerRepository().addJob(job)
-            return res(
-                ctx.status(200),
-                ctx.json(ApiResponseBuilder(200,result,false))
-            )
-        }catch(e){
-            return res(
-                ctx.status(500),
-                ctx.json(ApiResponseBuilder(500,{},true,e.message))
-            )
-        }
-    })
+    
 ] 

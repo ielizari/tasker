@@ -1,4 +1,5 @@
 import { WorklogDB, Worklog } from '../../domain/worklog'
+import { Job, JobDB} from '../../domain/job'
 import { formattedDateToISOString, ISOStringToFormatedDate } from '../../../lib/date.utils'
 
 
@@ -25,6 +26,18 @@ export const mapApiWorklogToWorklogDb = (worklog: Worklog): WorklogDB => {
     }
     return {
         ...worklog, 
+        ...dates
+    }
+}
+
+export const mapApiJobToJobDb = (job: Job): JobDB => {
+    const dates = {
+        //createdDate: formattedDateToISOString(worklog.createdDate),
+        startDatetime: formattedDateToISOString(job.startDatetime),
+        endDatetime: formattedDateToISOString(job.endDatetime)
+    }
+    return {
+        ...job, 
         ...dates
     }
 }

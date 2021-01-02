@@ -284,11 +284,17 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
         }
     }
     addJob (job: Job): JobObject{  
-        try{      
-            console.log(job)
-             db.get('jobs').push(job).write()
-             this.setDbLastModified()
-             return this.getJobById(job.id)
+        try{
+            let runningJobs = db.get('jobs').filter({worklog: job.worklog, endDatetime: ''}).value()
+            runningJobs.map((item) => {
+                item.endDatetime = job.startDatetime
+                db.get('jobs').find({id: item.id}).assign(item).write()
+            })
+
+            db.get('jobs').push(job).write()
+
+            this.setDbLastModified()
+            return this.getJobById(job.id)
         }catch(e){
             throw e
         }

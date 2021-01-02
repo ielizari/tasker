@@ -8,8 +8,7 @@ import { Job, JobObject } from '../../../domain/job'
 import { IconButton } from '../common/icon-button'
 import { FaPlus } from 'react-icons/fa'
 import { JobNewComponent } from '../job/job-new.component'
-import { chdir } from 'process'
-import { reduceRight } from 'lodash'
+import { getWorklog } from '../../../application/getWorklog'
 
 const SequenceContainer = styled.div`
     padding: 1rem;
@@ -87,15 +86,33 @@ export const WorklogSequence = (props) => {
     const addJobHandler = () => {
         setJobView(true)
     }
-    const returnJobHandler = () => {
+    const returnJobHandler = () => {        
         setJobView(false)
     }
-    console.log(worklogObj)
+
+    const submitHandler = () => {
+        setJobView(false)
+        getWorklog(worklogObj.worklog.id).then(
+            result => {
+                if(!result.hasError){
+                    setWorklogObj(result.data)
+                }else{
+                    console.log(result.error)
+                    setWorklogObj(null)
+                }
+            },
+            error => {
+                throw error
+            }
+        )
+    }
+
     return(
         <>
         { jobView ?
             <JobNewComponent
                 worklog={worklogObj.worklog}
+                submit={submitHandler}
                 cancel={returnJobHandler}
             />
             :
@@ -113,7 +130,6 @@ export const WorklogSequence = (props) => {
                     <tbody>
                     {worklogObj.childJobs.length &&            
                         worklogObj.childJobs.map((child: JobObject) => {
-                            console.log(child)
                             return (
                                 <tr>
                                     <td>{ISOStringToFormatedDate(child.job.startDatetime)}</td>

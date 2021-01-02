@@ -28,7 +28,16 @@ export const JobNewComponent = (props) => {
     const [job, setJob] = React.useState<Job>(emptyJob)    
     const [loading, setLoading] = React.useState<boolean>(false)
     const [title, setTitle] = React.useState<string>('Nuevo trabajo')
-    const [submitError, setSubmitError] = React.useState<Error | null>(null)
+    const [submitError, setSubmitError] = React.useState<Error | null>(null)    
+    const [mode, setMode] = React.useState(props.mode || 'new')
+
+    React.useEffect(()=> {
+        if(mode === 'edit'){
+            setTitle('Editar trabajo')
+        } else {
+            setTitle('Nuevo trabajo')
+        }
+    },[mode])
 
     let formItems = [
         {
@@ -70,9 +79,6 @@ export const JobNewComponent = (props) => {
 
      const validate = (values) => {
         const errors : Partial<Job> = {}
-        // if(!values.title){
-        //     errors.title = 'Campo obligatorio'
-        // }   
         
         if(!values.startDatetime){
             errors.startDatetime = 'Campo obligatorio'
@@ -87,27 +93,24 @@ export const JobNewComponent = (props) => {
         return errors
     }
     const onSubmit = (values: Job, helpers) => {
-        console.log(values)
         values.worklog = worklog.id
         setLoading(true)
         addJob(values).then(
             (result) => {
-                if(!result.hasError){
-                    //setSubmitSuccess(result.data.worklog);                                        
-                    setSubmitError(null);
-                    helpers.resetForm({})
-                }else{
-
-                    //setSubmitSuccess(null);
-                    setSubmitError(new Error(result.error));                                      
-                }
                 helpers.setSubmitting(false); 
                 setLoading(false)
+
+                if(!result.hasError){                                 
+                    setSubmitError(null)
+                    helpers.resetForm({})
+                    props.submit()
+                }else{
+                    setSubmitError(new Error(result.error));                                      
+                }                
             },
             (error) => {
                 console.log(error)
                 helpers.setSubmitting(false);
-                //setSubmitSuccess(null);
                 setSubmitError(error);
                 setLoading(false)
             }
