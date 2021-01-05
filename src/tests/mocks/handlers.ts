@@ -255,7 +255,7 @@ export const handlers = [
             ctx.status(200),
             ctx.json(ApiResponseBuilder(200,true,false))
         )
-    })
+    }),
 /*
     rest.get('http://localhost:3000/api/db/export', (req,res,ctx) => {
         try{
@@ -301,5 +301,14 @@ export const handlers = [
                 ctx.json(ApiResponseBuilder(500,{},true,e.message))
             )
         }
-    })*/
+    }),*/
+
+    rest.get('http://localhost:3000/api/db/synced', (req,res,ctx) => {
+        
+        return res(
+            ctx.status(200),
+             ctx.json(ApiResponseBuilder(200,true,false))
+        )
+        
+    })
 ]

@@ -270,6 +270,7 @@ describe("Lista de partes de trabajo", () =>{
       userEvent.click(await screen.queryByLabelText(/Filtrar/i))
     })
     
+    
     expect(await screen.findByText(/Compra 15-11-20/i)).toBeInTheDocument()
     expect(await screen.queryByText(/Compra 05-11-20/i)).not.toBeInTheDocument()
 

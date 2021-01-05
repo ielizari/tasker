@@ -4,7 +4,7 @@ import LocalStorage from 'lowdb/adapters/LocalStorage'
 import { TaskDetail, TaskObject, TaskItem } from '../../../domain/task'
 import { WorklogObject, Worklog, WorklogDB } from '../../../domain/worklog'
 import { Job, JobObject } from '../../../domain/job'
-import { mapWorklogToApiWorklog, mapApiWorklogToWorklogDb } from '../../../application/dtos/dbToApiDto'
+import { mapWorklogToApiWorklog, mapApiWorklogToWorklogDb, mapApiTaskToTaskDb, mapTaskToApiTask } from '../../../application/dtos/dbToApiDto'
 
 import { TaskerRepository, setTaskerRepository, FileDownload } from '../../../application/taskerRepository'
 import { isEmpty } from 'lodash'
@@ -116,7 +116,7 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
     }
     getTaskById(id: string): TaskObject {    
         try{    
-            let task = db.get('tasks').find({id: id}).value() || null            
+            let task = mapTaskToApiTask(db.get('tasks').find({id: id}).value()) || null            
             let parentTask = null;
             let childTasks = [];
             childTasks = childTasks.concat(db.get('tasks').filter({parent: id}).value() || []);
@@ -136,7 +136,7 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
     }
     addTask (task: TaskDetail): TaskObject{  
         try{      
-             db.get('tasks').push(task).write()
+             db.get('tasks').push(mapApiTaskToTaskDb(task)).write()
              this.setDbLastModified()
              return this.getTaskById(task.id)
         }catch(e){
@@ -146,7 +146,7 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
 
     updateTask(task: TaskDetail): TaskObject{
         try{
-            db.get('tasks').find({id: task.id}).assign(task).write()
+            db.get('tasks').find({id: task.id}).assign(mapApiTaskToTaskDb(task)).write()
             this.setDbLastModified()
             return this.getTaskById(task.id)
         }catch(e){

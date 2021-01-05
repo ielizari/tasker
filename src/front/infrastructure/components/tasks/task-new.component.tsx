@@ -160,7 +160,7 @@ export const TaskNewComponent = (props) => {
                         id: 'btnReset',
                         type: 'reset',
                         icon: FaRedo,
-                        label: 'Guardar',
+                        label: 'Reiniciar',
                         className: 'form-button-submit button-icon'
                     },                    
                     {

@@ -4,7 +4,6 @@ import { TaskDetail, TaskObject } from '../../../../domain/task'
 import { getTaskerRepository, FileDownload } from '../../../../application/taskerRepository'
 import { ApiResponse, ApiResponseBuilder } from '../../../../domain/api-response'
 import { ISOStringToFormatedDate } from '../../../../../lib/date.utils'
-import { mapApiTaskToTaskDb } from '../../../../application/dtos/dbToApiDto'
 
 export const taskHandlers = [
     rest.post('http://localhost:3000/api/tasks',(req, res, ctx) => { 
@@ -50,7 +49,7 @@ export const taskHandlers = [
             }
             
             task.createdDate = ISOStringToFormatedDate(new Date().toISOString())
-            let result = getTaskerRepository().addTask(mapApiTaskToTaskDb(task))
+            let result = getTaskerRepository().addTask(task)
             return res(
                 ctx.status(200),
                 ctx.json(ApiResponseBuilder(200,result,false))
@@ -92,8 +91,8 @@ export const taskHandlers = [
             if(isEmpty(task.id)) {
                 throw new Error('Es necesario proporcionar el id de la tarea a editar')
             }
-                        
-            let result: TaskObject = getTaskerRepository().updateTask(mapApiTaskToTaskDb(task))
+            
+            let result: TaskObject = getTaskerRepository().updateTask(task)
             return res(
                 ctx.status(200),
                 ctx.json(ApiResponseBuilder(200,result,false))
