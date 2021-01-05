@@ -89,14 +89,18 @@ export const elapsedTime = ( from: string, to: string): number => {
 }
 
 export const formatElapsedTime = (seconds: number) : string => {
-    let hora = Math.floor(seconds/3600000)
-	let resto = seconds%3600000
+    let absSeconds = Math.abs(seconds)
+    let hora = Math.floor(absSeconds/3600000)
+	let resto = absSeconds%3600000
 	let minuto = Math.floor(resto / 60000)
 	resto = resto%60000
 	let segundo = resto / 1000
 	resto = resto % 1000
     
     let timeString = padNumber(hora) + ":" + padNumber(minuto) + ":" + padNumber(segundo)
+    if(seconds < 0){
+        timeString = "-"+timeString
+    }
     return timeString
 }
 

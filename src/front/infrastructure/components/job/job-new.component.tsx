@@ -10,7 +10,10 @@ import { isValidDateTime } from '../../../../lib/date.utils'
 import { BlockContainer, BlockHeaderComponent} from '../common/block'
 import { Spinner } from '../common/spinner'
 import { addJob } from 'src/front/application/addJob'
+import { updateJob } from 'src/front/application/updateJob'
 import { SyncStateContext} from '../../../application/contexts/dbSyncContext'
+import { mapApiJobToComponent } from '../../../application/dtos/jobApiToComponent.dto'
+import { isEmpty } from 'lodash'
 
 const emptyJob: Job = {    
         id: '',
@@ -29,11 +32,19 @@ export const JobNewComponent = (props) => {
     const {setSync} = syncCtx
 
     const [worklog, setWorklog] = React.useState<Worklog>(props.worklog)
-    const [job, setJob] = React.useState<Job>(emptyJob)    
+    const [job, setJob] = React.useState<Job>(mapApiJobToComponent(props.job) || emptyJob)    
     const [loading, setLoading] = React.useState<boolean>(false)
     const [title, setTitle] = React.useState<string>('Nuevo trabajo')
     const [submitError, setSubmitError] = React.useState<Error | null>(null)    
     const [mode, setMode] = React.useState(props.mode || 'new')
+
+    React.useEffect(()=>{
+        if(!isEmpty(job.id)){
+            setMode('edit')
+        }else{
+            setMode('new')
+        }
+    },[job])
 
     React.useEffect(()=> {
         if(mode === 'edit'){
@@ -98,35 +109,68 @@ export const JobNewComponent = (props) => {
     }
     const onSubmit = (values: Job, helpers) => {
         values.worklog = worklog.id
+        console.log(values)
+        
         setLoading(true)
-        addJob(values).then(
-            (result) => {
-                helpers.setSubmitting(false); 
-                setLoading(false)
+        if(mode === 'new'){
+            console.log('nuevo job', values.id)
+            addJob(values).then(
+                (result) => {
+                    helpers.setSubmitting(false); 
+                    setLoading(false)
 
-                if(!result.hasError){    
-                    setSync({sync: false})                             
-                    setSubmitError(null)
-                    helpers.resetForm({})
-                    props.submit()
-                }else{
-                    setSubmitError(new Error(result.error));                                      
-                }                
-            },
-            (error) => {
-                console.log(error)
-                helpers.setSubmitting(false);
-                setSubmitError(error);
-                setLoading(false)
-            }
-        )
+                    if(!result.hasError){    
+                        setSync({sync: false})                             
+                        setSubmitError(null)
+                        helpers.resetForm({})
+                        props.submit()
+                    }else{
+                        setSubmitError(new Error(result.error));                                      
+                    }                
+                },
+                (error) => {
+                    console.log(error)
+                    helpers.setSubmitting(false);
+                    setSubmitError(error);
+                    setLoading(false)
+                }
+            )
+        }else if(mode === 'edit'){
+            console.log('update job',values.id)
+            updateJob(values).then(
+                (result) => {
+                    helpers.setSubmitting(false); 
+                    setLoading(false)
+
+                    if(!result.hasError){    
+                        setSync({sync: false})                             
+                        setSubmitError(null)
+                        helpers.resetForm({})
+                        props.submit()
+                    }else{
+                        setSubmitError(new Error(result.error));                                      
+                    }                
+                },
+                (error) => {
+                    console.log(error)
+                    helpers.setSubmitting(false);
+                    setSubmitError(error);
+                    setLoading(false)
+                }
+            )
+        }
     }
     return (
         <BlockContainer> 
             <BlockHeaderComponent 
                 title={title}
             />  
-            {loading ? <Spinner /> : ''}          
+            {loading ? <Spinner /> : ''}
+
+            {submitError &&
+                <div aria-label='error-message' className='message-error'>{submitError.message}</div>
+            }
+
             <FormBuilder 
                 key = "newJobForm"
                 formView = "form"

@@ -10,11 +10,10 @@ import { BlockActions } from '../common/block-actions'
 import { FaEdit, FaTrashAlt, FaPlus } from 'react-icons/fa'
 import { Modal } from '../common/modal'
 import { Link } from 'react-router-dom'
-import { ISOStringToFormatedDate } from '../../../../lib/date.utils'
 import { BlockContainer, BlockHeaderComponent } from '../common/block'
 import { WorklogSequence } from './worklog-sequence.component'
 import { SyncStateContext} from '../../../application/contexts/dbSyncContext'
- 
+import { elapsedTime, formatElapsedTime, ISOStringToFormatedDate } from '../../../../lib/date.utils'
 const WorklogDetailContainer = styled.ul`
 `;
 const WorklogDetailKey = styled.div`
@@ -181,6 +180,11 @@ export const WorklogDetailComponent = (props) => {
         
             return () => cancelled = true
     },[worklogid])
+
+    React.useEffect(() => {
+        console.log("WL Detail",worklog)
+    },[worklog])
+    
     return (        
         <BlockContainer>
             <Modal 
@@ -219,7 +223,21 @@ export const WorklogDetailComponent = (props) => {
                             <WorklogDetailItem>
                                 <WorklogDetailKey>Fin:</WorklogDetailKey>
                                 <WorklogDetailValue>{worklog.worklog.endDatetime ? worklog.worklog.endDatetime : '-'}</WorklogDetailValue>
-                            </WorklogDetailItem>    
+                            </WorklogDetailItem>
+                            <WorklogDetailItem>
+                                <WorklogDetailKey>Duración:</WorklogDetailKey>
+                                <WorklogDetailValue>
+                                    {worklog.worklog.endDatetime ? 
+                                        formatElapsedTime(
+                                            elapsedTime( 
+                                                worklog.worklog.startDatetime, 
+                                                worklog.worklog.endDatetime
+                                            )) 
+                                        : 
+                                        '-'
+                                        }
+                                </WorklogDetailValue>
+                            </WorklogDetailItem>   
                             <WorklogDetailItem>
                                 <WorklogDetailKey>Tags:</WorklogDetailKey>
                                 <WorklogDetailValue>

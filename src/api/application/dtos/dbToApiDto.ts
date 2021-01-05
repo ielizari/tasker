@@ -1,7 +1,32 @@
 import { WorklogDB, Worklog } from '../../domain/worklog'
 import { Job, JobDB} from '../../domain/job'
 import { formattedDateToISOString, ISOStringToFormatedDate } from '../../../lib/date.utils'
+import { TaskDetail, TaskDB } from 'src/front/domain/task-detail'
 
+export const mapTaskToApiTask = (task: TaskDB): TaskDetail => {
+    if(!task){
+        return null
+    }
+    const dates = {
+        createdDate: ISOStringToFormatedDate(task.createdDate),
+        limitDate: ISOStringToFormatedDate(task.limitDate),
+    }
+    return {
+        ...task, 
+        ...dates
+    }
+}
+
+export const mapApiTaskToTaskDb = (task: TaskDetail): TaskDB => {
+    const dates = {
+        createdDate: formattedDateToISOString(task.createdDate),
+        limitDate: formattedDateToISOString(task.limitDate),
+    }
+    return {
+        ...task, 
+        ...dates
+    }
+}
 
 export const mapWorklogToApiWorklog = (worklog: WorklogDB): Worklog => {
     if(!worklog){

@@ -36,19 +36,23 @@ const ButtonWrapper = styled.button`
     }
 `;
 
-const IconWrapper = styled.span`
+const IconWrapper = styled.div`
     display: inline-flex;
     align-items: center;
-    margin-right: 1rem;
+    
     transition: background-color .3s;
 `
 
+const TextWrapper = styled.div`
+    margin-left: 1rem;
+`
+
 export const IconButton = (props) => {
-    const [icon,setIcon] = React.useState(null)
     const [text, setText] = React.useState('')  
+    let Icon = props.icon || null
 
     React.useEffect(()=> {
-        setIcon(props.icon)
+        Icon = props.icon
     },[props.icon])
     
     React.useEffect(()=> {
@@ -63,20 +67,23 @@ export const IconButton = (props) => {
             aria-label={props.text}
             type={props.type}
         >
-            <IconWrapper className={props.className}>{icon}</IconWrapper>       
-            {text}
+            <IconWrapper className={props.className}><Icon/></IconWrapper>       
+            {text && 
+                <TextWrapper>{text}</TextWrapper>
+            }
         </ButtonWrapper>
     )
 }
 
+
 export const IconLink = (props) => {
-    const [icon,setIcon] = React.useState(null)
     const [route, setRoute] = React.useState(props.route || '')
     const [text, setText] = React.useState(props.text || '')
 
-   
+    let Icon = props.icon || null
+
     React.useEffect(()=> {
-        setIcon(props.icon)
+        Icon = props.icon      
     },[props.icon])
 
     React.useEffect(()=> {
@@ -95,8 +102,10 @@ export const IconLink = (props) => {
             role="button"
             aria-label={text}
             >
-            <IconWrapper className={props.className}>{icon}</IconWrapper>
-            {text}
+            <IconWrapper className={props.className}><Icon /></IconWrapper>
+            {text && 
+                <TextWrapper>{text}</TextWrapper>
+            }
         </LinkWrapper>
     )
 }

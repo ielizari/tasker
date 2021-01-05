@@ -28,21 +28,28 @@ const adapter = new LocalStorage<Schema>('db')
 export const db = lowdb(adapter)
 
 export class LowdbLocalstorageRepository implements TaskerRepository {
+    orderById(input: Array<TaskDetail | Worklog | Job>): Array<TaskDetail | Worklog | Job> {
+        return input.sort((a,b) => {
+            if(parseInt(a.id) > parseInt(b.id)){
+                return 1
+            }else return -1
+        })
+    }
     newId(table: string) : string {
         let res: Array<TaskDetail> | Array<Worklog> | Array<Job>
         let id: string 
         switch(table){
-            case 'tasks':                
-                res = db.get('tasks').orderBy('id','desc').take(1).value()
-                id = res.length ? (parseInt(res[0].id) + 1).toString() : '1'
+            case 'tasks':
+                res = this.orderById(db.get('tasks').value()) as Array<TaskDetail>                
+                id = res.length ? (parseInt(res[res.length-1].id)+1).toString() : '1'
                 break
-            case 'worklogs':
-                res = db.get('worklogs').orderBy('id','desc').take(1).value()
-                id = res.length ? (parseInt(res[0].id) + 1).toString() : '1'
+            case 'worklogs':               
+                res = this.orderById(db.get('worklogs').value()) as Array<Worklog>                
+                id = res.length ? (parseInt(res[res.length-1].id)+1).toString() : '1'
                 break
             case 'jobs':
-                res = db.get('jobs').orderBy('id','desc').take(1).value()
-                id = res.length ? (parseInt(res[0].id) + 1).toString() : '1'
+                res = this.orderById(db.get('jobs').value()) as Array<Job>                
+                id = res.length ? (parseInt(res[res.length-1].id)+1).toString() : '1'
                 break
             default:
                 throw new Error(`La tabla '${table}' no existe`)
@@ -74,23 +81,29 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
 
     
     exportDb(): FileDownload{
-        try{
-            const data = localStorage.getItem('db')
-            let jsonObject = JSON.stringify(data)
-            let exportedFilename = `taskerdb_${new Date().getTime()}.txt`
-            
+        let lastExportedDate = ''
+        try{            
+            lastExportedDate = db.get('metadata').value()[0].lastExported
             this.setDbLastExported()
+            const data = localStorage.getItem('db')
+
+            let jsonObject = JSON.stringify(data)
+            let exportedFilename = `taskerdb_${new Date().getTime()}.txt`            
+            
             return {blob: jsonObject, filename: exportedFilename}
 
         }catch(e){
+            this.setDbLastExported(lastExportedDate)
             throw e
         }
     }
 
     getTasks(filter: Partial<TaskDetail> = {}): Array<TaskItem>  {
         const search = JSON.parse(filter as string)
-        const tasks = db.get('tasks').filter(search).value()
-        console.log(tasks)
+        const tasks = db.get('tasks').filter(task => 
+            ((!search.parent && !(typeof(search.parent)==='string')) || task.parent === search.parent )&&
+            (!search.title || task.title.toLowerCase().includes(search.title.toLowerCase()))
+        ).value()
         const result : Array<TaskItem>= []
         tasks.map((task: TaskDetail) => {
             result.push({
@@ -157,7 +170,12 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
 
     getWorklogs(filter: Partial<Worklog> = {}): Array<Worklog>  {
         const search = JSON.parse(filter as string)
-        const worklogs = db.get('worklogs').filter(search).value()
+        console.log(search)
+        const worklogs = db.get('worklogs').filter(wl => 
+            (!search.title || wl.title.toLowerCase().includes(search.title.toLowerCase())) &&
+            ((!search.endDatetime && !(typeof(search.endDatetime)==='string')) || wl.endDatetime === search.endDatetime)
+            //(!search.endDatetime && isEmpty(search.endDatetime) && wl.endDatetime === search.endDatetime)
+        ).value()
         const result : Array<Worklog>= []
         worklogs.map((worklog: Worklog) => {
             result.push({
@@ -202,7 +220,7 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
 
     updateWorklog(worklog: Worklog): WorklogObject{
         try{
-            db.get('worklogs').find({id: worklog.id}).assign(worklog).write()
+            db.get('worklogs').find({id: worklog.id}).assign(mapApiWorklogToWorklogDb(worklog)).write()
             this.setDbLastModified()
             return this.getWorklogById(worklog.id)
         }catch(e){
@@ -214,11 +232,39 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
             const worklog = db.get('worklogs').find({id: worklogid}).value()
             if(worklog){
                 db.get('worklogs').remove({id: worklogid}).write()
+                db.get('jobs').remove({worklog: worklogid}).write()
                 this.setDbLastModified()
             }else{
                 return false
             }
             return true
+        }catch(e){
+            throw e
+        }
+    }
+
+    closeWorklog(worklog: Worklog): WorklogObject {
+        try{
+            
+            let runningJob = db.get('jobs').find({worklog: worklog.id, endDatetime: ''}).value()
+            if(runningJob){
+                runningJob.endDatetime = worklog.endDatetime
+                db.get('jobs').find({id: runningJob.id}).assign(runningJob).write()
+            }
+
+            db.get('worklogs').find({id: worklog.id}).assign(mapApiWorklogToWorklogDb(worklog)).write()
+
+            return this.getWorklogById(worklog.id)
+        }catch(e){
+            throw e
+        }
+    }
+
+    reopenWorklog(worklog: Worklog): WorklogObject {
+        try{
+            db.get('worklogs').find({id: worklog.id}).assign(mapApiWorklogToWorklogDb(worklog)).write()
+            
+            return this.getWorklogById(worklog.id)
         }catch(e){
             throw e
         }
@@ -292,7 +338,7 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
                 item.endDatetime = job.startDatetime
                 db.get('jobs').find({id: item.id}).assign(item).write()
             })
-
+            console.log(job)
             db.get('jobs').push(job).write()
 
             this.setDbLastModified()

@@ -3,6 +3,8 @@ import { isEmpty } from 'lodash'
 import { TaskDetail, TaskObject } from '../../../../domain/task'
 import { getTaskerRepository, FileDownload } from '../../../../application/taskerRepository'
 import { ApiResponse, ApiResponseBuilder } from '../../../../domain/api-response'
+import { ISOStringToFormatedDate } from '../../../../../lib/date.utils'
+import { mapApiTaskToTaskDb } from '../../../../application/dtos/dbToApiDto'
 
 export const taskHandlers = [
     rest.post('http://localhost:3000/api/tasks',(req, res, ctx) => { 
@@ -47,8 +49,8 @@ export const taskHandlers = [
                 throw new Error('Una tarea nueva no puede contener un valor en el campo "id"')
             }
             
-            task.createdDate = new Date().toString()
-            let result = getTaskerRepository().addTask(task)
+            task.createdDate = ISOStringToFormatedDate(new Date().toISOString())
+            let result = getTaskerRepository().addTask(mapApiTaskToTaskDb(task))
             return res(
                 ctx.status(200),
                 ctx.json(ApiResponseBuilder(200,result,false))
@@ -91,7 +93,7 @@ export const taskHandlers = [
                 throw new Error('Es necesario proporcionar el id de la tarea a editar')
             }
                         
-            let result: TaskObject = getTaskerRepository().updateTask(task)
+            let result: TaskObject = getTaskerRepository().updateTask(mapApiTaskToTaskDb(task))
             return res(
                 ctx.status(200),
                 ctx.json(ApiResponseBuilder(200,result,false))

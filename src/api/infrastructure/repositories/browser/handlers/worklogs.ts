@@ -3,7 +3,6 @@ import { isEmpty } from 'lodash'
 import { Worklog, WorklogObject } from '../../../../domain/worklog'
 import { getTaskerRepository } from '../../../../application/taskerRepository'
 import { ApiResponse, ApiResponseBuilder } from '../../../../domain/api-response'
-import { mapApiWorklogToWorklogDb } from '../../../../application/dtos/dbToApiDto'
 import { ISOStringToFormatedDate } from '../../../../../lib/date.utils'
 
 export const worklogHandlers = [
@@ -95,7 +94,49 @@ export const worklogHandlers = [
                 throw new Error('Es necesario proporcionar el id del parte a editar')
             }
                   
-            let result: WorklogObject = getTaskerRepository().updateWorklog(mapApiWorklogToWorklogDb(worklog))
+            let result: WorklogObject = getTaskerRepository().updateWorklog(worklog)
+            return res(
+                ctx.status(200),
+                ctx.json(ApiResponseBuilder(200,result,false))
+            )
+        }catch(e){
+            return res(
+                ctx.status(500),
+                ctx.json(ApiResponseBuilder(500,{},true,e.message))
+            )
+        }
+    }),
+
+    rest.put('http://localhost:3000/api/worklogs/close', (req, res, ctx) => {
+        try{
+            const worklog: Worklog | null = req.body ? req.body as Worklog : null
+            
+            if(isEmpty(worklog.id)) {
+                throw new Error('Es necesario proporcionar el id del parte a cerrar')
+            }
+                  
+            let result: WorklogObject = getTaskerRepository().closeWorklog(worklog)
+            return res(
+                ctx.status(200),
+                ctx.json(ApiResponseBuilder(200,result,false))
+            )
+        }catch(e){
+            return res(
+                ctx.status(500),
+                ctx.json(ApiResponseBuilder(500,{},true,e.message))
+            )
+        }
+    }),
+
+    rest.put('http://localhost:3000/api/worklogs/reopen', (req, res, ctx) => {
+        try{
+            const worklog: Worklog | null = req.body ? req.body as Worklog : null
+            
+            if(isEmpty(worklog.id)) {
+                throw new Error('Es necesario proporcionar el id del parte a cerrar')
+            }
+                  
+            let result: WorklogObject = getTaskerRepository().reopenWorklog(worklog)
             return res(
                 ctx.status(200),
                 ctx.json(ApiResponseBuilder(200,result,false))

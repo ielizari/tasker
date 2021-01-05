@@ -6,6 +6,7 @@ import { font, color } from '../../../styles/theme';
 import {
   Link
 } from "react-router-dom";
+import { DbSync } from '../db-sync'
 
 const Head = styled.nav`
     display: flex;
@@ -42,6 +43,10 @@ const MenuItem = styled.li`
     ${font.h3()}
 `;
 
+const SyncWarning = styled.div`
+    margin-left: auto;
+`
+
 export const Header = () =>{
     return(
         <>            
@@ -65,7 +70,8 @@ export const Header = () =>{
                     <MenuItem>
                         <Link to="/about">About</Link>
                     </MenuItem>                    
-                </Menu>               
+                </Menu>
+                <SyncWarning><DbSync /></SyncWarning>       
             </Head>
         </>
     );

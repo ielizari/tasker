@@ -77,7 +77,7 @@ export const GlobalStyle = createGlobalStyle`
         background-color: ${color.darkGrey}
     }
     .button-icon{
-        margin-right: 1rem;       
+             
     }   
     .form-button-submit .button-icon{
         color: ${color.success}

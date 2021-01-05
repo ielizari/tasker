@@ -16,9 +16,9 @@ export const jobHandlers = [
             }else{
                 throw new Error('Un trabajo nuevo no puede contener un valor en el campo "id"')
             }
-                
+            
             //job.createdDate = ISOStringToFormatedDate(new Date().toISOString())
-            let result = getTaskerRepository().addJob(job)
+            let result = getTaskerRepository().addJob(mapApiJobToJobDb(job))
             return res(
                 ctx.status(200),
                 ctx.json(ApiResponseBuilder(200,result,false))

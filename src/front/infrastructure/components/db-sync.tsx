@@ -1,16 +1,37 @@
 import React from 'react'
 import styled from 'styled-components'
+import { color, common } from '../../styles/theme'
 import { SyncStateContext } from '../../application/contexts/dbSyncContext'
 import { exportDb } from '../../application/exportDatabase'
 import { isSyncedDb } from '../../application/isSyncedDatabase'
 import { FaSave } from 'react-icons/fa'
 import { IconButton } from './common/icon-button'
+import { BrowserRouter } from 'react-router-dom'
 
 const SyncWarningContainer = styled.div`
-    background-color: red;
-    padding: 1rem;
     text-align: center;
-    color: #fff;
+`
+const ExportButton = styled.button`
+    ${common.roundedCorners('50%')};
+    border-style: solid;
+    border-width: 2px;
+    border-color: ${color.darkOrange};
+    color: ${color.darkOrange};
+    background-color: rgba(0,0,0,0);
+    animation-name: iconglow;
+    animation-duration: 2s;
+    animation-iteration-count: infinite;
+
+    @keyframes iconglow {
+        from {
+            color: ${color.darkOrange};
+            border-color: ${color.darkOrange};
+        }
+        to {
+            color: ${color.white};
+            border-color: ${color.white};
+        }
+    }
 `
 
 const exportDB = () => {              
@@ -84,15 +105,13 @@ export const DbSync = () => {
     return (
         <>
         {!sync.sync &&
-            <SyncWarningContainer>
-                Necesita sincronización
-                <button onClick={handleExport}>Download</button>
-                <IconButton 
-                    id='exportDb'
-                    text=''
-                    icon={FaSave}
-                    onClick={handleExport}
-                />
+            <SyncWarningContainer>            
+                <ExportButton 
+                    id='export'
+                    key='export'
+                    aria-label='export'
+                    onClick={handleExport}                   
+                ><FaSave /></ExportButton>
             </SyncWarningContainer>
         }
         </>

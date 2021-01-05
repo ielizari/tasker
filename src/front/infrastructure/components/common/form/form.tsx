@@ -31,6 +31,7 @@ export const FormButtons = styled.div`
     flex-direction: row;
     justify-content: center;
     margin: 1rem;
+    gap: 1rem;
 
 `
 
@@ -158,12 +159,13 @@ export const FormDateInput :React.FC<any> = ({label, icon, handler, dateText, ..
 }
 
 export const FormSelect: React.FC<any> = ({ label, selOptions, ...props }) => {
-    const [field, meta] = useField(props);     
+    const [field, meta] = useField(props);  
+    
     return ( 
         <FormItemWrapper>
             <label htmlFor={props.id || props.name}>{label}</label> 
             <Field as="select" {...field} {...props} aria-label={props.id || props.name}>
-                {
+                {selOptions &&
                     selOptions.map((item) =>
                         <option key={item.value} value={item.value}>{item.label}</option>
                     )
@@ -374,7 +376,7 @@ export const FormBuilder: React.FC<any> = (props) => {
                                         return (
                                             <FormSelect
                                                 label={item.label}
-                                                selOptions={item.selectOptions}
+                                                selOptions={item.selOptions}
                                                 id={item.id}
                                                 name={item.id}
                                                 key={item.id}        

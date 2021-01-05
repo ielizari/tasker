@@ -1,23 +1,20 @@
 import React from 'react'
 import styled from 'styled-components'
 import { color, common } from '../../../styles/theme';
-import { FormWrapper, FormDateInput,FormSelect,FormTextInput, FormButtons} from '../common/form/form'
-import { Formik, Form, Field, useField } from 'formik'
+
 import { TaskDetail } from '../../../domain/task-detail'
 import { TaskStatus, TaskPriority, ConstObjectToSelectOptionsArray } from '../../../domain/task-definitions'
 import { addTask } from '../../../application/addTask'
 import { getTask } from '../../../application/getTask'
 import { updateTask } from '../../../application/updateTask'
 import { Link, useParams } from 'react-router-dom'
-import { FaCheck, FaTimes, FaRedo, FaCalendar} from 'react-icons/fa'
-import { IconButton, IconLink } from '../common/icon-button'
+import { FaCheck, FaTimes, FaRedo} from 'react-icons/fa'
 import { Spinner } from '../common/spinner'
 import { BlockContainer, BlockHeaderComponent} from '../common/block'
 import { SyncStateContext} from '../../../application/contexts/dbSyncContext'
 
-import  {Datepicker}  from '../../../../lib/orzkDatepicker/datepicker'
-import '../../../../lib/orzkDatepicker/datepicker.css'
-
+import { FormBuilder } from '../common/form/form'
+import { isValidDateTime, dateToFormattedDate, formattedDateToISOString } from '../../../../lib/date.utils'
 
 const emptyTask: TaskDetail = {
     id: '',
@@ -55,9 +52,7 @@ export const TaskNewComponent = (props) => {
 
     const syncCtx = React.useContext(SyncStateContext)
     const {setSync} = syncCtx
-
-    const [dpLimit,setDpLimit] = React.useState<Datepicker | null>(null)
-    const [limitDate, setLimitDate] = React.useState<string>('')
+    
     const [submitSuccess, setSubmitSuccess] = React.useState(null)
     const [submitError, setSubmitError] = React.useState<Error | null>(null)
     const [mode, setMode] = React.useState(props.mode || 'new')
@@ -72,26 +67,6 @@ export const TaskNewComponent = (props) => {
         else if(mode === 'child') setTitle('Nueva subtarea')
         else setTitle('Nueva tarea')
     },[mode])
-
-    React.useEffect(() => {        
-        let dp = new Datepicker('limitDate','FechaLimite', {lang:'es'})
-        dp.onSubmit = () => {   
-            setLimitDate(dp.getFullDateString())         
-            dp.printDate();
-         }          
-
-        if(task && task.limitDate !== '' && new Date(task.limitDate)){
-            dp.setDate(new Date(task.limitDate))
-        }
-        setDpLimit(dp)
-
-    },[task])
-
-    React.useEffect(() => {   
-        if(dpLimit && dpLimit.getDate() !== null){    
-            setLimitDate(dpLimit.getFullDateString())
-        }
-    },[dpLimit])
 
     React.useEffect(()=> {   
         let cancelled = false    
@@ -124,7 +99,6 @@ export const TaskNewComponent = (props) => {
                     setSubmitError(null)
                     setError(error)
                     setTask(null)
-                    setLimitDate('')
                     setLoading(false)
                 }
             )        
@@ -134,12 +108,147 @@ export const TaskNewComponent = (props) => {
         return () => cancelled = true    
     },[])
 
-    const dateHandler = () => {
-        dpLimit.show()
-    }
-
+    
     const statusItems = ConstObjectToSelectOptionsArray(TaskStatus)
     const priorityItems = ConstObjectToSelectOptionsArray(TaskPriority)
+
+    let formItems = 
+        [
+            {
+                type: 'text',
+                id: 'title',
+                label: 'Título'
+            },
+            {
+                type: 'text',
+                id: 'description',
+                label: 'Descripción'
+            },
+            {
+                type: 'text',
+                id: 'author',
+                label: 'Autor'
+            },
+            {
+                type: 'date2',
+                id: 'limitDate',
+                label: 'Fecha límite'
+            },
+            {
+                type: 'select',
+                id: 'status',
+                label: 'Estado',
+                selOptions: statusItems
+            },
+            {
+                type: 'select',
+                id: 'priority',
+                label: 'Prioridad',
+                selOptions: priorityItems
+            },            
+            {
+                type: 'buttons',
+                buttons: [
+                    {        
+                        id: 'btnSubmit',
+                        type: 'submit',
+                        icon: FaCheck,
+                        label: 'Guardar',
+                        className: 'form-button-submit button-icon'
+                    },
+                    {        
+                        id: 'btnReset',
+                        type: 'reset',
+                        icon: FaRedo,
+                        label: 'Guardar',
+                        className: 'form-button-submit button-icon'
+                    },                    
+                    {
+                        id: 'cancelBtn',
+                        type: 'link',
+                        route: taskid ? `/tasks/${taskid}` : '/tasks',
+                        icon: FaTimes,
+                        label: 'Cancelar',
+                        className: 'form-button-cancel button-icon'
+                    }
+                ]
+            }            
+        ]
+        const validate = (values) => {
+            const errors : Partial<TaskDetail> = {}
+                        
+            if(!values.title){                        
+                errors.title = 'Campo obligatorio'
+            }                    
+            if(!values.author){
+                errors.author = 'Campo obligatorio'
+            }
+            if(!values.status){
+                errors.status = 'Campo obligatorio'
+            }
+            if(!values.priority){
+                errors.priority = 'Campo obligatorio'
+            }
+            if(values.limitDate && !isValidDateTime(values.limitDate)){
+                errors.limitDate = 'Formato de fecha y hora no válido'
+            }
+           
+            return errors
+        }
+        const onSubmit = (values: TaskDetail, helpers) => {
+            setLoading(true)
+            if(mode === 'new' || mode=='child'){
+                addTask(values)
+                    .then(                            
+                        (result) => {
+                            if(!result.hasError){
+                                setSubmitSuccess(result.data.task)
+                                setSubmitError(null)
+                                helpers.resetForm({})
+                                setSync({sync: false})
+                            }else{
+                                setSubmitSuccess(null);
+                                setSubmitError(new Error(result.error));                                      
+                            }
+                            helpers.setSubmitting(false); 
+                            setLoading(false)
+                        },
+                        (error) => {
+                            console.log(error)
+                            helpers.setSubmitting(false);
+                            setSubmitSuccess(null);
+                            setSubmitError(error);
+                            setLoading(false)
+                        }
+                    )
+            }else if(mode === 'edit'){
+                updateTask(values)
+                    .then(                            
+                        (result) => {
+                            if(!result.hasError){                                        
+                                setSubmitSuccess(result.data.task); 
+                                setTask(null)                                     
+                                setTask(result.data.task)                                        
+                                setSubmitError(null);
+                                setSync({sync: false})
+                            }else{
+                                setSubmitSuccess(null);
+                                setSubmitError(new Error(result.error));                                      
+                            }
+                            helpers.setSubmitting(false); 
+                            setLoading(false)
+                        },
+                        (error) => {
+                            console.log(error)
+                            helpers.setSubmitting(false);
+                            setSubmitSuccess(null);
+                            setSubmitError(error);
+                            setLoading(false)
+                        }
+                    )
+            }      
+        }
+    
     return (        
         <BlockContainer> 
             <BlockHeaderComponent 
@@ -160,163 +269,16 @@ export const TaskNewComponent = (props) => {
                 </ParentTaskReference>
             }
             {task &&
-                <Formik
-                    enableReinitialize
-                    initialValues={task}               
-                    validate = {values => {
-                        const errors : Partial<TaskDetail> = {}
-                        
-                        if(!values.title){                        
-                            errors.title = 'Campo obligatorio'
-                        }                    
-                        if(!values.author){
-                            errors.author = 'Campo obligatorio'
-                        }
-                        if(!values.status){
-                            errors.status = 'Campo obligatorio'
-                        }
-                        if(!values.priority){
-                            errors.priority = 'Campo obligatorio'
-                        }
-                        
-                        let datetime = values.limitDate.split(" ")
-                        if(datetime.length > 0 && datetime.length !== 11 && datetime[0] !== ''){
-                            if(!datetime[0].match(/^(((0[1-9]|[12]\d|3[01])\/(0[13578]|1[02])\/((19|[2-9]\d)\d{2}))|((0[1-9]|[12]\d|30)\/(0[13456789]|1[012])\/((19|[2-9]\d)\d{2}))|((0[1-9]|1\d|2[0-8])\/02\/((19|[2-9]\d)\d{2}))|(29\/02\/((1[6-9]|[2-9]\d)(0[48]|[2468][048]|[13579][26])|(([1][26]|[2468][048]|[3579][26])00))))$/g)){
-                                errors.limitDate = 'Formato de fecha no válido'
-                            }
-                            if(datetime.length === 2 && !datetime[1].match(/^([0-1]?[0-9]|[2][0-3]):([0-5][0-9])(:[0-5][0-9])?$/)){
-                                errors.limitDate = 'Formato de hora no válido'
-                            }
-                        }
-                        return errors
-                    }}
-                    onSubmit = {(values,{setSubmitting, resetForm}) => {  
-                        if(values.limitDate !== ''){
-                            values.limitDate = (new Datepicker().createDate(values.limitDate)).toString()
-                        }
-                        
-                        setLoading(true)
-                        if(mode === 'new' || mode=='child'){
-                            addTask(values)
-                            .then(                            
-                                (result) => {
-                                    if(!result.hasError){
-                                        setSubmitSuccess(result.data.task)
-                                        setSubmitError(null)
-                                        resetForm({})
-                                        setSync({sync: false})
-                                    }else{
-                                        setSubmitSuccess(null);
-                                        setSubmitError(new Error(result.error));                                      
-                                    }
-                                    setSubmitting(false); 
-                                    setLoading(false)
-                                },
-                                (error) => {
-                                    console.log(error)
-                                    setSubmitting(false);
-                                    setSubmitSuccess(null);
-                                    setSubmitError(error);
-                                    setLoading(false)
-                                }
-                            )
-                        }else if(mode === 'edit'){
-                            updateTask(values)
-                            .then(                            
-                                (result) => {
-                                    if(!result.hasError){                                        
-                                        setSubmitSuccess(result.data.task); 
-                                        setTask(null)                                     
-                                        setTask(result.data.task)                                        
-                                        setSubmitError(null);
-                                        setSync({sync: false})
-                                    }else{
-                                        setSubmitSuccess(null);
-                                        setSubmitError(new Error(result.error));                                      
-                                    }
-                                    setSubmitting(false); 
-                                    setLoading(false)
-                                },
-                                (error) => {
-                                    console.log(error)
-                                    setSubmitting(false);
-                                    setSubmitSuccess(null);
-                                    setSubmitError(error);
-                                    setLoading(false)
-                                }
-                            )
-                        }      
-                    }}
-                >                 
-                    {props =>  {
-                        return (      
-                        <FormWrapper>
-                            <FormTextInput 
-                                label="Título"
-                                name="title"
-                                type="text"                             
-                            />
-                            <FormTextInput 
-                                label="Descripción"
-                                name="description"
-                                type="text"                                
-                            />
-                            <FormTextInput 
-                                label="Autor"
-                                name="author"
-                                type="text"                                
-                            />   
-                            <FormDateInput 
-                                label="Fecha límite"
-                                name="limitDate"
-                                type="text"
-                                id="limitDate"
-                                icon={FaCalendar}
-                                handler={dateHandler}   
-                                dateText={limitDate}                    
-                            />   
-                            <FormSelect
-                                label="Estado"
-                                selOptions={statusItems}
-                                name="status"                  
-                            />   
-                            <FormSelect
-                                label="Prioridad"
-                                selOptions={priorityItems}
-                                name="priority"
-                                type="text"                            
-                            />                             
-                            <FormButtons>                                
-                                <IconButton
-                                    key="btnSubmit"
-                                    text="Guardar"
-                                    icon={FaCheck}
-                                    type="submit"
-                                    disabled={props.isSubmitting && !props.isValidating}
-                                    className="form-button-submit button-icon"
-                                />
-                                <IconButton 
-                                    key="btnReset"
-                                    text="Limpiar"
-                                    icon={FaRedo}
-                                    type="reset"
-                                    disabled={props.isSubmitting && !props.isValidating}
-                                    className="form-button-reset button-icon"
-                                />
-                                <IconLink 
-                                    key="btnCancel"
-                                    route={taskid ? `/tasks/${taskid}` : '/tasks'}
-                                    text="Cancelar"
-                                    icon={FaTimes}
-                                    type="button"
-                                    disabled={props.isSubmitting && !props.isValidating}
-                                    className="form-button-cancel button-icon"
-                                    />
-                            </FormButtons>
-                        </FormWrapper>               
-                    )}}  
-                </Formik>
-            }
+                <FormBuilder 
+                    key = "newTaskForm"
+                    formView = "form"
+                    formItems = {formItems}
+                    initValues = {task}
+                    validation = {validate}
+                    onSubmit = {onSubmit}
+                />
+            }                
+            
         </BlockContainer>
     )
 }
