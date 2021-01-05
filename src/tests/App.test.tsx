@@ -172,7 +172,7 @@ describe("Nueva tarea", () => {
     renderWithProviders(<App />, {route: '/tasks/new'})
 
     await act( async() => {
-      userEvent.type(await screen.getByLabelText(/Fecha Límite/i),"28/12/2020")
+      userEvent.type(await screen.getByLabelText(/Fecha Límite/i),"28/12/2020 12:00")
     })
     await act( async() => {
       userEvent.click(screen.getByText(/Guardar/i))
@@ -418,7 +418,7 @@ describe("Detalle de parte", () => {
     renderWithProviders(<App />, {route: '/worklogs/1'})
     expect(await screen.findByLabelText(/Editar/i)).toBeInTheDocument()
     expect(await screen.findByLabelText(/Borrar/i)).toBeInTheDocument()
-    expect(await screen.findByLabelText(/Añadir trabajo/i)).toBeInTheDocument()
+    expect(await screen.findAllByLabelText(/Añadir trabajo/i)).toHaveLength(1)
   })
 
   it("El botón 'Editar' carga la url worklogs/edit/1", async() => {

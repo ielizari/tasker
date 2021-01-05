@@ -245,14 +245,14 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
 
     closeWorklog(worklog: Worklog): WorklogObject {
         try{
-            
+            worklog = mapApiWorklogToWorklogDb(worklog)
             let runningJob = db.get('jobs').find({worklog: worklog.id, endDatetime: ''}).value()
             if(runningJob){
                 runningJob.endDatetime = worklog.endDatetime
                 db.get('jobs').find({id: runningJob.id}).assign(runningJob).write()
             }
 
-            db.get('worklogs').find({id: worklog.id}).assign(mapApiWorklogToWorklogDb(worklog)).write()
+            db.get('worklogs').find({id: worklog.id}).assign(worklog).write()
 
             return this.getWorklogById(worklog.id)
         }catch(e){

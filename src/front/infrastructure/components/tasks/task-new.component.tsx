@@ -76,6 +76,7 @@ export const TaskNewComponent = (props) => {
             .then(
                 (result) => { 
                     if(!cancelled){ 
+                        console.log(result)
                         if(result.hasError){
                             setError(new Error(result.error))
                             setTask(null)
