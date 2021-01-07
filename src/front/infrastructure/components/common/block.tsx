@@ -18,6 +18,9 @@ const BlockTitle = styled.div`
     ${common.roundedCornersTop()};
     padding: 1rem;
 `
+export const BlockContent = styled.div`
+    padding: 1rem;
+`
 
 export const BlockEmptySet = styled.div`
     display: flex;

@@ -1,21 +1,26 @@
 import React from 'react'
-import { TaskItem } from '../../../domain/task-list'
+import { TaskObject, TaskDetail } from '../../../domain/task'
 import { getTaskList } from '../../../application/getTaskList'
 import styled from 'styled-components'
 import { color, common } from '../../../styles/theme';
 import { Link } from "react-router-dom";
+import { FaFilter, FaPlus, FaMinus, FaCaretRight, FaCaretDown } from 'react-icons/fa'
 
 import { Spinner } from '../common/spinner'
 
 import { BlockHeaderComponent, BlockContainer, BlockEmptyComponent } from '../common/block'
-import { FaPlus, FaFilter } from 'react-icons/fa'
-import { TaskDetail } from '../../../domain/task-detail'
 
-
-const ListItem = styled.li`
-    list-style: none;
+const TaskListContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
     padding: 1rem;
-    margin: 1rem;
+`
+
+const ListItem = styled.div`
+    display: flex;
+    flex-direction: row;
+    align-items: center;
     border-style: solid;
     border-width: 1px;
     border-color: ${color.orange};
@@ -24,24 +29,103 @@ const ListItem = styled.li`
     ${common.roundedCorners()};
 `
 
-const TaskListItem = (props: {task: TaskItem } ) => {    
+const ListItemTitleLink = styled(Link)`
+    width: 100%;
+    padding: 1rem;
+`
+const ListItemTitleResult = styled.div`
+    width: 100%;
+    padding: 1rem;
+    cursor: pointer;
+`
+
+const ListItemExpand = styled.div`
+    display: inline-flex;
+    padding: 1rem;
+    cursor: pointer;
+    justify-content: center;
+    align-items: center;
+    gap: 0.3rem;
+    background-color: ${color.darkOrange};
+`
+const TaskChildContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+    padding-left: 1rem;
+    gap: 1rem;
+`
+
+const TaskListItem = (props: {item: TaskObject, resultHandler? } ) => {
+    const [showChildren, setShowChildren] = React.useState<boolean>(false)  
+    const [ childrenTasks, setChildrenTasks ] = React.useState<Array<TaskObject>>([])
+    const [error, setError] = React.useState<String>(null)
+    const [loading, setLoading] = React.useState<boolean>(false)
     
+    const loadChildren = () => {
+        getTaskList({parent: props.item.task.id})
+            .then(
+                (result) => {
+                    if(result.hasError){
+                        setError(result.error);
+                        setChildrenTasks([])
+                    }else{
+                        console.log(result)
+                        setChildrenTasks(result.data); 
+                        setError(null);
+                    }                        
+                    setLoading(false)                        
+                },
+                (error) => {
+                    setError(error)
+                    setLoading(false)   
+                }
+            )
+        setShowChildren(!showChildren)
+    }
     return(
-        <ul>
-            <Link to={`/tasks/${props.task.id}`}>
-                <ListItem>{props.task.title}</ListItem>
-            </Link>
-        </ul>
+        <>
+            {loading && <Spinner />}
+            <ListItem>
+                <ListItemExpand onClick={loadChildren}>                    
+                    {showChildren ?
+                        <FaMinus />
+                        :
+                        <FaPlus />
+                    }
+                    ({props.item.childTasks.length})
+                </ListItemExpand>
+                {props.resultHandler ?
+                    <ListItemTitleResult onClick={() => props.resultHandler(props.item.task)}>{props.item.task.title}</ListItemTitleResult> 
+                    :
+                    <ListItemTitleLink to={`/tasks/${props.item.task.id}`}>{props.item.task.title}</ListItemTitleLink>                     
+                }           
+            </ListItem>
+            {showChildren && 
+                <TaskChildContainer>
+                    <TaskListWidget tasks={childrenTasks} resultHandler={props.resultHandler}/>
+                </TaskChildContainer>
+            }
+        </>
+    )
+}
+
+const TaskListWidget = (props: {tasks: Array<TaskObject>, resultHandler?}) => {
+    return (
+        <>
+        {
+            props.tasks.map((item: TaskObject) => (
+                <TaskListItem key={item.task.id} item={item} resultHandler={props.resultHandler}/>
+            ))            
+        }
+        </>
     )
 }
 export const TaskListComponent = (props) => {
-    const [tasks, setTasks] = React.useState<Array<TaskItem>>([])
+    const [tasks, setTasks] = React.useState<Array<TaskObject>>([])
     const [error, setError] = React.useState<Error | null>(null)
     const [loading, setLoading] = React.useState<boolean>(false)
     const [actions, setActions] = React.useState<Array<any>>([])
     const [filters, setFilters ] = React.useState<Partial<TaskDetail>>(props.filter ||{parent: ''})
-
-    
 
     const searchHandler = (values) => {
         const filter: Partial<TaskDetail> = {
@@ -115,10 +199,8 @@ export const TaskListComponent = (props) => {
                     label: 'Filtrar',
                     className: 'button-icon'
                 }
-            ]
-            
-        },
-        
+            ]            
+        },        
     ]
      return (
         <BlockContainer>
@@ -128,17 +210,17 @@ export const TaskListComponent = (props) => {
             />
             {loading && <Spinner />}            
             
+            <TaskListContainer>
             {tasks.length ? 
                 (error!==null ? 
                     <div>Error: {error.message?error.message:'unknown error'}</div> 
                     :
-                    tasks.map((item: TaskItem) => (
-                        <TaskListItem key={item.id} task={item} />
-                    ))
+                    <TaskListWidget tasks={tasks} resultHandler={props.resultHandler} />                    
                 )
                 :
                 <BlockEmptyComponent />
             }
+            </TaskListContainer>
         </BlockContainer>
         )
         

@@ -27,6 +27,7 @@ const DialogContent = styled.div`
     ${common.roundedCorners()};
     ${common.shadow()};
     width: 50%;
+    background-color: ${color.white};
 `
 
 const DialogHeader = styled.div`
@@ -72,6 +73,32 @@ const DialogButtons = styled.div`
     justify-content: center;
 
 `
+
+export const ModalWithComponent = ({isOpened, onClose, component, resultHandler}) => {
+    let Component = component || null
+
+    React.useEffect(()=> {
+        Component = component      
+    },[component])
+
+    return(
+        <>
+            {isOpened &&
+                ReactDOM.createPortal(
+                    <DialogWrapper role="dialog" onClick={(e: any) => {
+                        if(e.target.contains(document.getElementById('modalContent')))
+                            onClose(e)
+                    }}>
+                        <DialogContent id="modalContent" role="document">                            
+                            <Component resultHandler={resultHandler}/>
+                        </DialogContent>
+                    </DialogWrapper>
+                    , modalContainer
+                )                
+            }
+        </>
+    )
+}
 export const Modal = ({title, isOpened, onClose, action, content, type}) => {
     return(
         <>

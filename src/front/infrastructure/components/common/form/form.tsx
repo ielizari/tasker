@@ -3,6 +3,7 @@ import styled from 'styled-components'
 import { color, common } from '../../../../styles/theme';
 import { Formik, Form, Field, useField, useFormikContext } from 'formik'
 import { IconButton, IconLink } from '../icon-button'
+import { ModalWithComponent } from '../modal'
 
 import { FaCalendar } from 'react-icons/fa'
 import  {Datepicker}  from '../../../../../lib/orzkDatepicker/datepicker'
@@ -66,6 +67,22 @@ export const FormInputIcon = styled.span`
     }
 `
 
+export const FormSelectIcon = styled.span`
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+    padding: 0 .5rem;
+    transition: background-color .3s;
+    color: ${color.white} !important;
+    background-color: #3333f1;
+    ${common.roundedCornersLeft()}  
+    cursor: pointer;
+
+    :hover {
+        background-color: #5555ff;
+    }
+`
+
 export const FormTextInput :React.FC<any> = ({label, ...props}) => {
     const [field, meta] = useField(props)
    
@@ -73,6 +90,57 @@ export const FormTextInput :React.FC<any> = ({label, ...props}) => {
         <FormItemWrapper>
             {label && <label htmlFor={props.id || props.name}>{label}</label>}
             <Field {...field} {...props} aria-label={props.id || props.name}/>
+            {meta.touched && meta.error ? (
+                <div aria-label={'validate_' + (props.id || props.name)} className="form-item-error">{meta.error}</div>
+            ): null}
+        </FormItemWrapper>
+    )
+}
+
+export const FormSelectFromComponent : React.FC<any> = ({label, buttonLabel, selectedLabel, component, resultHandler, ...props}) => {
+    const [field, meta, {setValue, setTouched}] = useField(props)
+    const [isOpened, setIsOpened] = React.useState<boolean>(false)
+    const [selectLabel, setSelectLabel] = React.useState<string>(props.selectedLabel || '')
+
+    React.useEffect(()=> {
+        setSelectLabel(selectedLabel)
+    },[selectedLabel])
+
+    const hideWidget = () => {
+        setIsOpened(false)
+    }
+    const showWidget = () => {
+        setIsOpened(true)
+    }
+    const selectResultHandler = (result: any) => {
+        let processed = resultHandler(result)
+        setValue(processed.value)
+        setSelectLabel(processed.label)
+        setTouched(true)
+        setIsOpened(false)
+    }
+    return (
+        <FormItemWrapper>
+            <ModalWithComponent
+                isOpened={isOpened} 
+                onClose={hideWidget}
+                component={component}
+                resultHandler={selectResultHandler}
+                 />
+            <label htmlFor={props.id || props.name} >{label}</label>
+            <input type="hidden" name={props.id} />
+            <FormInputWithIconWrapper >                
+                <FormSelectIcon onClick={showWidget}>{buttonLabel}</FormSelectIcon>
+                <Field type="hidden" {...field} {...props} />
+                <input 
+                    type="text" 
+                    id={"select_label_"+props.id}
+                    name={"select_label_"+props.id}
+                    value={selectLabel}
+                    aria-label={"select_label_"+props.id}
+                    readOnly
+                />
+            </FormInputWithIconWrapper>
             {meta.touched && meta.error ? (
                 <div aria-label={'validate_' + (props.id || props.name)} className="form-item-error">{meta.error}</div>
             ): null}
@@ -382,6 +450,19 @@ export const FormBuilder: React.FC<any> = (props) => {
                                                 key={item.id}        
                                             />   
                                         )
+                                    }else if(item.type === 'selectFromComponent'){
+                                        return (
+                                            <FormSelectFromComponent
+                                                label={item.label}
+                                                id={item.id}
+                                                name={item.id}
+                                                key={item.id}
+                                                selectedLabel={item.selectedLabel}
+                                                component={item.component}
+                                                buttonLabel={item.buttonLabel}
+                                                resultHandler={item.resultHandler}
+                                            />
+                                        )
                                     }else if(item.type === 'file'){
                                         return(
                                             
@@ -391,6 +472,24 @@ export const FormBuilder: React.FC<any> = (props) => {
                                                 name={item.id}
                                                 key={item.id}
                                                 onChange={item.onChange}
+                                            />
+                                        )
+                                    }else if(item.type === 'hidden'){
+                                        return(
+                                            <input 
+                                                type='hidden'
+                                                name={item.id}
+                                                key={item.id}
+                                                value={item.value}
+                                            />
+                                        )
+                                    }else if(item.type === 'button'){
+                                        return(
+                                            <IconButton 
+                                                key={item.id}
+                                                text={item.label}
+                                                icon={item.icon}
+                                                onClick={item.handler}
                                             />
                                         )
                                     }else if(item.type === 'buttons'){

@@ -98,25 +98,32 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
         }
     }
 
-    getTasks(filter: Partial<TaskDetail> = {}): Array<TaskItem>  {
+    getTasks(filter: Partial<TaskDetail> = {}): Array<TaskObject>  {
         const search = JSON.parse(filter as string)
         const tasks = db.get('tasks').filter(task => 
             ((!search.parent && !(typeof(search.parent)==='string')) || task.parent === search.parent )&&
             (!search.title || task.title.toLowerCase().includes(search.title.toLowerCase()))
         ).value()
-        const result : Array<TaskItem>= []
+        
+        const result : Array<TaskObject>= []
         tasks.map((task: TaskDetail) => {
-            result.push({
-                id: task.id || '',
-                title: task.title || '',
-                limitDate: task.limitDate || ''
-            })
+            let taskobject: TaskObject = {
+                task: task,
+                parentTask: null,
+                childTasks: []
+            }
+            if(!isEmpty(task.parent)){
+                taskobject.parentTask = db.get('tasks').find({id: task.parent}).value() || null
+            }
+            taskobject.childTasks = taskobject.childTasks.concat(db.get('tasks').filter({parent: task.id}).value() || []);
+            
+            result.push(taskobject)
         })
         return result
     }
     getTaskById(id: string): TaskObject {    
         try{    
-            let task = mapTaskToApiTask(db.get('tasks').find({id: id}).value()) || null            
+            let task = db.get('tasks').find({id: id}).value() || null            
             let parentTask = null;
             let childTasks = [];
             childTasks = childTasks.concat(db.get('tasks').filter({parent: id}).value() || []);
@@ -170,7 +177,6 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
 
     getWorklogs(filter: Partial<Worklog> = {}): Array<Worklog>  {
         const search = JSON.parse(filter as string)
-        console.log(search)
         const worklogs = db.get('worklogs').filter(wl => 
             (!search.title || wl.title.toLowerCase().includes(search.title.toLowerCase())) &&
             ((!search.endDatetime && !(typeof(search.endDatetime)==='string')) || wl.endDatetime === search.endDatetime)

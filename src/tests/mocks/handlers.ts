@@ -11,10 +11,32 @@ export const handlers = [
     rest.post('http://localhost:3000/api/tasks',(req, res, ctx) => {       
         const filters : Partial<TaskDetail> = req.body ? JSON.parse(req.body as string) : {}
          
-        if(filters.title === 'Hacer la compra'){   
+        if(filters.title === 'Hacer la compra'){ 
+            const task: TaskDetail = {            
+                "id":"1",
+                "parent":"",
+                "title":"Hacer la compra",
+                "description": "Comprar huevos, leche, cebollas",
+                "createdDate": "2020-11-10T11:45:00.000Z",
+                "limitDate": "2020-12-01T08:45:00.000Z",
+                "author": "Iñaki",
+                "authorId": "1",
+                "status": "1",
+                "priority": "3",
+                "tags": ["compra","casa","comida"]            
+            }
+            const parentTask = null
+            const childTasks = []
+    
+            const taskObject : TaskObject= {
+                task: task,
+                parentTask: parentTask,
+                childTasks: childTasks
+            }
+
             return res(
                 ctx.status(200),
-                ctx.json(ApiResponseBuilder(200,taskData.tasks.filter((task)=>task.title === filters.title),false))
+                ctx.json(ApiResponseBuilder(200,[taskObject],false))
             )
         }else if(filters.title === 'Tarea que no existe'){
             return res(
@@ -22,9 +44,46 @@ export const handlers = [
                 ctx.json(ApiResponseBuilder(200,[],false))
             )
         }else{ 
+            let result :Array<TaskObject> = [
+                {
+                    task: {            
+                        "id":"1",
+                        "parent":"",
+                        "title":"Hacer la compra",
+                        "description": "Comprar huevos, leche, cebollas",
+                        "createdDate": "2020-11-10T11:45:00.000Z",
+                        "limitDate": "2020-12-01T08:45:00.000Z",
+                        "author": "Iñaki",
+                        "authorId": "1",
+                        "status": "1",
+                        "priority": "3",
+                        "tags": ["compra","casa","comida"]            
+                    },
+                    parentTask: null,
+                    childTasks: []
+                },
+                {
+                    task: {
+                        "id":"2",
+                        "parent":"",
+                        "title":"KYB - ID 167: PET",
+                        "description": "Eliminar el retardo al imprimir etiquetas",
+                        "createdDate": "2020-10-02T09:30:00.000Z",
+                        "limitDate": "",
+                        "author": "Iñaki",
+                        "authorId": "1",
+                        "status": "1",
+                        "priority": "3",
+                        "tags": ["KYB","PET","ID-167"]
+                    },
+                    parentTask: null,
+                    childTasks: []
+                }
+            ]
+            
             return res(
                 ctx.status(200),
-                ctx.json(ApiResponseBuilder(200,taskData.tasks,false))
+                ctx.json(ApiResponseBuilder(200,result,false))
             )
         }
     }),
@@ -41,8 +100,8 @@ export const handlers = [
             "parent":"",
             "title":"Hacer la compra",
             "description": "Comprar huevos, leche, cebollas",
-            "createdDate": "10/11/2020 12:45",
-            "limitDate": "01/12/2020 09:45",
+            "createdDate": "2020-11-10T11:45:00.000Z",
+            "limitDate": "2020-12-01T08:45:00.000Z",
             "author": "Iñaki",
             "authorId": "1",
             "status": "1",

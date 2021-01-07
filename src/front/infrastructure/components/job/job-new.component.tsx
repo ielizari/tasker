@@ -1,10 +1,10 @@
 import React from 'react'
 import styled from 'styled-components'
-import { color, font} from '../../../styles/theme'
 import { FaCheck, FaTimes } from 'react-icons/fa'
 
 import { Worklog } from '../../../domain/worklog'
 import { Job } from '../../../domain/job'
+import { TaskDetail, TaskObject } from '../../../domain/task'
 import { FormBuilder } from '../common/form/form'
 import { isValidDateTime } from '../../../../lib/date.utils'
 import { BlockContainer, BlockHeaderComponent} from '../common/block'
@@ -14,6 +14,8 @@ import { updateJob } from 'src/front/application/updateJob'
 import { SyncStateContext} from '../../../application/contexts/dbSyncContext'
 import { mapApiJobToComponent } from '../../../application/dtos/jobApiToComponent.dto'
 import { isEmpty } from 'lodash'
+import { TaskListComponent } from '../tasks/task-list.component'
+import { getTask } from 'src/front/application/getTask'
 
 const emptyJob: Job = {    
         id: '',
@@ -27,24 +29,58 @@ const emptyJob: Job = {
         tags: []    
 }
 
+const SelectWidget = styled.div`
+    position: absolute;
+    z-index: 9999;
+    background-color: rgba(0,0,0,0.3);
+    display: flex;
+    justify-content: center;
+    align-items:center;
+`
+
 export const JobNewComponent = (props) => {
     const syncCtx = React.useContext(SyncStateContext)
     const {setSync} = syncCtx
 
     const [worklog, setWorklog] = React.useState<Worklog>(props.worklog)
-    const [job, setJob] = React.useState<Job>(mapApiJobToComponent(props.job) || emptyJob)    
+    const [task, setTask] = React.useState<TaskDetail>(null)
+    const [job, setJob] = React.useState<Job>(null)
     const [loading, setLoading] = React.useState<boolean>(false)
     const [title, setTitle] = React.useState<string>('Nuevo trabajo')
     const [submitError, setSubmitError] = React.useState<Error | null>(null)    
     const [mode, setMode] = React.useState(props.mode || 'new')
+    const [showTaskSelect, setShowTaskSelect] = React.useState<boolean>(false)
 
-    React.useEffect(()=>{
-        if(!isEmpty(job.id)){
-            setMode('edit')
+    React.useEffect(()=> {     
+        if(props.job){
+            if(!isEmpty(props.job.task)){
+                setLoading(true)
+                getTask(props.job.task).then(
+                    result => {
+                        setLoading(false)
+                        if(!result.hasError){
+                            setTask(result.data.task)
+                        }else{
+                            setTask(null)
+                            console.log(result.error)
+                        }
+                        setJob(mapApiJobToComponent(props.job))
+                        setMode('edit')                                           
+                    },
+                    error => {
+                        setLoading(false)
+                        console.log(error)
+                    }
+                )
+            }else{
+                setJob(mapApiJobToComponent(props.job))
+                setMode('edit')  
+            }
         }else{
+            setJob(emptyJob)
             setMode('new')
-        }
-    },[job])
+        }       
+    },[])
 
     React.useEffect(()=> {
         if(mode === 'edit'){
@@ -53,12 +89,28 @@ export const JobNewComponent = (props) => {
             setTitle('Nuevo trabajo')
         }
     },[mode])
+    
+    const taskSelectHandler = (task: TaskDetail) => {
+        return({
+            value: task.id,
+            label: task.title
+        })
+    }
 
     let formItems = [
         {
             type: 'text',
             id: 'title',
             label: 'Título'
+        },
+        {
+            id: 'task',
+            type: 'selectFromComponent',
+            label: 'Tarea',
+            buttonLabel: 'Seleccione una tarea',
+            component: TaskListComponent,
+            resultHandler: taskSelectHandler,
+            selectedLabel: task ? task.title : ''
         },
         {
             type: 'date2',
@@ -113,7 +165,6 @@ export const JobNewComponent = (props) => {
         
         setLoading(true)
         if(mode === 'new'){
-            console.log('nuevo job', values.id)
             addJob(values).then(
                 (result) => {
                     helpers.setSubmitting(false); 
@@ -136,7 +187,6 @@ export const JobNewComponent = (props) => {
                 }
             )
         }else if(mode === 'edit'){
-            console.log('update job',values.id)
             updateJob(values).then(
                 (result) => {
                     helpers.setSubmitting(false); 
@@ -161,7 +211,7 @@ export const JobNewComponent = (props) => {
         }
     }
     return (
-        <BlockContainer> 
+        <BlockContainer>            
             <BlockHeaderComponent 
                 title={title}
             />  
@@ -170,15 +220,17 @@ export const JobNewComponent = (props) => {
             {submitError &&
                 <div aria-label='error-message' className='message-error'>{submitError.message}</div>
             }
-
-            <FormBuilder 
-                key = "newJobForm"
-                formView = "form"
-                formItems = {formItems}
-                initValues = {job}
-                validation = {validate}
-                onSubmit = {onSubmit}
-            />
+            
+            {job &&
+                <FormBuilder 
+                    key = "newJobForm"
+                    formView = "form"
+                    formItems = {formItems}
+                    initValues = {job}
+                    validation = {validate}
+                    onSubmit = {onSubmit}
+                />
+            }
         
         </BlockContainer>
     )

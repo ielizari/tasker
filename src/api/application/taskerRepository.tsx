@@ -22,7 +22,7 @@ export interface TaskerRepository{
     setDbLastExported(date: string): boolean
     isDbSynced(): boolean
 
-    getTasks(filter?: Partial<TaskDetail>): Array<TaskItem>
+    getTasks(filter?: Partial<TaskDetail>): Array<TaskObject>
     addTask(task: TaskDetail): TaskObject
     getTaskById(id: string): TaskObject
     deleteTask(id: string): boolean 

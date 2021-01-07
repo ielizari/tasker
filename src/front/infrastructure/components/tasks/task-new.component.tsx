@@ -16,6 +16,8 @@ import { SyncStateContext} from '../../../application/contexts/dbSyncContext'
 import { FormBuilder } from '../common/form/form'
 import { isValidDateTime, dateToFormattedDate, formattedDateToISOString } from '../../../../lib/date.utils'
 
+import { mapTaskApiTocomponent } from '../../../application/dtos/taskApiToComponent.dto'
+
 const emptyTask: TaskDetail = {
     id: '',
     title: '',
@@ -81,10 +83,10 @@ export const TaskNewComponent = (props) => {
                             setError(new Error(result.error))
                             setTask(null)
                         }else{
-                            if(mode === 'edit'){    
-                                setTask(result.data.task) 
+                            if(mode === 'edit'){
+                                setTask(mapTaskApiTocomponent(result.data.task)) 
                             }else{
-                                setParentTask(result.data.task)
+                                setParentTask(mapTaskApiTocomponent(result.data.task))
                                 emptyTask.parent = result.data.task.id
                                 setTask(emptyTask)
                             }

@@ -361,8 +361,7 @@ describe("Nuevo parte", () => {
   })
 
 
-  it("Guarda un parte nuevo correctamente", async() => {
-       
+  it("Guarda un parte nuevo correctamente", async() => {       
       renderWithProviders(<App />, {route: '/worklogs/new'})
 
       await act(async () => {
