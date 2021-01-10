@@ -35,6 +35,7 @@ export interface TaskerRepository{
     updateWorklog(worklog: Worklog): WorklogObject
     closeWorklog(worklog: Worklog): WorklogObject
     reopenWorklog(worklog: Worklog): WorklogObject
+    getWorklogGroupedData(worklogid: string): any
 
     getJobs(filter?: Partial<Job>): Array<JobObject>
     addJob(job:Job): JobObject

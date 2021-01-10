@@ -78,7 +78,6 @@ export const TaskNewComponent = (props) => {
             .then(
                 (result) => { 
                     if(!cancelled){ 
-                        console.log(result)
                         if(result.hasError){
                             setError(new Error(result.error))
                             setTask(null)
@@ -87,8 +86,9 @@ export const TaskNewComponent = (props) => {
                                 setTask(mapTaskApiTocomponent(result.data.task)) 
                             }else{
                                 setParentTask(mapTaskApiTocomponent(result.data.task))
-                                emptyTask.parent = result.data.task.id
-                                setTask(emptyTask)
+                                let newTask = Object.assign({},emptyTask)
+                                newTask.parent = result.data.task.id
+                                setTask(newTask)
                             }
                             setError(null)
                             setSubmitError(null)
@@ -108,7 +108,10 @@ export const TaskNewComponent = (props) => {
         }else{
             setTask(emptyTask)
         }  
-        return () => cancelled = true    
+        return () => {
+            setTask(null); 
+            cancelled = true   
+        } 
     },[])
 
     
@@ -200,6 +203,7 @@ export const TaskNewComponent = (props) => {
         }
         const onSubmit = (values: TaskDetail, helpers) => {
             setLoading(true)
+            console.log(values)
             if(mode === 'new' || mode=='child'){
                 addTask(values)
                     .then(                            

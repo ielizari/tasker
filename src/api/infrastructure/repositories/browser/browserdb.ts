@@ -8,6 +8,7 @@ import { mapWorklogToApiWorklog, mapApiWorklogToWorklogDb, mapApiTaskToTaskDb, m
 
 import { TaskerRepository, setTaskerRepository, FileDownload } from '../../../application/taskerRepository'
 import { isEmpty } from 'lodash'
+import { elapsedTime, ISOStringToFormatedDate } from 'src/lib/date.utils'
 
 export type metadataDB = {
         created: string,
@@ -276,6 +277,29 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
         }
     }
 
+    getWorklogGroupedData(worklogid: string): any {
+        try{
+            let result : TaskTreeItem = emptyTaskTree()
+            let jobs = db.get('jobs').filter({worklog: worklogid}).value()            
+            jobs.forEach((job: Job) => {
+                let timeInSeconds = job.endDatetime ? 
+                    elapsedTime( 
+                        ISOStringToFormatedDate(job.startDatetime),
+                        ISOStringToFormatedDate(job.endDatetime)
+                    )/1000
+                : -1
+                result.timeInSeconds += timeInSeconds
+                if(job.task){
+                    result = mergeTaskTrees(getTaskTree(job.task,timeInSeconds,job),result)
+                }
+            })            
+            console.log(result)
+            return result            
+        }catch(e){
+            throw e
+        }
+    }
+
     getJobs(filter: Partial<Job> = {}): Array<JobObject>  {
         let search = {}
         if(typeof filter === 'string'){
@@ -513,3 +537,111 @@ export const startDb = () => {
     setTaskerRepository(new LowdbLocalstorageRepository())
 }
 
+interface TaskTreeItem {
+    id: string,
+    title: string,
+    timeInSeconds: number,
+    jobs: Array<Job>,
+    childTasks: Array<TaskTreeItem>
+}
+const getTaskTree = (taskid: string, time: number, job: Job = null, childTask: TaskTreeItem = null): TaskTreeItem => {
+    try{
+        let result : TaskTreeItem
+        let root : TaskTreeItem = emptyTaskTree()
+        let task: TaskDetail = db.get('tasks').find({id: taskid}).value()
+        result = {
+            id: task.id, 
+            title: task.title, 
+            timeInSeconds: time, 
+            jobs: job ? [job] : [],
+            childTasks: childTask ? [childTask] : []
+        }
+        if(!isEmpty(task.parent)){
+            let parent: TaskTreeItem = getTaskTree(task.parent,time,null,result) 
+            return parent
+        }else{   
+            root.childTasks.push(result)         
+            return root
+        }
+    }catch(e){
+        throw e
+    }
+}
+
+const mergeTaskTrees = (source: TaskTreeItem, target: TaskTreeItem): TaskTreeItem =>{    
+    if(!hasChildTasks(target) && hasChildTasks(source)){
+            target.jobs = target.jobs.concat(source.jobs)
+            target.childTasks = source.childTasks
+            return target
+    }else if( !hasChildTasks(source) ){
+            target.jobs = target.jobs.concat(source.jobs)
+            target.timeInSeconds += source.timeInSeconds
+            return target        
+    }else{
+        let commonChilds = itemsPresentInBoth(source,target)
+        let missingChilds = itemsMissingInTarget(source,target)
+
+        target.childTasks.forEach(targetItem => {
+            let inCommon = commonChilds.filter(commonItem => targetItem.id === commonItem[0].id)
+            if(inCommon.length === 1){
+                targetItem = mergeTaskTrees(inCommon[0][0],inCommon[0][1])
+            }else{
+                if(inCommon.length > 0){
+                    console.log("Error: No debería haber más de un item en común", inCommon)
+                }
+            }
+        })
+
+        missingChilds.forEach(item => {
+            target.childTasks.push(item)
+        })
+       
+        target.jobs = target.jobs.concat(source.jobs)
+        target.timeInSeconds += source.timeInSeconds
+        return target
+    }
+}
+
+const hasChildTasks = (item: TaskTreeItem): boolean => {
+    if(item.childTasks.length > 0){
+        return true
+    }
+    return false
+}
+
+const emptyTaskTree = () : TaskTreeItem => {
+    return {id: '0', title: 'root', timeInSeconds: 0, jobs: [], childTasks: []}
+}
+
+const itemsPresentInBoth = (source: TaskTreeItem, target: TaskTreeItem) : Array<Array<TaskTreeItem>> => {
+    let result: Array<Array<TaskTreeItem>> = []
+    let mergedIds: Array<string> = []
+    let merge = source.childTasks.concat(target.childTasks)
+    
+    merge.forEach(item => {
+        let commonItems = merge.filter(mergeItem => mergeItem.id === item.id)
+        if(commonItems.length === 2){
+            if(!mergedIds.includes(item.id)){
+                mergedIds.push(item.id)
+                result.push(commonItems)
+            }            
+        }else{
+            if(commonItems.length !== 1){
+                console.log("Error: no debería haber más de un item con el mismo id en un nodo", commonItems)
+            }
+        }
+    })
+    
+    return result
+}
+
+const itemsMissingInTarget = (source: TaskTreeItem, target: TaskTreeItem): Array<TaskTreeItem> => {
+    let result: Array<TaskTreeItem> = []
+    source.childTasks.forEach(sourceItem => {
+        if(target.childTasks.filter(targetItem => sourceItem.id === targetItem.id).length === 0){
+            result.push(sourceItem)
+        }
+    })
+    
+    return result
+}

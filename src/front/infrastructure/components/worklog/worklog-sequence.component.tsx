@@ -1,7 +1,7 @@
 import React from 'react'
 import styled from 'styled-components'
 import { color, common } from '../../../styles/theme'
-import { elapsedTime, formatElapsedTime, ISOStringToFormatedDate } from '../../../../lib/date.utils'
+import { dateToFormattedDate, elapsedTime, formatElapsedTime, ISOStringToFormatedDate } from '../../../../lib/date.utils'
 
 import { WorklogObject, Worklog } from '../../../domain/worklog'
 import { Job, JobObject } from '../../../domain/job'
@@ -12,7 +12,9 @@ import { getWorklog } from '../../../application/getWorklog'
 import { updateWorklog } from '../../../application/updateWorklog'
 import { closeWorklog } from '../../../application/closeWorklog'
 import { reopenWorklog } from '../../../application/reopenWorklog'
+import { updateJob } from '../../../application/updateJob'
 import { SyncStateContext} from '../../../application/contexts/dbSyncContext'
+import { mapApiJobToComponent } from 'src/front/application/dtos/jobApiToComponent.dto'
 
 const SequenceContainer = styled.div`
     padding: 1rem;
@@ -74,7 +76,7 @@ interface Pause {
     endDatetime: string
 }
 
-export const RunningElapsedTime = (props) => {
+export const RunningElapsedTime = (props: {start}) => {
     const [start,setStart] = React.useState(props.start)
     const [diff, setDiff] = React.useState(null) 
 
@@ -108,12 +110,20 @@ export const WorklogSequence = (props) => {
     const {setSync} = syncCtx
 
     const [ worklogObj, setWorklogObj ] = React.useState<WorklogObject>(props.worklog)
-    const [jobView, setJobView] = React.useState<boolean>(false)
+    const [ jobView, setJobView ] = React.useState<boolean>(false)
     const [ editJob, setEditJob ] = React.useState<Job>(null)
-    const [sequence, setSequence] = React.useState<Array<JobObject|Pause>>([])
+    const [ sequence, setSequence ] = React.useState<Array<JobObject|Pause>>([])
+    const [ pausedJob, setPausedJob ] = React.useState<Job>(null)
+
+    React.useEffect(() => {
+        if(!pausedJob && sequence.length > 1 && isPause(sequence[sequence.length-1])){
+            setPausedJob((sequence[sequence.length-2] as JobObject).job)
+        }else{
+            setPausedJob(null)
+        }
+    },[sequence])
 
     React.useEffect(()=>{
-        console.log(worklogObj)
         setSequence(fillSequenceTable())
     },[worklogObj])
 
@@ -127,6 +137,46 @@ export const WorklogSequence = (props) => {
     }
     const returnJobHandler = () => {        
         setJobView(false)
+    }
+
+    const pauseJobHandler = () => {
+        if(!pausedJob && !isPause(sequence[sequence.length-1])){
+            let lastJob: Job = Object.assign({},mapApiJobToComponent((sequence[sequence.length-1] as JobObject).job))
+            lastJob.endDatetime = dateToFormattedDate(new Date())
+            updateJob(lastJob).then(
+                result => {
+                    if(!result.hasError){
+                        submitHandler()
+                    }else{
+                        console.log(result.error)
+                    }
+                },
+                error => {
+                    console.log(error)
+
+                }
+            )
+        }
+    }
+
+    const resumeJobHandler = () => {
+        if(pausedJob){
+            let tmpjob = Object.assign({},pausedJob)
+            tmpjob.endDatetime = ''
+            updateJob(mapApiJobToComponent(tmpjob)).then(
+                result => {
+                    if(!result.hasError){
+                        submitHandler()
+                    }else{
+                        console.log(result.error)
+                    }
+                },
+                error => {
+                    console.log(error)
+
+                }
+            )
+        }
     }
 
     const finishWorklogHandler = () => {
@@ -186,6 +236,7 @@ export const WorklogSequence = (props) => {
         if(!worklogObj){
             return res
         }
+
         let sortedJobs = worklogObj.childJobs.sort((a,b) => {
             if(a.job.startDatetime > b.job.startDatetime){
                 return 1
@@ -198,7 +249,7 @@ export const WorklogSequence = (props) => {
 
         for (let i=0; i< sortedJobs.length; i++){
             res.push(sortedJobs[i])
-            if(i+1 < sortedJobs.length && sortedJobs[i].job.endDatetime < sortedJobs[i+1].job.startDatetime){
+            if(i+1 < sortedJobs.length && sortedJobs[i].job.endDatetime !== '' && sortedJobs[i].job.endDatetime < sortedJobs[i+1].job.startDatetime){
                 let pause : Pause = {
                     startDatetime: sortedJobs[i].job.endDatetime,
                     endDatetime: sortedJobs[i+1].job.startDatetime
@@ -212,12 +263,12 @@ export const WorklogSequence = (props) => {
                 res.push(pause)
             }       
         }
-        
+        console.log(res)
         return res
     }
 
     const isPause = (object: any): object is Pause => {
-        return !('job' in object)
+        return !('job' in object) && ('startDatetime' in object)
     }
     return(
         <>
@@ -289,7 +340,24 @@ export const WorklogSequence = (props) => {
                         text="Añadir trabajo"
                         type="button"
                         icon={FaPlus}            
-                    />
+                    /> 
+                    {worklogObj.worklog.endDatetime === '' &&           
+                        (!pausedJob ?
+                            <IconButton
+                                onClick={pauseJobHandler}
+                                text="Pausar trabajo"
+                                type="button"
+                                icon={FaPause}            
+                            />
+                            :
+                            <IconButton
+                                onClick={resumeJobHandler}
+                                text="Reanudar trabajo"
+                                type="button"
+                                icon={FaPlay}            
+                            />
+                        )
+                    }
                     {worklogObj.worklog.endDatetime === '' ?
                         <IconButton
                             onClick={finishWorklogHandler}

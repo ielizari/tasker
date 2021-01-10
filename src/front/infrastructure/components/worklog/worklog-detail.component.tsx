@@ -12,24 +12,46 @@ import { Modal } from '../common/modal'
 import { Link } from 'react-router-dom'
 import { BlockContainer, BlockHeaderComponent } from '../common/block'
 import { WorklogSequence } from './worklog-sequence.component'
+import { WorklogGrouped } from './worklog-grouped.component'
 import { SyncStateContext} from '../../../application/contexts/dbSyncContext'
 import { elapsedTime, formatElapsedTime, ISOStringToFormatedDate } from '../../../../lib/date.utils'
-const WorklogDetailContainer = styled.ul`
-`;
+
+const WorklogDetailContainer = styled.div`
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+`
 const WorklogDetailKey = styled.div`
     font-weight: bold;
     color: ${color.black};
     flex-basis: 10rem;
-`;
+`
 const WorklogDetailValue = styled.div`
-    color: ${color.black}
-`;
+    color: ${color.black};
+    white-space: nowrap;
+`
 
+const WorklogGroupedContainer = styled.div`
+    width: 50%;
+    padding: 0 1rem;
+`
+const WorklogGroupedTitle = styled.div`
+    padding: 0.5rem 0;
+    font-weight: bold;
+    color: #000;
+    font-size: 1.2rem;
+`
+const WorklogDetailGrouped = styled(WorklogGrouped)`
+`
+
+const WorklogDetailFields = styled.ul`
+    width: 50%;
+`
 const WorklogDetailItem = styled.li`
     display: flex;
     flex-direction: vertical;
     margin: 1rem;
-`;
+`
 
 const ErrorMessage = styled.div`
     background-color: ${color.lightRed};
@@ -37,23 +59,6 @@ const ErrorMessage = styled.div`
     text-align: center;
     color: ${color.white};
     margin: 0.5rem;
-`;
-
-const WorklogChildrenContainer = styled.div`
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-
-    & a{
-        display: inline-flex;
-        background-color: ${color.orange};
-        ${common.roundedCorners()};
-        padding: 0.5rem;
-    }
-
-    & a:hover {
-        background-color: ${color.lightOrange};
-    }    
 `
 
 const WorklogTagsContainer = styled.div`
@@ -206,59 +211,68 @@ export const WorklogDetailComponent = (props) => {
                 {error !== null ?
                     <ErrorMessage>{error.message}</ErrorMessage>
                     :
-                    (worklog && worklog.worklog)?                
+                    (worklog && worklog.worklog)?
+                    <>             
                         <WorklogDetailContainer> 
-                            <WorklogDetailItem>
-                                <WorklogDetailKey>Título:</WorklogDetailKey>
-                                <WorklogDetailValue>{worklog.worklog.title}</WorklogDetailValue>
-                            </WorklogDetailItem>      
-                            <WorklogDetailItem>
-                                <WorklogDetailKey>Creada:</WorklogDetailKey>
-                                <WorklogDetailValue>{worklog.worklog.createdDate ? worklog.worklog.createdDate : '-'}</WorklogDetailValue>
-                            </WorklogDetailItem>
-                            <WorklogDetailItem>
-                                <WorklogDetailKey>Inicio:</WorklogDetailKey>
-                                <WorklogDetailValue>{worklog.worklog.startDatetime ? worklog.worklog.startDatetime : '-'}</WorklogDetailValue>
-                            </WorklogDetailItem>
-                            <WorklogDetailItem>
-                                <WorklogDetailKey>Fin:</WorklogDetailKey>
-                                <WorklogDetailValue>{worklog.worklog.endDatetime ? worklog.worklog.endDatetime : '-'}</WorklogDetailValue>
-                            </WorklogDetailItem>
-                            <WorklogDetailItem>
-                                <WorklogDetailKey>Duración:</WorklogDetailKey>
-                                <WorklogDetailValue>
-                                    {worklog.worklog.endDatetime ? 
-                                        formatElapsedTime(
-                                            elapsedTime( 
-                                                worklog.worklog.startDatetime, 
-                                                worklog.worklog.endDatetime
-                                            )) 
-                                        : 
-                                        '-'
+                            <WorklogDetailFields>
+                                <WorklogDetailItem>
+                                    <WorklogDetailKey>Título:</WorklogDetailKey>
+                                    <WorklogDetailValue>{worklog.worklog.title}</WorklogDetailValue>
+                                </WorklogDetailItem>      
+                                <WorklogDetailItem>
+                                    <WorklogDetailKey>Creada:</WorklogDetailKey>
+                                    <WorklogDetailValue>{worklog.worklog.createdDate ? worklog.worklog.createdDate : '-'}</WorklogDetailValue>
+                                </WorklogDetailItem>
+                                <WorklogDetailItem>
+                                    <WorklogDetailKey>Inicio:</WorklogDetailKey>
+                                    <WorklogDetailValue>{worklog.worklog.startDatetime ? worklog.worklog.startDatetime : '-'}</WorklogDetailValue>
+                                </WorklogDetailItem>
+                                <WorklogDetailItem>
+                                    <WorklogDetailKey>Fin:</WorklogDetailKey>
+                                    <WorklogDetailValue>{worklog.worklog.endDatetime ? worklog.worklog.endDatetime : '-'}</WorklogDetailValue>
+                                </WorklogDetailItem>
+                                <WorklogDetailItem>
+                                    <WorklogDetailKey>Duración:</WorklogDetailKey>
+                                    <WorklogDetailValue>
+                                        {worklog.worklog.endDatetime ? 
+                                            formatElapsedTime(
+                                                elapsedTime( 
+                                                    worklog.worklog.startDatetime, 
+                                                    worklog.worklog.endDatetime
+                                                )) 
+                                            : 
+                                            '-'
+                                            }
+                                    </WorklogDetailValue>
+                                </WorklogDetailItem>   
+                                <WorklogDetailItem>
+                                    <WorklogDetailKey>Tags:</WorklogDetailKey>
+                                    <WorklogDetailValue>
+                                    {worklog.worklog.tags.length ?
+                                        <WorklogTagsContainer>
+                                        {
+                                            worklog.worklog.tags.map((tag) => {
+                                                return <div key={tag}>{tag}</div>
+                                            })
                                         }
-                                </WorklogDetailValue>
-                            </WorklogDetailItem>   
-                            <WorklogDetailItem>
-                                <WorklogDetailKey>Tags:</WorklogDetailKey>
-                                <WorklogDetailValue>
-                                {worklog.worklog.tags.length ?
-                                    <WorklogTagsContainer>
-                                    {
-                                        worklog.worklog.tags.map((tag) => {
-                                            return <div key={tag}>{tag}</div>
-                                        })
-                                    }
-                                    </WorklogTagsContainer> 
-                                    :
-                                    '-'
-                                }               
-                                </WorklogDetailValue>
-                            </WorklogDetailItem>    
-                            
-                            {worklog &&
-                                <WorklogSequence worklog={worklog} />  
-                            }                      
-                        </WorklogDetailContainer>
+                                        </WorklogTagsContainer> 
+                                        :
+                                        '-'
+                                    }               
+                                    </WorklogDetailValue>
+                                </WorklogDetailItem>
+                            </WorklogDetailFields>
+
+                            <WorklogGroupedContainer>
+                                <WorklogGroupedTitle>Resumen agrupado</WorklogGroupedTitle>
+                                <WorklogDetailGrouped worklogid={worklog.worklog.id}/>
+                            </WorklogGroupedContainer>
+                        </WorklogDetailContainer>       
+
+                        {worklog &&                            
+                            <WorklogSequence worklog={worklog} />                            
+                        }                      
+                    </>
                         
                     :   
                         <div></div>

@@ -88,6 +88,10 @@ export const elapsedTime = ( from: string, to: string): number => {
     return diff
 }
 
+export const formatElapsedTimeFromSeconds = (seconds: number) : string => {
+    return formatElapsedTime(seconds*1000)
+}
+
 export const formatElapsedTime = (seconds: number) : string => {
     let absSeconds = Math.abs(seconds)
     let hora = Math.floor(absSeconds/3600000)

@@ -148,5 +148,28 @@ export const worklogHandlers = [
             )
         }
     }),
+
+    rest.get('http://localhost:3000/api/worklogs/:worklogid/grouped',(req,res,ctx) =>{
+        try{            
+            const worklogid = req.params.worklogid || '';
+            if(worklogid !== ''){
+                let result = getTaskerRepository().getWorklogGroupedData(worklogid)
+                return res(
+                    ctx.status(200),
+                    ctx.json(ApiResponseBuilder(200,result,false))
+                )
+            }else{
+                return res(
+                    ctx.status(400),
+                    ctx.json(ApiResponseBuilder(400,{},true,'Id de parte no válido'))
+                )
+            }
+        }catch(e){
+            return res(
+                ctx.status(500),
+                ctx.json(ApiResponseBuilder(500,{},true,e.message))
+            )
+        }
+    }),
     
 ] 

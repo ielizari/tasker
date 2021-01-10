@@ -49,7 +49,6 @@ export const JobNewComponent = (props) => {
     const [title, setTitle] = React.useState<string>('Nuevo trabajo')
     const [submitError, setSubmitError] = React.useState<Error | null>(null)    
     const [mode, setMode] = React.useState(props.mode || 'new')
-    const [showTaskSelect, setShowTaskSelect] = React.useState<boolean>(false)
 
     React.useEffect(()=> {     
         if(props.job){
