@@ -190,7 +190,7 @@ export const JobNewComponent = (props) => {
                 (result) => {
                     helpers.setSubmitting(false); 
                     setLoading(false)
-
+                    console.log(result)
                     if(!result.hasError){    
                         setSync({sync: false})                             
                         setSubmitError(null)

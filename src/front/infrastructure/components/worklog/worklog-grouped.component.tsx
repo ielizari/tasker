@@ -11,6 +11,7 @@ interface TaskTreeItem {
     id: string,
     title: string,
     timeInSeconds: number,
+    hasRunningJob: boolean,
     jobs: Array<Job>,
     childTasks: Array<TaskTreeItem>
 }
@@ -50,9 +51,11 @@ const ChildJobs = styled.div`
     padding-left: 2rem;
     color: ${color.blue};
 `
-const GroupedNode = (props: {node: TaskTreeItem}) => {
+const GroupedNode = (props: {node: TaskTreeItem, runningJobHandler?}) => {
     const [node, setNode] = React.useState<TaskTreeItem>(null)
-    const [showChildren, setShowChildren] = React.useState<boolean>(false)
+    const [showChildren, setShowChildren] = React.useState<boolean>(true)
+    const [nodeElapsedSeconds, setNodeElapsedSeconds] = React.useState<number>(0)
+    const [runningJobStart, setRunningJobStart] = React.useState<string>(null)
 
     const showChildrenItems = () => { setShowChildren(true)}
     const hideChildrenItems = () => { setShowChildren(false)}
@@ -61,11 +64,33 @@ const GroupedNode = (props: {node: TaskTreeItem}) => {
         if(node && node.title === 'root'){
             setShowChildren(true)
         }
+        if(node){
+            setNodeElapsedSeconds(node.timeInSeconds)
+            handleRunningJob()
+        }
+        
     },[node])
+
     React.useEffect(()=>{
         setNode(props.node)
     },[props.node])
 
+    const handleRunningJob = () => {
+        let start = node.jobs.filter(j => j.endDatetime === '')
+        if(start.length > 0){
+            if(props.runningJobHandler){
+                props.runningJobHandler(start[0].startDatetime)
+            }            
+            setRunningJobStart(start[0].startDatetime)
+            
+        }else{
+            setRunningJobStart(null)
+        }
+    }   
+
+    const handleChildRunningJob = (start: string) => {
+        setRunningJobStart(start)
+    }
     return (
         <>
         {node &&
@@ -77,13 +102,19 @@ const GroupedNode = (props: {node: TaskTreeItem}) => {
                     <Expand onClick={showChildrenItems}>+</Expand>
                 }
                 <NodeInfoTitle>{node.title !== '' ? node.title : 'Sin título'}</NodeInfoTitle>
-                <span>{formatElapsedTimeFromSeconds(node.timeInSeconds)}</span>
+                <span>
+                {node.hasRunningJob && runningJobStart ?
+                    <RunningElapsedTime start={runningJobStart} initialSeconds={nodeElapsedSeconds}/>
+                    :
+                    formatElapsedTimeFromSeconds(node.timeInSeconds)
+                }
+                </span>
             </NodeInfo>
             {showChildren && node.jobs.length > 0 &&
                 <ChildJobs>
                     {node.jobs.map(item => {
                         return(
-                        <NodeInfo>
+                        <NodeInfo key={`grouped_job_${item.id}`}>
                             <NodeInfoTitle>{item.title !== '' ? item.title : 'Sin título'}</NodeInfoTitle>
                             <span>
                                 {item.endDatetime !== '' ?
@@ -103,7 +134,7 @@ const GroupedNode = (props: {node: TaskTreeItem}) => {
             {showChildren && node.childTasks.length > 0 &&                 
                 <ChildTasks>
                 {node.childTasks.map(item => {
-                    return <GroupedNode node={item} />
+                    return <GroupedNode key={`grouped_${item.id}`} node={item} runningJobHandler={handleChildRunningJob}/>
                 })
                 }          
                 </ChildTasks>

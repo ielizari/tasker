@@ -7,7 +7,7 @@ import { Job, JobObject } from '../../../domain/job'
 import { mapWorklogToApiWorklog, mapApiWorklogToWorklogDb, mapApiTaskToTaskDb, mapTaskToApiTask } from '../../../application/dtos/dbToApiDto'
 
 import { TaskerRepository, setTaskerRepository, FileDownload } from '../../../application/taskerRepository'
-import { isEmpty } from 'lodash'
+import { isEmpty, over } from 'lodash'
 import { elapsedTime, ISOStringToFormatedDate } from 'src/lib/date.utils'
 
 export type metadataDB = {
@@ -287,7 +287,7 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
                         ISOStringToFormatedDate(job.startDatetime),
                         ISOStringToFormatedDate(job.endDatetime)
                     )/1000
-                : -1
+                : 0                
                 result.timeInSeconds += timeInSeconds
                 if(job.task){
                     result = mergeTaskTrees(getTaskTree(job.task,timeInSeconds,job),result)
@@ -363,6 +363,9 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
     }
     addJob (job: Job): JobObject{  
         try{
+            let jobs: Array<JobObject> = this.getJobs({worklog: job.worklog})
+            checkOverlappingJobs(job,jobs)
+
             let runningJobs = db.get('jobs').filter({worklog: job.worklog, endDatetime: ''}).value()
             runningJobs.map((item) => {
                 item.endDatetime = job.startDatetime
@@ -380,6 +383,8 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
 
     updateJob(job: Job): JobObject{
         try{
+            let jobs: Array<JobObject> = this.getJobs({worklog: job.worklog})
+            checkOverlappingJobs(job,jobs)
             db.get('jobs').find({id: job.id}).assign(job).write()
             this.setDbLastModified()
             return this.getJobById(job.id)
@@ -541,6 +546,7 @@ interface TaskTreeItem {
     id: string,
     title: string,
     timeInSeconds: number,
+    hasRunningJob: boolean,
     jobs: Array<Job>,
     childTasks: Array<TaskTreeItem>
 }
@@ -549,10 +555,21 @@ const getTaskTree = (taskid: string, time: number, job: Job = null, childTask: T
         let result : TaskTreeItem
         let root : TaskTreeItem = emptyTaskTree()
         let task: TaskDetail = db.get('tasks').find({id: taskid}).value()
+        let hasRunningJob = false
+        if(job){
+            if(job.endDatetime === ''){
+                hasRunningJob = true
+            }
+        }else{
+            if(childTask.hasRunningJob === true){
+                hasRunningJob = true
+            }
+        }
         result = {
             id: task.id, 
             title: task.title, 
-            timeInSeconds: time, 
+            timeInSeconds: time,
+            hasRunningJob: hasRunningJob,//job ? job.endDatetime !== '' ? false : true : false,
             jobs: job ? [job] : [],
             childTasks: childTask ? [childTask] : []
         }
@@ -571,10 +588,12 @@ const getTaskTree = (taskid: string, time: number, job: Job = null, childTask: T
 const mergeTaskTrees = (source: TaskTreeItem, target: TaskTreeItem): TaskTreeItem =>{    
     if(!hasChildTasks(target) && hasChildTasks(source)){
             target.jobs = target.jobs.concat(source.jobs)
+            target.hasRunningJob = source.hasRunningJob || target.hasRunningJob
             target.childTasks = source.childTasks
             return target
     }else if( !hasChildTasks(source) ){
             target.jobs = target.jobs.concat(source.jobs)
+            target.hasRunningJob = source.hasRunningJob || target.hasRunningJob
             target.timeInSeconds += source.timeInSeconds
             return target        
     }else{
@@ -597,6 +616,7 @@ const mergeTaskTrees = (source: TaskTreeItem, target: TaskTreeItem): TaskTreeIte
         })
        
         target.jobs = target.jobs.concat(source.jobs)
+        target.hasRunningJob = source.hasRunningJob || target.hasRunningJob
         target.timeInSeconds += source.timeInSeconds
         return target
     }
@@ -610,7 +630,7 @@ const hasChildTasks = (item: TaskTreeItem): boolean => {
 }
 
 const emptyTaskTree = () : TaskTreeItem => {
-    return {id: '0', title: 'root', timeInSeconds: 0, jobs: [], childTasks: []}
+    return {id: '0', title: 'root', timeInSeconds: 0, hasRunningJob: false, jobs: [], childTasks: []}
 }
 
 const itemsPresentInBoth = (source: TaskTreeItem, target: TaskTreeItem) : Array<Array<TaskTreeItem>> => {
@@ -644,4 +664,35 @@ const itemsMissingInTarget = (source: TaskTreeItem, target: TaskTreeItem): Array
     })
     
     return result
+}
+
+const checkOverlappingJobs = (job: Job, jobs: Array<JobObject>): boolean => {
+    let overlappingJobs = jobs.filter(jobItem => {
+        if(jobItem.job.id === job.id){
+            return false
+        }
+        if(job.endDatetime !== ''){
+            if( job.startDatetime < jobItem.job.endDatetime && 
+                job.endDatetime > jobItem.job.startDatetime 
+            ){
+                return true
+            }
+        }else{
+            if(job.startDatetime < jobItem.job.endDatetime){
+                return true
+            }
+        }
+        return false
+    })
+
+    if(overlappingJobs.length > 0){
+        console.log(overlappingJobs)
+        throw new Error(`El intervalo de tiempo de este trabajo se solapa con uno ya existente: 
+            ${overlappingJobs[0].job.title || 'Sin título'}, 
+            ${overlappingJobs[0].task ? overlappingJobs[0].task.title : 'Sin tarea'}, 
+            ${ISOStringToFormatedDate(overlappingJobs[0].job.startDatetime)},
+            ${ISOStringToFormatedDate(overlappingJobs[0].job.endDatetime)}`)
+    }
+
+    return false
 }

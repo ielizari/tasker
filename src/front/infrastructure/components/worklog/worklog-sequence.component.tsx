@@ -76,8 +76,9 @@ interface Pause {
     endDatetime: string
 }
 
-export const RunningElapsedTime = (props: {start}) => {
+export const RunningElapsedTime = (props: {start, initialSeconds?}) => {
     const [start,setStart] = React.useState(props.start)
+    const [initialSeconds, setInitialSeconds] = React.useState<number>(0)
     const [diff, setDiff] = React.useState(null) 
 
     const calculateDiff = (): string => {
@@ -85,16 +86,24 @@ export const RunningElapsedTime = (props: {start}) => {
             elapsedTime(
                 ISOStringToFormatedDate(start,'dmy/','hms'),
                 ISOStringToFormatedDate(new Date().toISOString(),'dmy/','hms')
-            )
+            ) + initialSeconds
         )
     }
+    React.useEffect(() => {        
+        if(props.initialSeconds){
+            setInitialSeconds(props.initialSeconds*1000)
+        }else{
+            setInitialSeconds(0)
+        }
+    },[props.initialSeconds])
+
     React.useEffect(() => {
         setDiff(calculateDiff())
         const interval = setInterval(() => {   
             setDiff(calculateDiff()) 
         }, 500);
         return () => clearInterval(interval);
-      }, []);
+      }, [initialSeconds]);
     
 
     
@@ -249,7 +258,7 @@ export const WorklogSequence = (props) => {
 
         for (let i=0; i< sortedJobs.length; i++){
             res.push(sortedJobs[i])
-            if(i+1 < sortedJobs.length && sortedJobs[i].job.endDatetime !== '' && sortedJobs[i].job.endDatetime < sortedJobs[i+1].job.startDatetime){
+            if(i+1 < sortedJobs.length  && sortedJobs[i].job.endDatetime < sortedJobs[i+1].job.startDatetime){
                 let pause : Pause = {
                     startDatetime: sortedJobs[i].job.endDatetime,
                     endDatetime: sortedJobs[i+1].job.startDatetime
