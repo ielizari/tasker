@@ -1,7 +1,7 @@
 import React from 'react'
 import styled from 'styled-components'
 import '../../App.css';
-import { font, color } from '../../styles/theme';
+import { color } from '../../styles/theme';
 import { Spinner } from '../components/common/spinner'
 import { BlockContainer, BlockHeaderComponent} from '../components/common/block'
 import { FormBuilder } from '../components/common/form/form'
@@ -132,7 +132,7 @@ export const LoadDB = () => {
         <>            
             <BlockContainer> 
             <BlockHeaderComponent 
-                title="Crear base de datos"
+                title={title}
             />  
             {loading ? <Spinner /> : ''}            
            

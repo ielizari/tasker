@@ -49,7 +49,7 @@ export const Spinner = (props) => {
         <Container>
             <SpinnerBox aria-label="loading">
                 <SpinnerIcon size={75} className='icon-spin' />
-                <Message>Cargando...</Message>
+                <Message>{message}</Message>
             </SpinnerBox>            
         </Container>
     )

@@ -1,6 +1,4 @@
  import React from 'react'
-import styled from 'styled-components'
-import { color, common } from '../../../styles/theme';
 import { Worklog } from '../../../domain/worklog'
 import { addWorklog } from '../../../application/addWorklog'
 import { updateWorklog } from '../../../application/updateWorklog'
@@ -13,9 +11,8 @@ import { SyncStateContext} from '../../../application/contexts/dbSyncContext'
 
 import { FormBuilder } from '../common/form/form'
 
-import  {Datepicker}  from '../../../../lib/orzkDatepicker/datepicker'
 import '../../../../lib/orzkDatepicker/datepicker.css'
-import { isValidDateTime, dateToFormattedDate, formattedDateToISOString } from '../../../../lib/date.utils'
+import { isValidDateTime } from '../../../../lib/date.utils'
 
 
 const emptyWorklog: Worklog = {

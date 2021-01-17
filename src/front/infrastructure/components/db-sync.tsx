@@ -5,8 +5,6 @@ import { SyncStateContext } from '../../application/contexts/dbSyncContext'
 import { exportDb } from '../../application/exportDatabase'
 import { isSyncedDb } from '../../application/isSyncedDatabase'
 import { FaSave } from 'react-icons/fa'
-import { IconButton } from './common/icon-button'
-import { BrowserRouter } from 'react-router-dom'
 
 const SyncWarningContainer = styled.div`
     text-align: center;
@@ -65,10 +63,6 @@ const exportDB = () => {
             console.log(error)
         }
     )
-}
-
-const importDB = () => {
-
 }
 
 export const DbSync = () => {

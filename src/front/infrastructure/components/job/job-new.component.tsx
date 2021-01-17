@@ -4,7 +4,7 @@ import { FaCheck, FaTimes, FaTrash } from 'react-icons/fa'
 
 import { Worklog } from '../../../domain/worklog'
 import { Job } from '../../../domain/job'
-import { TaskDetail, TaskObject } from '../../../domain/task'
+import { TaskDetail } from '../../../domain/task'
 import { FormBuilder } from '../common/form/form'
 import { isValidDateTime } from '../../../../lib/date.utils'
 import { BlockContainer, BlockHeaderComponent} from '../common/block'

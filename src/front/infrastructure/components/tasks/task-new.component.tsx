@@ -14,7 +14,7 @@ import { BlockContainer, BlockHeaderComponent} from '../common/block'
 import { SyncStateContext} from '../../../application/contexts/dbSyncContext'
 
 import { FormBuilder } from '../common/form/form'
-import { isValidDateTime, dateToFormattedDate, formattedDateToISOString } from '../../../../lib/date.utils'
+import { isValidDateTime } from '../../../../lib/date.utils'
 
 import { mapTaskApiTocomponent } from '../../../application/dtos/taskApiToComponent.dto'
 
