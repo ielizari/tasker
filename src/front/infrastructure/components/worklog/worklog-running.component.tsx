@@ -1,10 +1,9 @@
 import React from 'react'
-import { Worklog, WorklogObject } from 'src/front/domain/worklog'
+import { Worklog } from 'src/front/domain/worklog'
 import styled from 'styled-components'
 import {color, common} from '../../../styles/theme'
-import { RunningWorklogsStateContext } from '../../../application/contexts/runningWorklogsContext'
+//import { RunningWorklogsStateContext } from '../../../application/contexts/runningWorklogsContext'
 import { getWorklogList } from '../../../application/getWorklogList'
-import { formatElapsedTime, elapsedTime, ISOStringToFormatedDate, dateToFormattedDate } from '../../../../lib/date.utils'
 import { RunningElapsedTime } from './worklog-sequence.component'
 import { Link } from 'react-router-dom'
 
@@ -28,8 +27,8 @@ const RowLink = styled(Link)`
     width: 100%;
 `
 export const RunningWorklogsWidget = () => {
-    const runningWorklogsCtx = React.useContext(RunningWorklogsStateContext)
-    const {state, setState} = runningWorklogsCtx
+    //const runningWorklogsCtx = React.useContext(RunningWorklogsStateContext)
+    //const {state, setState} = runningWorklogsCtx
     const [worklogs, setWorklogs] = React.useState<Array<Worklog>>([])
 
     React.useEffect(()=> {

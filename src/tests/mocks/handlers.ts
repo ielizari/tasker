@@ -2,9 +2,7 @@ import { rest } from 'msw'
 import taskData from './tasks.json'
 import { TaskDetail, TaskObject } from '../../front/domain/task-detail'
 import { Worklog, WorklogObject} from '../../front/domain/worklog'
-import { Job, JobObject } from '../../front/domain/job'
-import { isEmpty } from 'lodash'
-import  {Datepicker}  from '../../lib/orzkDatepicker/datepicker'
+import { JobObject } from '../../front/domain/job'
 import { ApiResponseBuilder, ApiResponse} from '../../api/domain/api-response'
 
 export const handlers = [
@@ -136,7 +134,7 @@ export const handlers = [
                 ctx.status(200),
                 ctx.json(ApiResponseBuilder(200,taskresponse,false))
             )
-        }else if(task.description == 'error'){
+        }else if(task.description === 'error'){
             return res(
                 ctx.status(500),
                 ctx.json(ApiResponseBuilder(500,taskresponse,true,'Error al crear la tarea'))
@@ -286,7 +284,7 @@ export const handlers = [
                 ctx.status(200),
                 ctx.json(ApiResponseBuilder(200,worklogresponse,false))
             )
-        }else if(worklog.title == 'Parte error'){
+        }else if(worklog.title === 'Parte error'){
             return res(
                 ctx.status(500),
                 ctx.json(ApiResponseBuilder(500,worklog,true,'Error al crear el parte'))

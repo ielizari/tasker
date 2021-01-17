@@ -1,13 +1,13 @@
 import lowdb from 'lowdb'
 import LocalStorage from 'lowdb/adapters/LocalStorage'
 
-import { TaskDetail, TaskObject, TaskItem } from '../../../domain/task'
+import { TaskDetail, TaskObject } from '../../../domain/task'
 import { WorklogObject, Worklog, WorklogDB } from '../../../domain/worklog'
 import { Job, JobObject } from '../../../domain/job'
-import { mapWorklogToApiWorklog, mapApiWorklogToWorklogDb, mapApiTaskToTaskDb, mapTaskToApiTask } from '../../../application/dtos/dbToApiDto'
+import { mapWorklogToApiWorklog, mapApiWorklogToWorklogDb, mapApiTaskToTaskDb } from '../../../application/dtos/dbToApiDto'
 
 import { TaskerRepository, setTaskerRepository, FileDownload } from '../../../application/taskerRepository'
-import { isEmpty, over } from 'lodash'
+import { isEmpty } from 'lodash'
 import { elapsedTime, ISOStringToFormatedDate } from 'src/lib/date.utils'
 
 export type metadataDB = {
@@ -109,7 +109,7 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
         .value()
         
         const result : Array<TaskObject>= []
-        tasks.map((task: TaskDetail) => {
+        tasks.forEach((task: TaskDetail) => {
             let taskobject: TaskObject = {
                 task: task,
                 parentTask: null,
@@ -186,7 +186,7 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
             //(!search.endDatetime && isEmpty(search.endDatetime) && wl.endDatetime === search.endDatetime)
         ).value()
         const result : Array<Worklog>= []
-        worklogs.map((worklog: Worklog) => {
+        worklogs.forEach((worklog: Worklog) => {
             result.push({
                 id: worklog.id || '',
                 title: worklog.title || '',
@@ -316,7 +316,7 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
         }
         const jobs = db.get('jobs').filter(search).value()
         const result : Array<JobObject>= []
-        jobs.map((job: Job) => {
+        jobs.forEach((job: Job) => {
             let jobobject: JobObject = {
                 job: job,
                 task: null,
@@ -374,11 +374,10 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
             checkOverlappingJobs(job,jobs)
 
             let runningJobs = db.get('jobs').filter({worklog: job.worklog, endDatetime: ''}).value()
-            runningJobs.map((item) => {
+            runningJobs.forEach((item) => {
                 item.endDatetime = job.startDatetime
                 db.get('jobs').find({id: item.id}).assign(item).write()
             })
-            console.log(job)
             db.get('jobs').push(job).write()
 
             this.setDbLastModified()

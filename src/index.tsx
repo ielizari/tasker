@@ -10,7 +10,6 @@ import {
 } from "react-router-dom";
 
 import { startDb } from './api/infrastructure/repositories/browser/browserdb'
-import { worker } from './api/infrastructure/repositories/browser/browser';
 
 let basepath = ''
 if(process.env.REACT_APP_MOCK){

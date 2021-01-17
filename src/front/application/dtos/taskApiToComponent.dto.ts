@@ -1,5 +1,5 @@
 import { TaskDetail} from '../../domain/task'
-import { formattedDateToISOString, ISOStringToFormatedDate } from '../../../lib/date.utils'
+import { ISOStringToFormatedDate } from '../../../lib/date.utils'
 
 export const mapTaskApiTocomponent = (task: TaskDetail): TaskDetail => {
     if(!task){

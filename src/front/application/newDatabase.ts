@@ -1,4 +1,4 @@
-import { ApiResponse, ApiResponseBuilder } from '../../api/domain/api-response'
+import { ApiResponse } from '../../api/domain/api-response'
 
 export const newDb = async (): Promise<ApiResponse> => {    
     

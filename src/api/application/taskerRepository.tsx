@@ -1,4 +1,4 @@
-import { TaskDetail, TaskItem, TaskObject } from '../domain/task'
+import { TaskDetail, TaskObject } from '../domain/task'
 import { Worklog, WorklogObject } from '../domain/worklog'
 import { Job, JobObject } from '../domain/job'
 import { Schema } from '../infrastructure/repositories/browser/browserdb'

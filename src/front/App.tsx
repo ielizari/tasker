@@ -18,7 +18,6 @@ import { Settings } from './infrastructure/views/settings.component'
 import { existsDb } from './application/existsDatabase'
 
 import { RunningWorklogsProvider } from '../front/application/contexts/runningWorklogsContext'
-import { RunningWorklogsWidget } from './infrastructure/components/worklog/worklog-running.component'
 
 
 function App() {

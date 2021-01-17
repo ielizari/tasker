@@ -1,8 +1,7 @@
 import React  from 'react'
 import styled from 'styled-components'
-import { color, common } from '../../styles/theme'
-import { BlockContainer, BlockHeaderComponent} from '../components/common/block'
-import { TaskListComponent } from '../components/tasks/task-list.component'
+import { color } from '../../styles/theme'
+import { BlockContainer} from '../components/common/block'
 import { RunningWorklogsTable } from '../components/worklog/worklog-running.component'
 
 const DashboardContainer = styled(BlockContainer)`

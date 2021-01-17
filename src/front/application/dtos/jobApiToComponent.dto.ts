@@ -1,6 +1,5 @@
-import { Worklog } from '../../domain/worklog'
 import { Job} from '../../domain/job'
-import { formattedDateToISOString, ISOStringToFormatedDate } from '../../../lib/date.utils'
+import { ISOStringToFormatedDate } from '../../../lib/date.utils'
 
 export const mapApiJobToComponent = (job: Job): Job => {
     if(!job){

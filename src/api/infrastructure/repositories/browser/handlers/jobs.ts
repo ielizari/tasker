@@ -1,9 +1,8 @@
 import { rest } from 'msw'
 import { isEmpty } from 'lodash'
 import { Job, JobObject } from '../../../../domain/job'
-import { getTaskerRepository, FileDownload } from '../../../../application/taskerRepository'
-import { ApiResponse, ApiResponseBuilder } from '../../../../domain/api-response'
-import { ISOStringToFormatedDate } from '../../../../../lib/date.utils'
+import { getTaskerRepository } from '../../../../application/taskerRepository'
+import { ApiResponseBuilder } from '../../../../domain/api-response'
 import { mapApiJobToJobDb } from '../../../../application/dtos/dbToApiDto'
 
 export const jobHandlers = [

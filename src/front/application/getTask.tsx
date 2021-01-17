@@ -1,5 +1,4 @@
 import { ApiResponse } from '../../api/domain/api-response'
-import { mapTaskApiTocomponent } from '../application/dtos/taskApiToComponent.dto'
  
 export const getTask = async (taskid: string): Promise<ApiResponse> => {
     return await fetch(`${process.env.PUBLIC_URL}/api/tasks/${taskid}`)

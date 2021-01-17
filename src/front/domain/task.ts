@@ -16,7 +16,7 @@ export const TaskPriority = {
 
 export const ConstObjectToSelectOptionsArray = (object) => {
     let result = []
-    Object.keys(object).map((item)=>{
+    Object.keys(object).forEach((item)=>{
         result.push(object[item])
     })
     return result
