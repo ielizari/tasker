@@ -6,7 +6,7 @@ import { ApiResponse, ApiResponseBuilder } from '../../../../domain/api-response
 import { ISOStringToFormatedDate } from '../../../../../lib/date.utils'
 
 export const taskHandlers = [
-    rest.post('http://localhost:3000/api/tasks',(req, res, ctx) => { 
+    rest.post(process.env.PUBLIC_URL + '/api/tasks',(req, res, ctx) => { 
         const filters = req.body ? req.body as Partial<TaskDetail> : {}  
         const tasks: Array<TaskObject> = getTaskerRepository().getTasks(filters)
         
@@ -20,7 +20,7 @@ export const taskHandlers = [
             ctx.json(response)
         )
     }),
-    rest.get('http://localhost:3000/api/tasks/:taskid',(req, res, ctx) => {  
+    rest.get(process.env.PUBLIC_URL + '/api/tasks/:taskid',(req, res, ctx) => {  
         const taskid = req.params.taskid || '';
 
         const task = getTaskerRepository().getTaskById(taskid)
@@ -38,7 +38,7 @@ export const taskHandlers = [
         }
     }),
 
-    rest.post('http://localhost:3000/api/tasks/add',(req,res,ctx) =>{
+    rest.post(process.env.PUBLIC_URL + '/api/tasks/add',(req,res,ctx) =>{
         try{
             const task: TaskDetail | null = req.body ? req.body as TaskDetail : null
 
@@ -62,7 +62,7 @@ export const taskHandlers = [
         }
     }),
 
-    rest.delete('http://localhost:3000/api/tasks/delete/:taskid', (req,res,ctx) => {
+    rest.delete(process.env.PUBLIC_URL + '/api/tasks/delete/:taskid', (req,res,ctx) => {
         try{
             const taskid = req.params.taskid || '';
             if(taskid === ''){
@@ -85,7 +85,7 @@ export const taskHandlers = [
         }
     }),
 
-    rest.put('http://localhost:3000/api/tasks/update', (req, res, ctx) => {
+    rest.put(process.env.PUBLIC_URL + '/api/tasks/update', (req, res, ctx) => {
         try{
             const task: TaskDetail | null = req.body ? req.body as TaskDetail : null
             if(isEmpty(task.id)) {

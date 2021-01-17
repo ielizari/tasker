@@ -3,7 +3,7 @@ import { ApiResponse } from '../../api/domain/api-response'
 
 export const reopenWorklog = async (worklog: Worklog): Promise<ApiResponse> => {
     
-    return await fetch('http://localhost:3000/api/worklogs/reopen',{
+    return await fetch(process.env.PUBLIC_URL + '/api/worklogs/reopen',{
         method: 'PUT',
         headers: {'Content-type': 'application/json'},
         body: JSON.stringify(worklog)

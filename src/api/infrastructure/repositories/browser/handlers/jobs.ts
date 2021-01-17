@@ -7,7 +7,7 @@ import { ISOStringToFormatedDate } from '../../../../../lib/date.utils'
 import { mapApiJobToJobDb } from '../../../../application/dtos/dbToApiDto'
 
 export const jobHandlers = [
-    rest.post('http://localhost:3000/api/jobs/add', (req, res,ctx) => {
+    rest.post(process.env.PUBLIC_URL + '/api/jobs/add', (req, res,ctx) => {
         try{
             const job: Job  | null = req.body ? req.body as Job : null
 
@@ -30,7 +30,7 @@ export const jobHandlers = [
             )
         }
     }),
-    rest.delete('http://localhost:3000/api/jobs/delete/:jobid', (req,res,ctx) => {
+    rest.delete(process.env.PUBLIC_URL + '/api/jobs/delete/:jobid', (req,res,ctx) => {
         try{
             const jobid = req.params.jobid || '';
             if(jobid === ''){
@@ -53,7 +53,7 @@ export const jobHandlers = [
         }
     }),
 
-    rest.put('http://localhost:3000/api/jobs/update', (req, res, ctx) => {
+    rest.put(process.env.PUBLIC_URL + '/api/jobs/update', (req, res, ctx) => {
         try{
             const job: Job | null = req.body ? req.body as Job : null
             

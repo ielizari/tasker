@@ -37,7 +37,7 @@ export const importDb = async (db: importForm): Promise<ApiResponse> => {
         }
     )
     
-    return await fetch('http://localhost:3000/api/db/import',{
+    return await fetch(process.env.PUBLIC_URL + '/api/db/import',{
         method: 'POST',
         headers: {'Content-type': 'application/json'},
         body: JSON.stringify(dbfile)

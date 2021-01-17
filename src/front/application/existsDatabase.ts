@@ -1,8 +1,7 @@
 import { ApiResponse } from '../../api/domain/api-response'
 
 export const existsDb = async (): Promise<ApiResponse> => {
-
-    return await fetch('http://localhost:3000/api/db/exists',{
+    return await fetch(process.env.PUBLIC_URL + '/api/db/exists',{
         method: 'GET',
     })
         .then(res => res.json())        

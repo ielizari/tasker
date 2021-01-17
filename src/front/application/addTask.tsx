@@ -3,7 +3,7 @@ import { ApiResponse } from '../../api/domain/api-response'
 
 export const addTask = async (task: TaskDetail): Promise<ApiResponse> => {
 
-    return await fetch('http://localhost:3000/api/tasks/add',{
+    return await fetch(process.env.PUBLIC_URL + '/api/tasks/add',{
         method: 'POST',
         headers: {'Content-type': 'application/json'},
         body: JSON.stringify(task)

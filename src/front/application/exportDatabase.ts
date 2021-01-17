@@ -2,7 +2,7 @@ import { ApiResponse } from '../../api/domain/api-response'
 
 export const exportDb = async (): Promise<ApiResponse> => {
 
-    return await fetch('http://localhost:3000/api/db/export',{
+    return await fetch(process.env.PUBLIC_URL + '/api/db/export',{
         method: 'GET',
     })
         .then(res => res.json())        

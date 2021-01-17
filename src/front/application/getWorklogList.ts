@@ -2,7 +2,7 @@ import { Worklog} from './../domain/worklog'
 import { ApiResponse } from '../../api/domain/api-response'
  
 export const getWorklogList = async (filters?: Partial<Worklog>): Promise<ApiResponse> => {
-    return await fetch(`http://localhost:3000/api/worklogs`,{
+    return await fetch(`${process.env.PUBLIC_URL}/api/worklogs`,{
         method: 'POST',
         body: JSON.stringify(filters)
     })

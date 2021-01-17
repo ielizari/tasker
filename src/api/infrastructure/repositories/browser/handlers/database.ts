@@ -4,7 +4,7 @@ import { ApiResponseBuilder } from '../../../../domain/api-response'
 import { Schema } from '../browserdb'
 
 export const databaseHandlers = [
-    rest.get('http://localhost:3000/api/db/exists', (req,res,ctx) => {
+    rest.get(process.env.PUBLIC_URL + '/api/db/exists', (req,res,ctx) => {
         try{
             const existsdb: boolean = getTaskerRepository().hasDB()
             return res(
@@ -19,7 +19,7 @@ export const databaseHandlers = [
         }
     }),
 
-    rest.get('http://localhost:3000/api/db/export', (req,res,ctx) => {
+    rest.get(process.env.PUBLIC_URL + '/api/db/export', (req,res,ctx) => {
         try{
             const db: FileDownload = getTaskerRepository().exportDb()
             return res(
@@ -34,7 +34,7 @@ export const databaseHandlers = [
         }
     }),
 
-    rest.post('http://localhost:3000/api/db/import', (req,res,ctx) => {
+    rest.post(process.env.PUBLIC_URL + '/api/db/import', (req,res,ctx) => {
         try{
             const dbfile = req.body ? req.body as Schema: null 
             const db: boolean = getTaskerRepository().importDb(dbfile)
@@ -50,7 +50,7 @@ export const databaseHandlers = [
         }
     }),
 
-    rest.post('http://localhost:3000/api/db/new', (req,res,ctx) => {
+    rest.post(process.env.PUBLIC_URL + '/api/db/new', (req,res,ctx) => {
         try{
             const db: boolean = getTaskerRepository().newDb()
             return res(
@@ -65,7 +65,7 @@ export const databaseHandlers = [
         }
     }),
 
-    rest.get('http://localhost:3000/api/db/synced', (req,res,ctx) => {
+    rest.get(process.env.PUBLIC_URL + '/api/db/synced', (req,res,ctx) => {
         try{
             const db: boolean = getTaskerRepository().isDbSynced()
             return res(

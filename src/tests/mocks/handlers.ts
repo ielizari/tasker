@@ -8,7 +8,7 @@ import  {Datepicker}  from '../../lib/orzkDatepicker/datepicker'
 import { ApiResponseBuilder, ApiResponse} from '../../api/domain/api-response'
 
 export const handlers = [
-    rest.post('http://localhost:3000/api/tasks',(req, res, ctx) => {       
+    rest.post(process.env.PUBLIC_URL + '/api/tasks',(req, res, ctx) => {       
         const filters : Partial<TaskDetail> = req.body ? JSON.parse(req.body as string) : {}
          
         if(filters.title === 'Hacer la compra'){ 
@@ -88,13 +88,13 @@ export const handlers = [
         }
     }),
     // Tarea inexistente
-    rest.get('http://localhost:3000/api/tasks/1111',(req, res, ctx) => {  
+    rest.get(process.env.PUBLIC_URL + '/api/tasks/1111',(req, res, ctx) => {  
         return res(
             ctx.status(404, 'La tarea no existe'),
             ctx.json(ApiResponseBuilder(200,{},true,'La tarea no existe'))
         )         
     }),
-    rest.get('http://localhost:3000/api/tasks/1',(req, res, ctx) => {          
+    rest.get(process.env.PUBLIC_URL + '/api/tasks/1',(req, res, ctx) => {          
         const task: TaskDetail = {            
             "id":"1",
             "parent":"",
@@ -122,7 +122,7 @@ export const handlers = [
             ctx.json(ApiResponseBuilder(200,taskObject,false))
         )        
     }),
-    rest.post('http://localhost:3000/api/tasks/add',(req,res,ctx) =>{
+    rest.post(process.env.PUBLIC_URL + '/api/tasks/add',(req,res,ctx) =>{
         const task: TaskDetail = req.body as TaskDetail        
         
         task.createdDate = "2000-01-01T00:00:00+0200"
@@ -145,7 +145,7 @@ export const handlers = [
         
     }),
     
-    rest.put('http://localhost:3000/api/tasks/update', (req, res, ctx) => {
+    rest.put(process.env.PUBLIC_URL + '/api/tasks/update', (req, res, ctx) => {
         
         const taskobject: TaskObject = {
             task: null,
@@ -161,7 +161,7 @@ export const handlers = [
         
     }),
 
-    rest.delete('http://localhost:3000/api/tasks/delete/1', (req,res,ctx) => {
+    rest.delete(process.env.PUBLIC_URL + '/api/tasks/delete/1', (req,res,ctx) => {
             const task: TaskDetail = {            
                 "id":"1",
                 "parent":"",
@@ -184,7 +184,7 @@ export const handlers = [
         
     }),
 
-    rest.post('http://localhost:3000/api/worklogs',(req, res, ctx) => {       
+    rest.post(process.env.PUBLIC_URL + '/api/worklogs',(req, res, ctx) => {       
         const filters : Partial<Worklog> = req.body ? JSON.parse(req.body as string) : {}
         
         if(filters.title === 'Compra 15-11-20'){
@@ -205,7 +205,7 @@ export const handlers = [
         }
     }),
 
-    rest.get('http://localhost:3000/api/worklogs/1',(req, res, ctx) => {     
+    rest.get(process.env.PUBLIC_URL + '/api/worklogs/1',(req, res, ctx) => {     
         const worklog: Worklog = {            
             "id":"1",
             "createdDate": "05/11/2020 08:00",
@@ -250,14 +250,14 @@ export const handlers = [
         )        
     }),
 
-    rest.get('http://localhost:3000/api/worklogs/1111',(req, res, ctx) => {  
+    rest.get(process.env.PUBLIC_URL + '/api/worklogs/1111',(req, res, ctx) => {  
         return res(
             ctx.status(404, 'El parte no existe'),
             ctx.json(ApiResponseBuilder(200,{},true,'El parte no existe'))
         )         
     }),
 
-    rest.delete('http://localhost:3000/api/worklogs/delete/1', (req,res,ctx) => {
+    rest.delete(process.env.PUBLIC_URL + '/api/worklogs/delete/1', (req,res,ctx) => {
         const worklog: Worklog = {            
             "id":"1",
             "createdDate": "2020-11-05T07:00:00.000Z",
@@ -273,7 +273,7 @@ export const handlers = [
             )
     }),
 
-    rest.post('http://localhost:3000/api/worklogs/add',(req,res,ctx) =>{
+    rest.post(process.env.PUBLIC_URL + '/api/worklogs/add',(req,res,ctx) =>{
         const worklog: Worklog = req.body as Worklog
         
         worklog.createdDate = "2000-01-01T00:00:00+0200"
@@ -294,7 +294,7 @@ export const handlers = [
         }        
     }),
 
-    rest.put('http://localhost:3000/api/worklogs/update', (req, res, ctx) => {
+    rest.put(process.env.PUBLIC_URL + '/api/worklogs/update', (req, res, ctx) => {
         
         const worklogobject: WorklogObject = {
             worklog: null,
@@ -309,14 +309,14 @@ export const handlers = [
         
     }),
 
-    rest.get('http://localhost:3000/api/db/exists', (req, res, ctx) => {
+    rest.get(process.env.PUBLIC_URL + '/api/db/exists', (req, res, ctx) => {
         return res(
             ctx.status(200),
             ctx.json(ApiResponseBuilder(200,true,false))
         )
     }),
 /*
-    rest.get('http://localhost:3000/api/db/export', (req,res,ctx) => {
+    rest.get(process.env.PUBLIC_URL + '/api/db/export', (req,res,ctx) => {
         try{
             const db: FileDownload = getTaskerRepository().exportDb()
             return res(
@@ -331,7 +331,7 @@ export const handlers = [
         }
     }),
 
-    rest.post('http://localhost:3000/api/db/import', (req,res,ctx) => {
+    rest.post(process.env.PUBLIC_URL + '/api/db/import', (req,res,ctx) => {
         try{
             const dbfile = req.body ? req.body as Schema: null 
             const db: boolean = getTaskerRepository().importDb(dbfile)
@@ -347,7 +347,7 @@ export const handlers = [
         }
     }),
 
-    rest.post('http://localhost:3000/api/db/new', (req,res,ctx) => {
+    rest.post(process.env.PUBLIC_URL + '/api/db/new', (req,res,ctx) => {
         try{
             const db: boolean = getTaskerRepository().newDb()
             return res(
@@ -362,7 +362,7 @@ export const handlers = [
         }
     }),*/
 
-    rest.get('http://localhost:3000/api/db/synced', (req,res,ctx) => {
+    rest.get(process.env.PUBLIC_URL + '/api/db/synced', (req,res,ctx) => {
         
         return res(
             ctx.status(200),

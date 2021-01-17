@@ -6,7 +6,7 @@ import { ApiResponse, ApiResponseBuilder } from '../../../../domain/api-response
 import { ISOStringToFormatedDate } from '../../../../../lib/date.utils'
 
 export const worklogHandlers = [
-    rest.post('http://localhost:3000/api/worklogs',(req, res, ctx) => { 
+    rest.post(process.env.PUBLIC_URL + '/api/worklogs',(req, res, ctx) => { 
         const filters = req.body ? req.body as Partial<Worklog> : {}  
         const worklogs : Array<Worklog> = getTaskerRepository().getWorklogs(filters)
         
@@ -21,7 +21,7 @@ export const worklogHandlers = [
         )
     }),
 
-    rest.get('http://localhost:3000/api/worklogs/:worklogid',(req, res, ctx) => {  
+    rest.get(process.env.PUBLIC_URL + '/api/worklogs/:worklogid',(req, res, ctx) => {  
         const worklogid = req.params.worklogid || '';
 
         const worklog = getTaskerRepository().getWorklogById(worklogid)
@@ -39,7 +39,7 @@ export const worklogHandlers = [
         }
     }),
 
-    rest.post('http://localhost:3000/api/worklogs/add',(req,res,ctx) =>{
+    rest.post(process.env.PUBLIC_URL + '/api/worklogs/add',(req,res,ctx) =>{
         try{
             const worklog: Worklog | null = req.body ? req.body as Worklog : null
 
@@ -63,7 +63,7 @@ export const worklogHandlers = [
         }
     }),
 
-    rest.delete('http://localhost:3000/api/worklogs/delete/:worklogid', (req,res,ctx) => {
+    rest.delete(process.env.PUBLIC_URL + '/api/worklogs/delete/:worklogid', (req,res,ctx) => {
         try{
             const worklogid = req.params.worklogid || '';
             if(worklogid === ''){
@@ -86,7 +86,7 @@ export const worklogHandlers = [
         }
     }),
 
-    rest.put('http://localhost:3000/api/worklogs/update', (req, res, ctx) => {
+    rest.put(process.env.PUBLIC_URL + '/api/worklogs/update', (req, res, ctx) => {
         try{
             const worklog: Worklog | null = req.body ? req.body as Worklog : null
             
@@ -107,7 +107,7 @@ export const worklogHandlers = [
         }
     }),
 
-    rest.put('http://localhost:3000/api/worklogs/close', (req, res, ctx) => {
+    rest.put(process.env.PUBLIC_URL + '/api/worklogs/close', (req, res, ctx) => {
         try{
             const worklog: Worklog | null = req.body ? req.body as Worklog : null
             
@@ -128,7 +128,7 @@ export const worklogHandlers = [
         }
     }),
 
-    rest.put('http://localhost:3000/api/worklogs/reopen', (req, res, ctx) => {
+    rest.put(process.env.PUBLIC_URL + '/api/worklogs/reopen', (req, res, ctx) => {
         try{
             const worklog: Worklog | null = req.body ? req.body as Worklog : null
             
@@ -149,7 +149,7 @@ export const worklogHandlers = [
         }
     }),
 
-    rest.get('http://localhost:3000/api/worklogs/:worklogid/grouped',(req,res,ctx) =>{
+    rest.get(process.env.PUBLIC_URL + '/api/worklogs/:worklogid/grouped',(req,res,ctx) =>{
         try{            
             const worklogid = req.params.worklogid || '';
             if(worklogid !== ''){

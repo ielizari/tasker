@@ -10,19 +10,30 @@ import {
 } from "react-router-dom";
 
 import { startDb } from './api/infrastructure/repositories/browser/browserdb'
+import { worker } from './api/infrastructure/repositories/browser/browser';
 
+let basepath = ''
 if(process.env.REACT_APP_MOCK){
   const { worker } = require('./tests/mocks/browser')
   worker.start()
 }else{
   const { worker } = require('./api/infrastructure/repositories/browser/browser')
-  worker.start()
+  if(process.env.NODE_ENV === 'production'){
+    worker.start({
+      serviceWorker: {
+        url: `${process.env.PUBLIC_URL}/mockServiceWorker.js`
+      }
+    })
+    basepath= '/tasker'
+  }else{
+    worker.start()
+  }
   startDb()
 }
 
 ReactDOM.render(
   <React.StrictMode>    
-    <Router>    
+    <Router basename={basepath}>    
       <GlobalStyle/>
       <SyncProvider>
         <App />

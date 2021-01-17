@@ -2,7 +2,7 @@ import { ApiResponse } from '../../api/domain/api-response'
 import { TaskDetail } from '../domain/task-detail'
  
 export const getTaskList = async (filters?: Partial<TaskDetail>): Promise<ApiResponse> => {
-    return await fetch(`http://localhost:3000/api/tasks`,{
+    return await fetch(`${process.env.PUBLIC_URL}/api/tasks`,{
         method: 'POST',
         body: JSON.stringify(filters)
     })
