@@ -37,18 +37,23 @@ export const BlockEmptyComponent = () => {
         </BlockEmptySet>
     )
 }
-export const BlockHeaderComponent = (props) => {
-    const [title, setTitle] = React.useState<string>(props.title || 'Sin título')
+export const BlockHeaderComponent = (props : {actions?,title?}) => {
+    const [title, setTitle] = React.useState<string>(null)
     const [actions, setActions] = React.useState<Array<any>>([])
 
     React.useEffect(() => {
         setActions(props.actions)
-    },[actions])
+    },[props.actions])
 
     React.useEffect(() => {
-        setTitle(props.title)
+        if(props.title){
+            setTitle(props.title)
+        }else{
+            setTitle('Sin título')
+        }
     },[props.title])
 
+    
     return (
         <>
             <BlockTitle>{title}</BlockTitle>     

@@ -99,12 +99,14 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
         }
     }
 
-    getTasks(filter: Partial<TaskDetail> = {}): Array<TaskObject>  {
-        const search = JSON.parse(filter as string)
+    getTasks(filter: Partial<TaskDetail> = {}, order = []): Array<TaskObject>  {
+        let search = JSON.parse(filter as string)
         const tasks = db.get('tasks').filter(task => 
             ((!search.parent && !(typeof(search.parent)==='string')) || task.parent === search.parent )&&
             (!search.title || task.title.toLowerCase().includes(search.title.toLowerCase()))
-        ).value()
+        )
+        .sortBy(order)
+        .value()
         
         const result : Array<TaskObject>= []
         tasks.map((task: TaskDetail) => {
@@ -291,6 +293,11 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
                 result.timeInSeconds += timeInSeconds
                 if(job.task){
                     result = mergeTaskTrees(getTaskTree(job.task,timeInSeconds,job),result)
+                }else{
+                    result.jobs.push(job)
+                    if(job.endDatetime === ''){
+                        result.hasRunningJob = true
+                    }
                 }
             })            
             console.log(result)
@@ -569,7 +576,7 @@ const getTaskTree = (taskid: string, time: number, job: Job = null, childTask: T
             id: task.id, 
             title: task.title, 
             timeInSeconds: time,
-            hasRunningJob: hasRunningJob,//job ? job.endDatetime !== '' ? false : true : false,
+            hasRunningJob: hasRunningJob,
             jobs: job ? [job] : [],
             childTasks: childTask ? [childTask] : []
         }
@@ -577,7 +584,8 @@ const getTaskTree = (taskid: string, time: number, job: Job = null, childTask: T
             let parent: TaskTreeItem = getTaskTree(task.parent,time,null,result) 
             return parent
         }else{   
-            root.childTasks.push(result)         
+            root.childTasks.push(result)
+            root.hasRunningJob = result.hasRunningJob    
             return root
         }
     }catch(e){

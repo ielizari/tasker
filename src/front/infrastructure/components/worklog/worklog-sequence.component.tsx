@@ -1,17 +1,18 @@
 import React from 'react'
 import styled from 'styled-components'
 import { color, common } from '../../../styles/theme'
-import { dateToFormattedDate, elapsedTime, formatElapsedTime, ISOStringToFormatedDate } from '../../../../lib/date.utils'
+import { dateToFormattedDate, elapsedTime, formatElapsedTime, formattedDateToDate, ISOStringToFormatedDate } from '../../../../lib/date.utils'
 
 import { WorklogObject, Worklog } from '../../../domain/worklog'
 import { Job, JobObject } from '../../../domain/job'
 import { IconButton } from '../common/icon-button'
-import { FaPlus, FaStop, FaPause, FaPlay } from 'react-icons/fa'
+import { FaPlus, FaStop, FaPause, FaPlay, FaRedoAlt } from 'react-icons/fa'
 import { JobNewComponent } from '../job/job-new.component'
 import { getWorklog } from '../../../application/getWorklog'
 import { updateWorklog } from '../../../application/updateWorklog'
 import { closeWorklog } from '../../../application/closeWorklog'
 import { reopenWorklog } from '../../../application/reopenWorklog'
+import { addJob } from '../../../application/addJob'
 import { updateJob } from '../../../application/updateJob'
 import { SyncStateContext} from '../../../application/contexts/dbSyncContext'
 import { mapApiJobToComponent } from 'src/front/application/dtos/jobApiToComponent.dto'
@@ -71,9 +72,18 @@ const PauseRow = styled.tr`
     background-color: ${color.grey};
 `
 
+const DayRow = styled.tr`
+    background-color: ${color.lightGreen};
+    text-align: center;
+`
+
 interface Pause {
     startDatetime: string
     endDatetime: string
+}
+
+interface Day {
+    date: string
 }
 
 export const RunningElapsedTime = (props: {start, initialSeconds?}) => {
@@ -84,8 +94,8 @@ export const RunningElapsedTime = (props: {start, initialSeconds?}) => {
     const calculateDiff = (): string => {
         return formatElapsedTime(
             elapsedTime(
-                ISOStringToFormatedDate(start,'dmy/','hms'),
-                ISOStringToFormatedDate(new Date().toISOString(),'dmy/','hms')
+                ISOStringToFormatedDate(start,'datetime','dmy/','hms'),
+                ISOStringToFormatedDate(new Date().toISOString(),'datetime','dmy/','hms')
             ) + initialSeconds
         )
     }
@@ -114,14 +124,14 @@ export const RunningElapsedTime = (props: {start, initialSeconds?}) => {
     )
 }
 
-export const WorklogSequence = (props) => {
+export const WorklogSequence = (props: {worklog: WorklogObject, worklogChangeHandler?}) => {
     const syncCtx = React.useContext(SyncStateContext)
     const {setSync} = syncCtx
 
     const [ worklogObj, setWorklogObj ] = React.useState<WorklogObject>(props.worklog)
     const [ jobView, setJobView ] = React.useState<boolean>(false)
     const [ editJob, setEditJob ] = React.useState<Job>(null)
-    const [ sequence, setSequence ] = React.useState<Array<JobObject|Pause>>([])
+    const [ sequence, setSequence ] = React.useState<Array<JobObject|Pause|Day>>([])
     const [ pausedJob, setPausedJob ] = React.useState<Job>(null)
 
     React.useEffect(() => {
@@ -133,6 +143,9 @@ export const WorklogSequence = (props) => {
     },[sequence])
 
     React.useEffect(()=>{
+        if(props.worklogChangeHandler){
+            props.worklogChangeHandler(worklogObj)
+        }
         setSequence(fillSequenceTable())
     },[worklogObj])
 
@@ -188,6 +201,42 @@ export const WorklogSequence = (props) => {
         }
     }
 
+    const repeatJobHandler = () => {
+        if(pausedJob){
+            let tmpjob = Object.assign({},pausedJob)
+            let startEnd = new Date().toISOString()
+            updateJob(mapApiJobToComponent(tmpjob)).then(
+                result => {
+                    if(!result.hasError){
+                        let newJob : Job = tmpjob
+                        tmpjob.startDatetime = startEnd
+                        tmpjob.endDatetime = ''
+                        tmpjob.id=''
+                        addJob(mapApiJobToComponent(newJob)).then(
+                            result => {
+                                if(!result.hasError){
+                                    submitHandler()
+                                }else{
+                                    console.log(result.error)
+                                }
+                            },
+                            error => {
+                                console.log(error)
+            
+                            }
+                        )
+                    }else{
+                        console.log(result.error)
+                    }
+                },
+                error => {
+                    console.log(error)
+
+                }
+            )            
+        }
+    }
+
     const finishWorklogHandler = () => {
         worklogObj.worklog.endDatetime = ISOStringToFormatedDate(new Date().toISOString())
         closeWorklog(worklogObj.worklog).then(
@@ -240,7 +289,7 @@ export const WorklogSequence = (props) => {
     }
 
     const fillSequenceTable = () => {
-        let res : Array<JobObject | Pause> = []
+        let res : Array<JobObject | Pause | Day> = []
 
         if(!worklogObj){
             return res
@@ -256,7 +305,38 @@ export const WorklogSequence = (props) => {
             }
         })
 
+        let actualDate: Date
         for (let i=0; i< sortedJobs.length; i++){
+            if(res.length === 0){
+                actualDate = formattedDateToDate(ISOStringToFormatedDate(sortedJobs[i].job.startDatetime))
+                let day : Day = {
+                    date: actualDate.getDate() + '/' + (actualDate.getMonth()+1) + '/' + actualDate.getFullYear()
+                }
+                res.push(day)
+            }else{
+                if(isJob(res[res.length-1])){
+                    let lastItem: Job = (res[res.length-1] as JobObject).job
+                    let start = formattedDateToDate(ISOStringToFormatedDate(lastItem.startDatetime))
+                    let end = lastItem.endDatetime !== '' ? formattedDateToDate(ISOStringToFormatedDate(lastItem.endDatetime)) : new Date()
+                    if(start.getDate() !== end.getDate()){
+                        let newDay: Day = {
+                            date: end.getDate() + '/' + (end.getMonth()+1) + '/' + end.getFullYear()
+                        }
+                        res.push(newDay)
+                    }
+                }else if (isPause(res[res.length-1])){
+                    let lastItem = res[res.length-1] as Pause
+                    let start = formattedDateToDate(ISOStringToFormatedDate(lastItem.startDatetime))
+                    let end = lastItem.endDatetime !== '' ? formattedDateToDate(ISOStringToFormatedDate(lastItem.endDatetime)) : new Date()
+                    if(start.getDate() !== end.getDate()){
+                        let newDay: Day = {
+                            date: end.getDate() + '/' + (end.getMonth()+1) + '/' + end.getFullYear()
+                        }
+                        res.push(newDay)
+                    }
+                }
+                
+            }
             res.push(sortedJobs[i])
             if(i+1 < sortedJobs.length  && sortedJobs[i].job.endDatetime < sortedJobs[i+1].job.startDatetime){
                 let pause : Pause = {
@@ -279,6 +359,15 @@ export const WorklogSequence = (props) => {
     const isPause = (object: any): object is Pause => {
         return !('job' in object) && ('startDatetime' in object)
     }
+
+    const isDay = (object: any): object is Day => {
+        return ('date' in object)
+    }
+
+    const isJob = (object: any): object is Job => {
+        return ('job' in object)
+    }
+
     return(
         <>
         { jobView ?
@@ -302,12 +391,12 @@ export const WorklogSequence = (props) => {
                     </thead>
                     <tbody>
                     {worklogObj.childJobs.length > 0 && sequence.length > 0 ?  
-                        sequence.map((child: JobObject | Pause) =>{
+                        sequence.map((child: JobObject | Pause | Day) =>{
                             if(isPause(child)){
                                 return (
                                     <PauseRow key={child.startDatetime}>
-                                        <td>{ISOStringToFormatedDate(child.startDatetime)}</td>
-                                        <td>{ISOStringToFormatedDate(child.endDatetime)}</td>
+                                        <td>{ISOStringToFormatedDate(child.startDatetime, 'time')}</td>
+                                        <td>{ISOStringToFormatedDate(child.endDatetime, 'time')}</td>
                                         <td>
                                             {child.endDatetime ? 
                                             formatElapsedTime(elapsedTime(ISOStringToFormatedDate(child.startDatetime), ISOStringToFormatedDate(child.endDatetime)))
@@ -319,11 +408,17 @@ export const WorklogSequence = (props) => {
                                         <td>Pausa</td>
                                     </PauseRow>
                                 )
+                            }else if(isDay(child)){       
+                                return(                         
+                                    <DayRow key={`day_${child.date}`}>
+                                        <td colSpan={5}>{child.date}</td>
+                                    </DayRow>
+                                )
                             }else{
                                 return (
                                     <tr key={child.job.id} onClick={() => addJobHandler(child.job)}>
-                                        <td>{ISOStringToFormatedDate(child.job.startDatetime)}</td>
-                                        <td>{ISOStringToFormatedDate(child.job.endDatetime)}</td>
+                                        <td>{ISOStringToFormatedDate(child.job.startDatetime, 'time')}</td>
+                                        <td>{ISOStringToFormatedDate(child.job.endDatetime, 'time')}</td>
                                         <td>
                                             {child.job.endDatetime ? 
                                             formatElapsedTime(elapsedTime(ISOStringToFormatedDate(child.job.startDatetime), ISOStringToFormatedDate(child.job.endDatetime)))
@@ -359,12 +454,21 @@ export const WorklogSequence = (props) => {
                                 icon={FaPause}            
                             />
                             :
-                            <IconButton
-                                onClick={resumeJobHandler}
-                                text="Reanudar trabajo"
-                                type="button"
-                                icon={FaPlay}            
-                            />
+                            <>
+                                <IconButton
+                                    onClick={repeatJobHandler}
+                                    text="Reanudar trabajo"
+                                    type="button"
+                                    icon={FaRedoAlt}            
+                                />
+                                <IconButton
+                                    onClick={resumeJobHandler}
+                                    text="Reanudar trabajo sin pausa"
+                                    type="button"
+                                    icon={FaPlay}            
+                                />
+                            </>
+                            
                         )
                     }
                     {worklogObj.worklog.endDatetime === '' ?

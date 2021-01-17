@@ -1,6 +1,6 @@
 import React from 'react'
 import styled from 'styled-components'
-import { color, font, common } from '../../../styles/theme'
+import { color } from '../../../styles/theme'
 import { IconLink, IconButton } from '../common/icon-button'
 import { IconType} from 'react-icons'
 import { FormBuilder } from '../common/form/form'
@@ -67,7 +67,9 @@ export const BlockActions = (props) => {
                                     onSubmit = {action.onSubmit}
                                 />
                             )
-                        }                        
+                        }else{
+                            return (<></>)
+                        }                       
                     })
                     :
                     ''

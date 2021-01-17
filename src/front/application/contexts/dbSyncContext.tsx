@@ -19,6 +19,16 @@ export const SyncProvider = ({children}) => {
         if(action.hasOwnProperty('existsDb')){
             res.existsDb = action.existsDb
         }
+        
+        if(action.sync === true){
+            window.onbeforeunload = null
+        }else{
+            window.onbeforeunload = (e) => {
+                let message = "Hay cambios en la base de datos sin guardar. ¿Desea salir del sitio de todos modos?";                   
+                (e || window.event).returnValue = message; //Gecko + IE
+                return message;
+            }
+        }
         return {...res}
     },initialState)
     return (

@@ -1,6 +1,6 @@
 import React from 'react'
 import styled from 'styled-components'
-import { FaCheck, FaTimes } from 'react-icons/fa'
+import { FaCheck, FaTimes, FaTrash } from 'react-icons/fa'
 
 import { Worklog } from '../../../domain/worklog'
 import { Job } from '../../../domain/job'
@@ -11,11 +11,13 @@ import { BlockContainer, BlockHeaderComponent} from '../common/block'
 import { Spinner } from '../common/spinner'
 import { addJob } from 'src/front/application/addJob'
 import { updateJob } from 'src/front/application/updateJob'
+import { deleteJob } from 'src/front/application/deleteJob'
 import { SyncStateContext} from '../../../application/contexts/dbSyncContext'
 import { mapApiJobToComponent } from '../../../application/dtos/jobApiToComponent.dto'
 import { isEmpty } from 'lodash'
 import { TaskListComponent } from '../tasks/task-list.component'
 import { getTask } from 'src/front/application/getTask'
+import { Modal } from '../common/modal'
 
 const emptyJob: Job = {    
         id: '',
@@ -49,6 +51,7 @@ export const JobNewComponent = (props) => {
     const [title, setTitle] = React.useState<string>('Nuevo trabajo')
     const [submitError, setSubmitError] = React.useState<Error | null>(null)    
     const [mode, setMode] = React.useState(props.mode || 'new')
+    const [isOpened, setOpened] = React.useState<boolean>(false)
 
     React.useEffect(()=> {     
         if(props.job){
@@ -80,6 +83,31 @@ export const JobNewComponent = (props) => {
             setMode('new')
         }       
     },[])
+
+    
+    const closeModal = () => {  setOpened(false)}
+    const openModal = () => { setOpened(true)}
+
+    const handleDeleteJob = () => {
+        if(job){
+            setLoading(true)
+            deleteJob(job.id).then(
+                result => {
+                    setLoading(false)
+                    if(!result.hasError){
+                        setSync({sync: false})
+                        props.submit()
+                    }else{
+                        setSubmitError(new Error(result.error))
+                    }
+                },
+                error => {
+                    setLoading(false)
+                    setSubmitError(new Error(error))
+                }
+            )
+        }
+    }
 
     React.useEffect(()=> {
         if(mode === 'edit'){
@@ -137,6 +165,14 @@ export const JobNewComponent = (props) => {
                     onClick: props.cancel,
                     icon: FaTimes,
                     label: 'Cancelar',
+                    className: 'form-button-cancel button-icon'
+                },
+                {
+                    id: 'deleteBtn',
+                    type: 'button',
+                    onClick: openModal,
+                    icon: FaTrash,
+                    label: 'Borrar',
                     className: 'form-button-cancel button-icon'
                 }
             ]
@@ -210,7 +246,14 @@ export const JobNewComponent = (props) => {
         }
     }
     return (
-        <BlockContainer>            
+        <BlockContainer>         
+            <Modal 
+                title="Eliminar tarea" 
+                isOpened={isOpened} 
+                onClose={closeModal}
+                content="Esta acción es irreversible. ¿Desea continuar?"
+                type="confirm"
+                action={handleDeleteJob} />   
             <BlockHeaderComponent 
                 title={title}
             />  

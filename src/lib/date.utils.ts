@@ -20,10 +20,10 @@ export const formattedDateToDate = (d: string, dateFormat: string = 'dmy/', time
     }
 }
 
-export const ISOStringToFormatedDate = (d: string, dateFormat: string = 'dmy/', timeFormat : string = 'hm'): string => {
+export const ISOStringToFormatedDate = (d: string, mode: string = 'datetime', dateFormat: string = 'dmy/', timeFormat : string = 'hm'): string => {
     try{
         if(d.length > 0){
-            let dp : Datepicker = new Datepicker(null,null,{lang:'es', dateFormat: dateFormat, timeFormat: timeFormat})
+            let dp : Datepicker = new Datepicker(null,null,{lang:'es', mode: mode, dateFormat: dateFormat, timeFormat: timeFormat})
             dp.setDate(new Date(Date.parse(d)))
             return dp.getFullDateString()
         }else{

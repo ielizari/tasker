@@ -1,5 +1,5 @@
 import React from 'react'
-import { TaskObject, TaskDetail } from '../../../domain/task'
+import { TaskObject, TaskDetail, ConstObjectToSelectOptionsArray } from '../../../domain/task'
 import { getTaskList } from '../../../application/getTaskList'
 import styled from 'styled-components'
 import { color, common } from '../../../styles/theme';
@@ -191,6 +191,16 @@ export const TaskListComponent = (props) => {
                     type: 'text',
                     id: 'actionBarSearch',
                     placeholder: 'Buscar...'
+                },
+                {
+                    type: 'select',
+                    id: 'actionBarOrder',
+                    selOptions: ConstObjectToSelectOptionsArray( {
+                        low:        { label: "Baja",    value: "1"},
+                        medum:      { label: "Media",   value: "2"},
+                        high:       { label: "Alta",    value: "3"},
+                        extreme:    { label: "Extrema", value: "4"}
+                    })
                 },
                 {        
                     id: 'filterBtn',

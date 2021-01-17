@@ -1,8 +1,8 @@
 import React from 'react'
 import styled from 'styled-components'
 import { color } from '../../../styles/theme'
+import { Job} from 'src/front/domain/job'
 import { WorklogObject } from 'src/front/domain/worklog'
-import { JobObject, Job} from 'src/front/domain/job'
 import { getWorklogGrouped } from 'src/front/application/getWorklogGroupedData'
 import { elapsedTime, formatElapsedTime, formatElapsedTimeFromSeconds, ISOStringToFormatedDate } from '../../../../lib/date.utils'
 import { RunningElapsedTime } from './worklog-sequence.component'
@@ -75,16 +75,18 @@ const GroupedNode = (props: {node: TaskTreeItem, runningJobHandler?}) => {
         setNode(props.node)
     },[props.node])
 
+    React.useEffect(()=> {
+        if(props.runningJobHandler){
+            props.runningJobHandler(runningJobStart)
+        }      
+    },[runningJobStart])
+
     const handleRunningJob = () => {
         let start = node.jobs.filter(j => j.endDatetime === '')
-        if(start.length > 0){
-            if(props.runningJobHandler){
-                props.runningJobHandler(start[0].startDatetime)
-            }            
-            setRunningJobStart(start[0].startDatetime)
-            
+        if(start.length > 0){                  
+            setRunningJobStart(start[0].startDatetime)            
         }else{
-            setRunningJobStart(null)
+            setRunningJobStart(runningJobStart)
         }
     }   
 
@@ -145,23 +147,30 @@ const GroupedNode = (props: {node: TaskTreeItem, runningJobHandler?}) => {
     )
 }
 
-export const WorklogGrouped = (props: {className?: string, worklogid: string}) => {
+export const WorklogGrouped = (props: {className?: string, worklog: WorklogObject}) => {
     const [ groupedData, setGroupedData ] = React.useState(null)
+    const [worklog, setWorklog] = React.useState<WorklogObject>(null)
+
+    React.useEffect(()=> {
+        setWorklog(props.worklog)
+    },[])
 
     React.useEffect(() => {
-        getWorklogGrouped(props.worklogid).then(
-            result => {
-                if(!result.hasError){
-                    setGroupedData(result.data)
-                }else{
-                    console.log(result.error)
+        if(worklog){
+            getWorklogGrouped(worklog.worklog.id).then(
+                result => {
+                    if(!result.hasError){
+                        setGroupedData(result.data)
+                    }else{
+                        console.log(result.error)
+                    }
+                },
+                error => {
+                    console.log(error)
                 }
-            },
-            error => {
-                console.log(error)
-            }
-        )
-    }, [props.worklogid])
+            )
+        }
+    }, [worklog, props.worklog])
 
     return (
         <Container className={props.className ? props.className : ''}>

@@ -100,8 +100,8 @@ export const WorklogDetailComponent = (props) => {
         setConfirmedDelete(true)   
     }
 
-    const childHandler = () => {
-
+    const changeHandler = (worklog: WorklogObject) => {
+        setWorklog(worklog)
     }
 
     React.useEffect(() => {
@@ -265,12 +265,12 @@ export const WorklogDetailComponent = (props) => {
 
                             <WorklogGroupedContainer>
                                 <WorklogGroupedTitle>Resumen agrupado</WorklogGroupedTitle>
-                                <WorklogDetailGrouped worklogid={worklog.worklog.id}/>
+                                <WorklogDetailGrouped worklog={worklog} />
                             </WorklogGroupedContainer>
                         </WorklogDetailContainer>       
 
                         {worklog &&                            
-                            <WorklogSequence worklog={worklog} />                            
+                            <WorklogSequence worklog={worklog} worklogChangeHandler={changeHandler}/>                            
                         }                      
                     </>
                         

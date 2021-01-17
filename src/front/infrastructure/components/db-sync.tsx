@@ -89,7 +89,7 @@ export const DbSync = () => {
         isSyncedDb().then(
             result => {
                 if(!result.hasError){
-                    if(sync.sync === true && result.data === false){
+                    if(sync.sync === true && result.data === false){                        
                         setSync({sync: false})
                     }
                 }else{
