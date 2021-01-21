@@ -33,8 +33,11 @@ export const LoadDB = () => {
     const [error, setError] = React.useState<Error | null>(null)
     const [loading, setLoading] = React.useState<boolean>(false)
     const [submitSuccess, setSubmitSuccess] = React.useState<boolean>(false)
-    const [submitError, setSubmitError] = React.useState<Error | null>(null)
     const [setupView, setSetupView] = React.useState<string>('select')
+
+    React.useEffect(() => {
+        setTitle('Base de datos')
+    },[])
 
     const renderView = (): string => {
         if(setupView === 'newDB'){
@@ -56,15 +59,15 @@ export const LoadDB = () => {
             result => {
                 setLoading(false)
                 if(result.hasError){
-                    setSubmitError(error)                    
+                    setError(error)                    
                 }else{
                     setSubmitSuccess(true)
-                    setSync({existsDb: true})
+                    setSync({existsDb: true, sync:true})
                     
                 }                
             },
             error => {
-                setSubmitError(error)
+                setError(error)
                 setLoading(false)
             }
         )
@@ -116,14 +119,14 @@ export const LoadDB = () => {
             result => {
                 setLoading(false)
                 if(result.hasError){
-                    setSubmitError(error)
+                    setError(error)
                 }else{
                     setSubmitSuccess(true)
-                    setSync({existsDb: true})
+                    setSync({existsDb: true,sync:true})
                 }                
             },
             error => {
-                setSubmitError(error)
+                setError(error)
                 setLoading(false)
             }
         )
@@ -141,8 +144,8 @@ export const LoadDB = () => {
                     La base de datos se ha importado correctamente
                 </div>  
             }
-            {submitError &&
-                <div aria-label='error-message' className='message-error'>{submitError.message}</div>
+            {error &&
+                <div aria-label='error-message' className='message-error'>{error.message}</div>
             }
             
             {renderView() === 'select' &&

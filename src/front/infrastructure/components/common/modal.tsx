@@ -74,12 +74,7 @@ const DialogButtons = styled.div`
 
 `
 
-export const ModalWithComponent = ({isOpened, onClose, component, resultHandler}) => {
-    let Component = component || null
-
-    React.useEffect(()=> {
-        Component = component      
-    },[component])
+export const ModalWithComponent = ({isOpened, onClose, Component, resultHandler}) => {    
 
     return(
         <>
@@ -90,7 +85,7 @@ export const ModalWithComponent = ({isOpened, onClose, component, resultHandler}
                             onClose(e)
                     }}>
                         <DialogContent id="modalContent" role="document">                            
-                            <Component resultHandler={resultHandler}/>
+                            <Component resultHandler={resultHandler} />
                         </DialogContent>
                     </DialogWrapper>
                     , modalContainer

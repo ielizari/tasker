@@ -60,16 +60,25 @@ const GroupedNode = (props: {node: TaskTreeItem, runningJobHandler?}) => {
     const showChildrenItems = () => { setShowChildren(true)}
     const hideChildrenItems = () => { setShowChildren(false)}
 
+    const handleChildRunningJob = (start: string) => {
+        setRunningJobStart(start)
+    }
+
     React.useEffect(() => {
         if(node && node.title === 'root'){
             setShowChildren(true)
         }
         if(node){
             setNodeElapsedSeconds(node.timeInSeconds)
-            handleRunningJob()
+            let start = node.jobs.filter(j => j.endDatetime === '')
+            if(start.length > 0){                  
+                setRunningJobStart(start[0].startDatetime)            
+            }else{
+                setRunningJobStart(runningJobStart)
+            }
         }
         
-    },[node])
+    },[node,runningJobStart])
 
     React.useEffect(()=>{
         setNode(props.node)
@@ -79,20 +88,8 @@ const GroupedNode = (props: {node: TaskTreeItem, runningJobHandler?}) => {
         if(props.runningJobHandler){
             props.runningJobHandler(runningJobStart)
         }      
-    },[runningJobStart])
+    },[runningJobStart,props])    
 
-    const handleRunningJob = () => {
-        let start = node.jobs.filter(j => j.endDatetime === '')
-        if(start.length > 0){                  
-            setRunningJobStart(start[0].startDatetime)            
-        }else{
-            setRunningJobStart(runningJobStart)
-        }
-    }   
-
-    const handleChildRunningJob = (start: string) => {
-        setRunningJobStart(start)
-    }
     return (
         <>
         {node &&
@@ -153,7 +150,7 @@ export const WorklogGrouped = (props: {className?: string, worklog: WorklogObjec
 
     React.useEffect(()=> {
         setWorklog(props.worklog)
-    },[])
+    },[props.worklog])
 
     React.useEffect(() => {
         if(worklog){

@@ -70,6 +70,10 @@ export const TaskNewComponent = (props) => {
         else setTitle('Nueva tarea')
     },[mode])
 
+    React.useEffect(()=> {
+        setMode(props.mode)
+    },[props.mode])
+
     React.useEffect(()=> {   
         let cancelled = false    
         if(taskid){
@@ -112,7 +116,7 @@ export const TaskNewComponent = (props) => {
             setTask(null); 
             cancelled = true   
         } 
-    },[])
+    },[mode,taskid])
 
     
     const statusItems = ConstObjectToSelectOptionsArray(TaskStatus)
@@ -136,7 +140,7 @@ export const TaskNewComponent = (props) => {
                 label: 'Autor'
             },
             {
-                type: 'date2',
+                type: 'date',
                 id: 'limitDate',
                 label: 'Fecha límite'
             },
@@ -203,11 +207,12 @@ export const TaskNewComponent = (props) => {
         }
         const onSubmit = (values: TaskDetail, helpers) => {
             setLoading(true)
-            console.log(values)
-            if(mode === 'new' || mode=='child'){
+            if(mode === 'new' || mode==='child'){
                 addTask(values)
                     .then(                            
                         (result) => {
+                            helpers.setSubmitting(false); 
+                            setLoading(false)
                             if(!result.hasError){
                                 setSubmitSuccess(result.data.task)
                                 setSubmitError(null)
@@ -216,9 +221,7 @@ export const TaskNewComponent = (props) => {
                             }else{
                                 setSubmitSuccess(null);
                                 setSubmitError(new Error(result.error));                                      
-                            }
-                            helpers.setSubmitting(false); 
-                            setLoading(false)
+                            }                            
                         },
                         (error) => {
                             console.log(error)
@@ -232,6 +235,8 @@ export const TaskNewComponent = (props) => {
                 updateTask(values)
                     .then(                            
                         (result) => {
+                            helpers.setSubmitting(false); 
+                            setLoading(false)
                             if(!result.hasError){                                        
                                 setSubmitSuccess(result.data.task); 
                                 setTask(null)                                     
@@ -241,10 +246,8 @@ export const TaskNewComponent = (props) => {
                             }else{
                                 setSubmitSuccess(null);
                                 setSubmitError(new Error(result.error));                                      
-                            }
-                            helpers.setSubmitting(false); 
-                            setLoading(false)
-                        },
+                            }                            
+                        },                        
                         (error) => {
                             console.log(error)
                             helpers.setSubmitting(false);
@@ -264,11 +267,14 @@ export const TaskNewComponent = (props) => {
             {loading ? <Spinner /> : ''}            
             {submitSuccess &&                
                 <div aria-label='success-message' className='message-success'>                    
-                    La {mode=='child' ? 'subtarea' : 'tarea'} <Link to={'/tasks/'+ submitSuccess.id}>'{submitSuccess.title}'</Link> ha sido {mode === 'new' ? 'creada':'editada'} con éxito.
+                    La {mode==='child' ? 'subtarea' : 'tarea'} <Link to={'/tasks/'+ submitSuccess.id}>'{submitSuccess.title}'</Link> ha sido {mode === 'new' ? 'creada':'editada'} con éxito.
                 </div>  
             }
             {submitError &&
                 <div aria-label='error-message' className='message-error'>{submitError.message}</div>
+            }
+            {error &&
+                <div aria-label='error-message' className='message-error'>{error.message}</div>
             }
             {parentTask &&
                 <ParentTaskReference to={`/tasks/${parentTask.id}`}>

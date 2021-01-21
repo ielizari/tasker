@@ -43,7 +43,7 @@ export const Spinner = (props) => {
     const [message,setMessage] = React.useState<string>('Cargando ...')
     React.useEffect(() => {
         props.message? setMessage(props.message) : setMessage('Cargando ...')
-    },[])
+    },[props.message])
 
     return (
         <Container>

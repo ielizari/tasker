@@ -17,10 +17,18 @@ jobs:
       uses: actions/setup-node@v2-beta
       with:
         node-version: '12'
-      
-    - name: 🔨 Build Project
+
+    - name: 🔨 Install packages
       run: |
         npm install
+        npm run build
+
+    - name: 🔨 Run tests
+      run: |
+        npm run test  
+
+    - name: 🔨 Build Project
+      run: |
         npm run build
         
     - name: 📂 Sync files

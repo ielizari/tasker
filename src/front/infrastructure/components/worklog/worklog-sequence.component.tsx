@@ -1,7 +1,7 @@
 import React from 'react'
 import styled from 'styled-components'
 import { color } from '../../../styles/theme'
-import { dateToFormattedDate, elapsedTime, formatElapsedTime, formattedDateToDate, ISOStringToFormatedDate } from '../../../../lib/date.utils'
+import { dateToFormattedDate, elapsedTime, formatElapsedTime, formattedDateToDate, formattedDateToISOString, ISOStringToFormatedDate } from '../../../../lib/date.utils'
 
 import { WorklogObject } from '../../../domain/worklog'
 import { Job, JobObject } from '../../../domain/job'
@@ -90,14 +90,10 @@ export const RunningElapsedTime = (props: {start, initialSeconds?}) => {
     const [initialSeconds, setInitialSeconds] = React.useState<number>(0)
     const [diff, setDiff] = React.useState(null) 
 
-    const calculateDiff = (): string => {
-        return formatElapsedTime(
-            elapsedTime(
-                ISOStringToFormatedDate(start,'datetime','dmy/','hms'),
-                ISOStringToFormatedDate(new Date().toISOString(),'datetime','dmy/','hms')
-            ) + initialSeconds
-        )
-    }
+    React.useEffect(() => {
+        setStart(props.start)
+    },[props.start])
+
     React.useEffect(() => {        
         if(props.initialSeconds){
             setInitialSeconds(props.initialSeconds*1000)
@@ -107,14 +103,16 @@ export const RunningElapsedTime = (props: {start, initialSeconds?}) => {
     },[props.initialSeconds])
 
     React.useEffect(() => {
-        setDiff(calculateDiff())
         const interval = setInterval(() => {   
-            setDiff(calculateDiff()) 
+            setDiff(formatElapsedTime(
+                elapsedTime(
+                    ISOStringToFormatedDate(start,'datetime','dmy/','hms'),
+                    ISOStringToFormatedDate(new Date().toISOString(),'datetime','dmy/','hms')
+                ) + initialSeconds
+            ))
         }, 500);
         return () => clearInterval(interval);
-      }, [initialSeconds]);
-    
-
+      }, [initialSeconds,start]);   
     
     return(
         <>
@@ -134,18 +132,83 @@ export const WorklogSequence = (props: {worklog: WorklogObject, worklogChangeHan
     const [ pausedJob, setPausedJob ] = React.useState<Job>(null)
 
     React.useEffect(() => {
-        if(!pausedJob && sequence.length > 1 && isPause(sequence[sequence.length-1])){
+        if(sequence.length > 1 && isPause(sequence[sequence.length-1])){
             setPausedJob((sequence[sequence.length-2] as JobObject).job)
         }else{
             setPausedJob(null)
         }
     },[sequence])
 
-    React.useEffect(()=>{
-        if(props.worklogChangeHandler){
-            props.worklogChangeHandler(worklogObj)
+    React.useEffect(() => {
+        setWorklogObj(props.worklog)
+    },[props.worklog])
+
+    React.useEffect(() => {
+        
+        let res : Array<JobObject | Pause | Day> = []
+    
+        if(worklogObj){
+    
+            let sortedJobs = worklogObj.childJobs.sort((a,b) => {
+                if(a.job.startDatetime > b.job.startDatetime){
+                    return 1
+                }else if(a.job.startDatetime < b.job.startDatetime){
+                    return -1
+                }else{
+                    return 0
+                }
+            })
+        
+            let actualDate: Date
+            for (let i=0; i< sortedJobs.length; i++){
+                if(res.length === 0){
+                    actualDate = formattedDateToDate(ISOStringToFormatedDate(sortedJobs[i].job.startDatetime))
+                    let day : Day = {
+                        date: actualDate.getDate() + '/' + (actualDate.getMonth()+1) + '/' + actualDate.getFullYear()
+                    }
+                    res.push(day)
+                }else{
+                    if(isJob(res[res.length-1])){
+                        let lastItem: Job = (res[res.length-1] as JobObject).job
+                        let start = formattedDateToDate(ISOStringToFormatedDate(lastItem.startDatetime))
+                        let end = lastItem.endDatetime !== '' ? formattedDateToDate(ISOStringToFormatedDate(lastItem.endDatetime)) : new Date()
+                        if(start.getDate() !== end.getDate()){
+                            let newDay: Day = {
+                                date: end.getDate() + '/' + (end.getMonth()+1) + '/' + end.getFullYear()
+                            }
+                            res.push(newDay)
+                        }
+                    }else if (isPause(res[res.length-1])){
+                        let lastItem = res[res.length-1] as Pause
+                        let start = formattedDateToDate(ISOStringToFormatedDate(lastItem.startDatetime))
+                        let end = lastItem.endDatetime !== '' ? formattedDateToDate(ISOStringToFormatedDate(lastItem.endDatetime)) : new Date()
+                        if(start.getDate() !== end.getDate()){
+                            let newDay: Day = {
+                                date: end.getDate() + '/' + (end.getMonth()+1) + '/' + end.getFullYear()
+                            }
+                            res.push(newDay)
+                        }
+                    }
+                        
+                }
+                res.push(sortedJobs[i])
+                if(i+1 < sortedJobs.length  && sortedJobs[i].job.endDatetime < sortedJobs[i+1].job.startDatetime){
+                    let pause : Pause = {
+                        startDatetime: sortedJobs[i].job.endDatetime,
+                        endDatetime: sortedJobs[i+1].job.startDatetime
+                    }
+                    res.push(pause)
+                }else if(i+1 >= sortedJobs.length && sortedJobs[i].job.endDatetime !== '' && (worklogObj.worklog.endDatetime === '' || worklogObj.worklog.endDatetime > sortedJobs[i].job.endDatetime)){                
+                    let pause : Pause = {
+                        startDatetime: sortedJobs[i].job.endDatetime,
+                        endDatetime: formattedDateToISOString(worklogObj.worklog.endDatetime)
+                    }                
+                    res.push(pause)
+                }       
+            }
         }
-        setSequence(fillSequenceTable())
+        
+        setSequence(res)
     },[worklogObj])
 
     const addJobHandler = (job: Job = null) => {
@@ -242,7 +305,11 @@ export const WorklogSequence = (props: {worklog: WorklogObject, worklogChangeHan
             result => {
                 if(!result.hasError){
                     setSync({sync: false})
-                    setWorklogObj(result.data)
+                    if(props.worklogChangeHandler){
+                        props.worklogChangeHandler(result.data)
+                    }else{
+                        setWorklogObj(result.data)
+                    }
                 }else{
                     console.log(result.error)
                 }
@@ -259,7 +326,11 @@ export const WorklogSequence = (props: {worklog: WorklogObject, worklogChangeHan
             result => {
                 if(!result.hasError){
                     setSync({sync: false})
-                    setWorklogObj(result.data)
+                    if(props.worklogChangeHandler){
+                        props.worklogChangeHandler(result.data)
+                    }else{
+                        setWorklogObj(result.data)
+                    }
                 }else{
                     console.log(result.error)
                 }
@@ -275,7 +346,11 @@ export const WorklogSequence = (props: {worklog: WorklogObject, worklogChangeHan
         getWorklog(worklogObj.worklog.id).then(
             result => {
                 if(!result.hasError){
-                    setWorklogObj(result.data)
+                    if(props.worklogChangeHandler){
+                        props.worklogChangeHandler(result.data)
+                    }else{
+                        setWorklogObj(result.data)
+                    }
                 }else{
                     console.log(result.error)
                     setWorklogObj(null)
@@ -285,74 +360,6 @@ export const WorklogSequence = (props: {worklog: WorklogObject, worklogChangeHan
                 throw error
             }
         )
-    }
-
-    const fillSequenceTable = () => {
-        let res : Array<JobObject | Pause | Day> = []
-
-        if(!worklogObj){
-            return res
-        }
-
-        let sortedJobs = worklogObj.childJobs.sort((a,b) => {
-            if(a.job.startDatetime > b.job.startDatetime){
-                return 1
-            }else if(a.job.startDatetime < b.job.startDatetime){
-                return -1
-            }else{
-                return 0
-            }
-        })
-
-        let actualDate: Date
-        for (let i=0; i< sortedJobs.length; i++){
-            if(res.length === 0){
-                actualDate = formattedDateToDate(ISOStringToFormatedDate(sortedJobs[i].job.startDatetime))
-                let day : Day = {
-                    date: actualDate.getDate() + '/' + (actualDate.getMonth()+1) + '/' + actualDate.getFullYear()
-                }
-                res.push(day)
-            }else{
-                if(isJob(res[res.length-1])){
-                    let lastItem: Job = (res[res.length-1] as JobObject).job
-                    let start = formattedDateToDate(ISOStringToFormatedDate(lastItem.startDatetime))
-                    let end = lastItem.endDatetime !== '' ? formattedDateToDate(ISOStringToFormatedDate(lastItem.endDatetime)) : new Date()
-                    if(start.getDate() !== end.getDate()){
-                        let newDay: Day = {
-                            date: end.getDate() + '/' + (end.getMonth()+1) + '/' + end.getFullYear()
-                        }
-                        res.push(newDay)
-                    }
-                }else if (isPause(res[res.length-1])){
-                    let lastItem = res[res.length-1] as Pause
-                    let start = formattedDateToDate(ISOStringToFormatedDate(lastItem.startDatetime))
-                    let end = lastItem.endDatetime !== '' ? formattedDateToDate(ISOStringToFormatedDate(lastItem.endDatetime)) : new Date()
-                    if(start.getDate() !== end.getDate()){
-                        let newDay: Day = {
-                            date: end.getDate() + '/' + (end.getMonth()+1) + '/' + end.getFullYear()
-                        }
-                        res.push(newDay)
-                    }
-                }
-                
-            }
-            res.push(sortedJobs[i])
-            if(i+1 < sortedJobs.length  && sortedJobs[i].job.endDatetime < sortedJobs[i+1].job.startDatetime){
-                let pause : Pause = {
-                    startDatetime: sortedJobs[i].job.endDatetime,
-                    endDatetime: sortedJobs[i+1].job.startDatetime
-                }
-                res.push(pause)
-            }else if(i+1 >= sortedJobs.length && sortedJobs[i].job.endDatetime !== '' && (worklogObj.worklog.endDatetime === '' || worklogObj.worklog.endDatetime > sortedJobs[i].job.endDatetime)){                
-                let pause : Pause = {
-                    startDatetime: sortedJobs[i].job.endDatetime,
-                    endDatetime: worklogObj.worklog.endDatetime
-                }                
-                res.push(pause)
-            }       
-        }
-        console.log(res)
-        return res
     }
 
     const isPause = (object: any): object is Pause => {

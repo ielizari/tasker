@@ -42,7 +42,7 @@ function App() {
             setLoading(false)
           }
       )
-  }, [])
+  }, [setSync])
 
   return (
     <RunningWorklogsProvider>

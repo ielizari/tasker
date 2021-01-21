@@ -89,18 +89,11 @@ export const TaskDetailComponent = (props) => {
     const [priorityLabel, setPriorityLabel ] = React.useState<string>('')
     const [confirmedDelete, setConfirmedDelete ] = React.useState<boolean>(false)
     
-    const confirmDelete = () =>{
-        openModal()        
-    }
     const handleDelete = () => {
         setOpened(false)
         setLoading(true)
         setConfirmedDelete(true)   
-    }
-
-    const childHandler = () => {
-
-    }
+    }    
 
     React.useEffect(() => {
         let cancelled = false
@@ -127,34 +120,33 @@ export const TaskDetailComponent = (props) => {
         }
 
         return () => cancelled = true;
-    },[confirmedDelete])
+    },[confirmedDelete,taskid,setSync])
 
     const closeModal = () => {  setOpened(false)}
-    const openModal = () => { setOpened(true)}
-
-    let actionItems = [
-        {
-            icon: FaEdit,
-            text: 'Editar',
-            route: `/tasks/edit/${taskid}`,
-            type: 'link'
-        },
-        {
-            icon: FaTrashAlt,
-            text: 'Borrar',
-            type: 'button',
-            handler: confirmDelete
-        },
-        {
-            icon: FaPlus,
-            text: 'Subtarea',
-            route: `/tasks/new/${taskid}`,
-            type: 'link'
-        }
-    ]
+    const openModal = () => { setOpened(true)}    
 
     React.useEffect(() => {
         let cancelled = false;
+        let actionItems = [
+            {
+                icon: FaEdit,
+                text: 'Editar',
+                route: `/tasks/edit/${taskid}`,
+                type: 'link'
+            },
+            {
+                icon: FaTrashAlt,
+                text: 'Borrar',
+                type: 'button',
+                handler: openModal
+            },
+            {
+                icon: FaPlus,
+                text: 'Subtarea',
+                route: `/tasks/new/${taskid}`,
+                type: 'link'
+            }
+        ]
         setActions(actionItems)
         setLoading(true)
         getTask(taskid)
@@ -188,6 +180,7 @@ export const TaskDetailComponent = (props) => {
         
             return () => cancelled = true
     },[taskid])
+    
     return (        
         <BlockContainer>
             <Modal 

@@ -2,8 +2,6 @@ import React from 'react'
 import styled from 'styled-components'
 import { color, common } from '../../../styles/theme'
 import { Link } from 'react-router-dom'
-import {IconType} from 'react-icons'
-import { BlockActions } from './block-actions'
 
 const LinkWrapper = styled(Link)`  
     display: inline-flex;
@@ -49,15 +47,16 @@ const TextWrapper = styled.div`
 
 export const IconButton = (props) => {
     const [text, setText] = React.useState('')  
-    let Icon = props.icon || null
+    const [Icon, setIcon] = React.useState(null)
 
     React.useEffect(()=> {
-        Icon = props.icon
+        setIcon(props.icon)
     },[props.icon])
     
     React.useEffect(()=> {
         setText(props.text)
     },[props.text])
+    
 
     return (
         <ButtonWrapper
@@ -67,7 +66,7 @@ export const IconButton = (props) => {
             aria-label={props.text}
             type={props.type}
         >
-            <IconWrapper className={props.className}><Icon/></IconWrapper>       
+            <IconWrapper className={props.className}>{Icon}</IconWrapper>       
             {text && 
                 <TextWrapper>{text}</TextWrapper>
             }
@@ -79,11 +78,10 @@ export const IconButton = (props) => {
 export const IconLink = (props) => {
     const [route, setRoute] = React.useState(props.route || '')
     const [text, setText] = React.useState(props.text || '')
-
-    let Icon = props.icon || null
+    const [Icon, setIcon] = React.useState(null)
 
     React.useEffect(()=> {
-        Icon = props.icon      
+        setIcon(props.icon)
     },[props.icon])
 
     React.useEffect(()=> {
@@ -102,7 +100,7 @@ export const IconLink = (props) => {
             role="button"
             aria-label={text}
             >
-            <IconWrapper className={props.className}><Icon /></IconWrapper>
+            <IconWrapper className={props.className}>{Icon}</IconWrapper>
             {text && 
                 <TextWrapper>{text}</TextWrapper>
             }

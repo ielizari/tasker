@@ -91,9 +91,6 @@ export const WorklogDetailComponent = (props) => {
     const [isOpened, setOpened] = React.useState(false)
     const [confirmedDelete, setConfirmedDelete ] = React.useState<boolean>(false)
     
-    const confirmDelete = () =>{
-        openModal()        
-    }
     const handleDelete = () => {
         setOpened(false)
         setLoading(true)
@@ -129,34 +126,33 @@ export const WorklogDetailComponent = (props) => {
         }
 
         return () => cancelled = true;
-    },[confirmedDelete])
+    },[confirmedDelete,worklogid,setSync])
 
     const closeModal = () => {  setOpened(false)}
-    const openModal = () => { setOpened(true)}
-
-    let actionItems = [
-        {
-            icon: FaEdit,
-            text: 'Editar',
-            route: `/worklogs/edit/${worklogid}`,
-            type: 'link'
-        },
-        {
-            icon: FaTrashAlt,
-            text: 'Borrar',
-            type: 'button',
-            handler: confirmDelete
-        },
-        {
-            icon: FaPlus,
-            text: 'Añadir trabajo',
-            route: `/worklog/new/${worklogid}`,
-            type: 'link'
-        }
-    ]
+    const openModal = () => { setOpened(true)}    
 
     React.useEffect(() => {
         let cancelled = false;
+        let actionItems = [
+            {
+                icon: FaEdit,
+                text: 'Editar',
+                route: `/worklogs/edit/${worklogid}`,
+                type: 'link'
+            },
+            {
+                icon: FaTrashAlt,
+                text: 'Borrar',
+                type: 'button',
+                handler: openModal
+            },
+            {
+                icon: FaPlus,
+                text: 'Añadir trabajo',
+                route: `/worklog/new/${worklogid}`,
+                type: 'link'
+            }
+        ]
         setActions(actionItems)
         setLoading(true)
         getWorklog(worklogid)

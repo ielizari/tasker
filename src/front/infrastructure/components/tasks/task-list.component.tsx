@@ -58,7 +58,6 @@ const TaskChildContainer = styled.div`
 const TaskListItem = (props: {item: TaskObject, resultHandler? } ) => {
     const [showChildren, setShowChildren] = React.useState<boolean>(false)  
     const [ childrenTasks, setChildrenTasks ] = React.useState<Array<TaskObject>>([])
-    const [error, setError] = React.useState<String>(null)
     const [loading, setLoading] = React.useState<boolean>(false)
     
     const loadChildren = () => {
@@ -66,17 +65,16 @@ const TaskListItem = (props: {item: TaskObject, resultHandler? } ) => {
             .then(
                 (result) => {
                     if(result.hasError){
-                        setError(result.error);
+                        console.log(result.error);
                         setChildrenTasks([])
                     }else{
                         console.log(result)
-                        setChildrenTasks(result.data); 
-                        setError(null);
+                        setChildrenTasks(result.data)
                     }                        
                     setLoading(false)                        
                 },
                 (error) => {
-                    setError(error)
+                    console.log(error)
                     setLoading(false)   
                 }
             )
@@ -145,6 +143,46 @@ export const TaskListComponent = (props) => {
     React.useEffect(() => {  
         let cancelled = false
         setLoading(true)
+        let actionItems = [
+            {
+                icon: FaPlus,
+                text: 'Nueva tarea',
+                route: `/tasks/new`,
+                type: 'link'
+            },
+            {
+                view: 'actionBar',
+                type: 'form',         
+                key: 'actionBarFilterForm',   
+                initValues: {actionBarSearch: ''},
+                onSubmit: searchHandler,
+                validation: validation,
+                items: [
+                    {
+                        type: 'text',
+                        id: 'actionBarSearch',
+                        placeholder: 'Buscar...'
+                    },
+                    {
+                        type: 'select',
+                        id: 'actionBarOrder',
+                        selOptions: ConstObjectToSelectOptionsArray( {
+                            low:        { label: "Baja",    value: "1"},
+                            medum:      { label: "Media",   value: "2"},
+                            high:       { label: "Alta",    value: "3"},
+                            extreme:    { label: "Extrema", value: "4"}
+                        })
+                    },
+                    {        
+                        id: 'filterBtn',
+                        type: 'submit',
+                        icon: FaFilter,
+                        label: 'Filtrar',
+                        className: 'button-icon'
+                    }
+                ]            
+            },        
+        ]
         setActions(actionItems)
         getTaskList(filters)
             .then(
@@ -170,48 +208,8 @@ export const TaskListComponent = (props) => {
             )
         
         return () => cancelled = true
-    },[filters])    
+    },[filters])        
     
-    let actionItems = [
-        {
-            icon: FaPlus,
-            text: 'Nueva tarea',
-            route: `/tasks/new`,
-            type: 'link'
-        },
-        {
-            view: 'actionBar',
-            type: 'form',         
-            key: 'actionBarFilterForm',   
-            initValues: {actionBarSearch: ''},
-            onSubmit: searchHandler,
-            validation: validation,
-            items: [
-                {
-                    type: 'text',
-                    id: 'actionBarSearch',
-                    placeholder: 'Buscar...'
-                },
-                {
-                    type: 'select',
-                    id: 'actionBarOrder',
-                    selOptions: ConstObjectToSelectOptionsArray( {
-                        low:        { label: "Baja",    value: "1"},
-                        medum:      { label: "Media",   value: "2"},
-                        high:       { label: "Alta",    value: "3"},
-                        extreme:    { label: "Extrema", value: "4"}
-                    })
-                },
-                {        
-                    id: 'filterBtn',
-                    type: 'submit',
-                    icon: FaFilter,
-                    label: 'Filtrar',
-                    className: 'button-icon'
-                }
-            ]            
-        },        
-    ]
      return (
         <BlockContainer>
             <BlockHeaderComponent 

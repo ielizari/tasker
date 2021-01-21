@@ -1,7 +1,7 @@
 import React from 'react'
 import styled from 'styled-components'
 import { color, common } from '../../../../styles/theme';
-import { Formik, Form, Field, useField, useFormikContext } from 'formik'
+import { Formik, Form, Field, useField } from 'formik'
 import { IconButton, IconLink } from '../icon-button'
 import { ModalWithComponent } from '../modal'
 
@@ -124,9 +124,9 @@ export const FormSelectFromComponent : React.FC<any> = ({label, buttonLabel, sel
             <ModalWithComponent
                 isOpened={isOpened} 
                 onClose={hideWidget}
-                component={component}
+                Component={component}
                 resultHandler={selectResultHandler}
-                 />
+                />
             <label htmlFor={props.id || props.name} >{label}</label>
             <input type="hidden" name={props.id} />
             <FormInputWithIconWrapper >                
@@ -148,31 +148,37 @@ export const FormSelectFromComponent : React.FC<any> = ({label, buttonLabel, sel
     )
 }
 
-export const FormDateInput2 :React.FC<any> = ({label, minDate, maxDate, ...props}) => {
+export const FormDateInput :React.FC<any> = ({label, minDate, maxDate, ...props}) => {
     const [field, meta, {setValue, setTouched}] = useField(props)
     const [dp, setDp] = React.useState(null)
-    
+
     const showDp = () => {
         dp.show()
-    }
-    
+    }    
+    const handleChange = React.useCallback(() => {
+        setValue(dp.getFullDateString() || '')
+        setTouched(true)        
+    },[setValue,setTouched,dp])
+
+    React.useEffect(()=>{
+        if(dp){
+            dp.onSubmit = handleChange
+        }
+    },[dp, handleChange])
+
     React.useEffect(()=> {
         let options : any = {
             lang: 'es'
         }
-        if(props.minDate){
-            options.minDate = props.minDate
+        if(minDate){
+            options.minDate = minDate
         }
-        if(props.maxDate){
-            options.maxDate = props.maxDate
+        if(maxDate){
+            options.maxDate = maxDate
         }
         let picker : Datepicker = new Datepicker(props.id,label,options)
-        picker.onSubmit = function(){
-            setValue(this.getFullDateString())
-            setTouched(true)
-        }
         setDp(picker)
-    },[])
+    },[label,minDate,maxDate,props.id])
     
     return (
         <FormItemWrapper>
@@ -182,40 +188,6 @@ export const FormDateInput2 :React.FC<any> = ({label, minDate, maxDate, ...props
                 <Field 
                     {...field} 
                     {...props}
-                    aria-label={props.id || props.name}
-                />
-            </FormInputWithIconWrapper>
-            {meta.touched && meta.error ? (
-                <div aria-label={'validate_' + (props.id || props.name)} className="form-item-error">{meta.error}</div>
-            ): null}
-        </FormItemWrapper>
-    )
-}
-
-export const FormDateInput :React.FC<any> = ({label, icon, handler, dateText, ...props}) => {
-    const [field, meta, {setValue, setTouched}] = useField(props)
-    const [inputIcon, setInputIcon] = React.useState(null)
-
-    React.useEffect(()=> {
-        setInputIcon(icon)
-    },[])
-    React.useEffect(()=>{ 
-        setValue(dateText)
-        setTouched(true)
-    },[dateText])
-
-    return (
-        <FormItemWrapper>
-            <label htmlFor={props.id || props.name}>{label}</label>
-            <FormInputWithIconWrapper >
-                {inputIcon ?
-                    <FormInputIcon key={props.id || props.name + '_icon'} onClick={handler}>{inputIcon}</FormInputIcon>
-                    :
-                    ''
-                }
-                <Field 
-                    {...field} 
-                    {...props}    
                     aria-label={props.id || props.name}
                 />
             </FormInputWithIconWrapper>
@@ -247,20 +219,19 @@ export const FormSelect: React.FC<any> = ({ label, selOptions, ...props }) => {
   };
 
   export const FormFileupload: React.FC<any> = ({label, ...props}) => {
-      const [field, meta,{setValue,setTouched}] = useField(props)
-      const {setFieldValue} = useFormikContext()
+      const [field, meta,{setValue}] = useField(props)
       
         return(
             <FormItemWrapper>
                 {label && <label htmlFor={props.id || props.name}>{label}</label>}            
                 <input 
                     {...props}
+                    name={field.name}
                     type="file" 
                     onChange={(event)=>{
-                        setFieldValue(props.id,event.currentTarget.files[0])
+                        setValue(event.currentTarget.files[0])
                     }}
-                    key={props.key}
-                    name={props.name}            
+                    key={props.key}      
                     aria-label={props.id || props.name} />
                 {meta.touched && meta.error ? (
                     <div aria-label={'validate_' + (props.id || props.name)} className="form-item-error">{meta.error}</div>
@@ -310,9 +281,10 @@ export const FormBuilder: React.FC<any> = (props) => {
       const [items, setItems] = React.useState(props.formItems || null)
       const [view, setView ] = React.useState(props.formView || null)
 
-      React.useEffect(() => {
+      React.useEffect(() => {     
         setItems(props.formItems)
-      },[])
+        setView(props.formView)
+      },[props.formItems,props.formView])
 
       return (
           <>
@@ -322,8 +294,8 @@ export const FormBuilder: React.FC<any> = (props) => {
                 enableReinitialize
                 initialValues={props.initValues}               
                 validate = {props.validation}
-                onSubmit = {(values,{setSubmitting, resetForm}) => {  
-                    props.onSubmit(values,{setSubmitting, resetForm})
+                onSubmit = {(values,{setSubmitting, resetForm}) => {
+                    props.onSubmit(values,{setSubmitting, resetForm})                    
                 }}            
             >
                 {(props) =>  {
@@ -344,15 +316,12 @@ export const FormBuilder: React.FC<any> = (props) => {
                                     }else if(item.type === 'date'){
                                         return (
                                             <FormDateInput 
-                                                    label={item.label}
-                                                    name={item.id}
-                                                    key={item.id}
-                                                    type="text"
-                                                    id={item.id}
-                                                    icon={item.icon}
-                                                    handler={item.handler}   
-                                                    dateText={item.dateText}                    
-                                                />   
+                                                label={item.label}
+                                                name={item.id}
+                                                key={item.id}
+                                                type="text"
+                                                id={item.id}                                                                        
+                                            />   
                                         )
                                     }else if(item.type === 'select'){
                                         return (
@@ -385,6 +354,8 @@ export const FormBuilder: React.FC<any> = (props) => {
                                                     className={item.className}
                                                 />
                                         )
+                                    }else{
+                                        return (<></>)
                                     }
                                 })
                             }
@@ -416,23 +387,10 @@ export const FormBuilder: React.FC<any> = (props) => {
                                                 label={item.label}
                                                 placeholder={item.placeholder}                           
                                             />
-                                        )
+                                        )                                    
                                     }else if(item.type === 'date'){
-                                        return (
-                                            <FormDateInput 
-                                                    label={item.label}
-                                                    name={item.id}
-                                                    key={item.id}
-                                                    type="text"
-                                                    id={item.id}
-                                                    icon={item.icon}
-                                                    handler={item.handler}   
-                                                    dateText={item.dateText}                    
-                                                />   
-                                        )
-                                    }else if(item.type === 'date2'){
                                             return (
-                                                <FormDateInput2
+                                                <FormDateInput
                                                         label={item.label}
                                                         name={item.id}
                                                         key={item.id}
@@ -514,7 +472,6 @@ export const FormBuilder: React.FC<any> = (props) => {
                                                                 text={button.label}
                                                                 icon={button.icon}
                                                                 route={button.route}
-                                                                type="button"
                                                                 className={button.className}
                                                             />
                                                         )
@@ -530,10 +487,12 @@ export const FormBuilder: React.FC<any> = (props) => {
                                                             />
                                                         )
                                                     }
-                                                }) 
+                                                })
                                             }
-                                            </FormButtons>         
-                                        )                              
+                                            </FormButtons>
+                                        )
+                                    }else{
+                                        return (<></>)
                                     }
                                     
                                 })

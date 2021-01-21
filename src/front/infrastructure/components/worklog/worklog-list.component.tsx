@@ -42,6 +42,38 @@ export const WorklogListComponent = ( props ) => {
     React.useEffect(() => {
         let cancelled = false
         setLoading(true)
+        let actionItems = [
+            {
+                icon: FaPlus,
+                text: 'Nuevo parte',
+                route: `/worklogs/new`,
+                type: 'link'
+            },
+            {
+                view: 'actionBar',
+                type: 'form',         
+                key: 'actionBarFilterForm',   
+                initValues: {actionBarSearch: ''},
+                onSubmit: searchHandler,
+                validation: validation,
+                items: [
+                    {
+                        type: 'text',
+                        id: 'actionBarSearch',
+                        placeholder: 'Buscar...'
+                    },
+                    {        
+                        id: 'filterBtn',
+                        type: 'submit',
+                        icon: FaFilter,
+                        label: 'Filtrar',
+                        className: 'button-icon'
+                    }
+                ]
+                
+            },
+            
+        ]
         setActions(actionItems)
         getWorklogList(filters)
             .then(
@@ -81,38 +113,7 @@ export const WorklogListComponent = ( props ) => {
         const errors = []
         return errors
     }
-    let actionItems = [
-        {
-            icon: FaPlus,
-            text: 'Nuevo parte',
-            route: `/worklogs/new`,
-            type: 'link'
-        },
-        {
-            view: 'actionBar',
-            type: 'form',         
-            key: 'actionBarFilterForm',   
-            initValues: {actionBarSearch: ''},
-            onSubmit: searchHandler,
-            validation: validation,
-            items: [
-                {
-                    type: 'text',
-                    id: 'actionBarSearch',
-                    placeholder: 'Buscar...'
-                },
-                {        
-                    id: 'filterBtn',
-                    type: 'submit',
-                    icon: FaFilter,
-                    label: 'Filtrar',
-                    className: 'button-icon'
-                }
-            ]
-            
-        },
-        
-    ]
+    
     return (
         <BlockContainer>
             <BlockHeaderComponent 

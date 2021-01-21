@@ -1,5 +1,4 @@
 import React from 'react'
-import styled from 'styled-components'
 import { FaCheck, FaTimes, FaTrash } from 'react-icons/fa'
 
 import { Worklog } from '../../../domain/worklog'
@@ -31,15 +30,6 @@ const emptyJob: Job = {
         tags: []    
 }
 
-const SelectWidget = styled.div`
-    position: absolute;
-    z-index: 9999;
-    background-color: rgba(0,0,0,0.3);
-    display: flex;
-    justify-content: center;
-    align-items:center;
-`
-
 export const JobNewComponent = (props) => {
     const syncCtx = React.useContext(SyncStateContext)
     const {setSync} = syncCtx
@@ -52,6 +42,10 @@ export const JobNewComponent = (props) => {
     const [submitError, setSubmitError] = React.useState<Error | null>(null)    
     const [mode, setMode] = React.useState(props.mode || 'new')
     const [isOpened, setOpened] = React.useState<boolean>(false)
+
+    React.useEffect(() => {
+        setWorklog(props.worklog)
+    },[props.worklog])
 
     React.useEffect(()=> {     
         if(props.job){
@@ -82,7 +76,7 @@ export const JobNewComponent = (props) => {
             setJob(emptyJob)
             setMode('new')
         }       
-    },[])
+    },[props.job])
 
     
     const closeModal = () => {  setOpened(false)}
@@ -140,12 +134,12 @@ export const JobNewComponent = (props) => {
             selectedLabel: task ? task.title : ''
         },
         {
-            type: 'date2',
+            type: 'date',
             id: 'startDatetime',
             label: 'Inicio'
         },
         {
-            type: 'date2',
+            type: 'date',
             id: 'endDatetime',
             label: 'Fin'
         },

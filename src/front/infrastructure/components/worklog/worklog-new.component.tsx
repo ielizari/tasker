@@ -35,7 +35,6 @@ export const WorklogNewComponent = (props) => {
     const {setSync} = syncCtx
 
     const [submitSuccess, setSubmitSuccess] = React.useState(null)
-    const [submitError, setSubmitError] = React.useState<Error | null>(null)
     const [mode, setMode] = React.useState(props.mode || 'new')
     const [worklog, setWorklog] = React.useState<Worklog | null>(emptyWorklog)
     const [error, setError] = React.useState<Error | null>(null)
@@ -50,7 +49,7 @@ export const WorklogNewComponent = (props) => {
                 label: 'Título'
             },
             {
-                type: 'date2',
+                type: 'date',
                 id: 'startDatetime',
                 label: 'Fecha y hora de inicio'
             },
@@ -101,12 +100,12 @@ export const WorklogNewComponent = (props) => {
                         if(!result.hasError){
                             setSync({sync: false})
                             setSubmitSuccess(result.data.worklog);                                        
-                            setSubmitError(null);
+                            setError(null);
                             helpers.resetForm({})
                         }else{
 
                             setSubmitSuccess(null);
-                            setSubmitError(new Error(result.error));                                      
+                            setError(new Error(result.error));                                      
                         }
                         helpers.setSubmitting(false); 
                         setLoading(false)
@@ -115,7 +114,7 @@ export const WorklogNewComponent = (props) => {
                         console.log(error)
                         helpers.setSubmitting(false);
                         setSubmitSuccess(null);
-                        setSubmitError(error);
+                        setError(error);
                         setLoading(false)
                     }
                 )
@@ -128,10 +127,10 @@ export const WorklogNewComponent = (props) => {
                             setSubmitSuccess(result.data.worklog); 
                             setWorklog(null)                                     
                             setWorklog(result.data.worklog)                                        
-                            setSubmitError(null);
+                            setError(null);
                         }else{
                             setSubmitSuccess(null);
-                            setSubmitError(new Error(result.error));                                      
+                            setError(new Error(result.error));                                      
                         }
                         helpers.setSubmitting(false); 
                         setLoading(false)
@@ -140,12 +139,16 @@ export const WorklogNewComponent = (props) => {
                         console.log(error)
                         helpers.setSubmitting(false);
                         setSubmitSuccess(null);
-                        setSubmitError(error);
+                        setError(error);
                         setLoading(false)
                     }
                 )
             }      
     }
+
+    React.useEffect(()=> {
+        setMode(props.mode)
+    },[props.mode])
 
     React.useEffect(()=> {
         if(mode === 'edit'){
@@ -173,7 +176,7 @@ export const WorklogNewComponent = (props) => {
                                 setWorklog(emptyWorklog)
                             }
                             setError(null)
-                            setSubmitError(null)
+                            setError(null)
                         }
                     
                         setLoading(false) 
@@ -182,7 +185,7 @@ export const WorklogNewComponent = (props) => {
                 (error) => {
                     console.log("error",error)
                     setSubmitSuccess(null)
-                    setSubmitError(null)
+                    setError(null)
                     setError(error)
                     setWorklog(null)
                     setLoading(false)
@@ -192,7 +195,7 @@ export const WorklogNewComponent = (props) => {
             setWorklog(emptyWorklog)
         }  
         return () => cancelled = true    
-    },[])
+    },[worklogid, mode])
 
     return (        
         <BlockContainer> 
@@ -207,8 +210,8 @@ export const WorklogNewComponent = (props) => {
                 </div>  
             }
 
-            {submitError &&
-                <div aria-label='error-message' className='message-error'>{submitError.message}</div>
+            {error &&
+                <div aria-label='error-message' className='message-error'>{error.message}</div>
             }
             
             {worklog &&

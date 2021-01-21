@@ -68,11 +68,10 @@ const exportDB = () => {
 export const DbSync = () => {
     const syncCtx = React.useContext(SyncStateContext)
     const {sync, setSync} = syncCtx
-    const [syncFail, setSyncFail] = React.useState<boolean>(false)
   
     React.useEffect(()=>{
         setSync({sync:true})
-    },[])
+    },[setSync])
     
     const handleExport = () => {
         exportDB()
@@ -94,7 +93,7 @@ export const DbSync = () => {
                 console.log(error)
             }
         )
-    },[sync])
+    },[sync, setSync])
 
     return (
         <>
