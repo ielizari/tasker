@@ -21,7 +21,6 @@ jobs:
     - name: 🔨 Install packages
       run: |
         npm install
-        npm run build
 
     - name: 🔨 Run tests
       run: |

@@ -55,7 +55,7 @@ describe("Lista de tareas", () =>{
     })
     
     expect(await screen.findByText(/Hacer la compra/i)).toBeInTheDocument()
-    expect(await screen.findByText(/KYB - ID 167: PET/i)).not.toBeInTheDocument()    
+    expect(await screen.queryByText(/KYB - ID 167: PET/i)).not.toBeInTheDocument()    
 
     await act(async () => {
       userEvent.clear(await screen.findByPlaceholderText(/Buscar.../i))

@@ -456,7 +456,7 @@ export class Datepicker  {
 			
 			// Set the dates blocked
 			if(typeof(tmpblockdates) != "undefined" && tmpblockdates != null && this.dpMode !== "time"){			
-				for(var i = 0; i< tmpblockdates.length; i++){
+				for(let i = 0; i< tmpblockdates.length; i++){
 						
 					if(tmpblockdates[i].length === 1){		
 						
@@ -500,7 +500,7 @@ export class Datepicker  {
 		
 		
 		// Validates the block dates
-		for(var i = 0; i< this.blockDates.length; i++){
+		for(let i = 0; i< this.blockDates.length; i++){
 			if(this.blockDates[i].length === 1){			
 				if(!this.dateInRange(this.blockDates[i][0],"day")){					
 					this.blockDates.splice(i);				
@@ -518,7 +518,7 @@ export class Datepicker  {
 		
 		
 		// Updates the weekdays positions in the array depending on the start day.
-		for(var i=0; i<this.startDay;i++){
+		for(let i=0; i<this.startDay;i++){
 			this.lang[this.language].day.push(this.lang[this.language].day.shift());
 			this.lang[this.language].dayShort.push(this.lang[this.language].dayShort.shift());				
 		}	
@@ -951,8 +951,8 @@ export class Datepicker  {
 				icon.appendChild(document.createTextNode(this.warning.length + " warning"));
 				this.msgContainer.appendChild(icon);	
 				
-				for(var i=0; i< this.warning.length; i++){
-					var msg = document.createElement("div");
+				for(let i=0; i< this.warning.length; i++){
+					let msg = document.createElement("div");
 					msg.className = "orzk-dp_msg_warning";
 					msg.appendChild(document.createTextNode(this.warning[i]));
 					this.msgTxt.appendChild(msg);
@@ -1020,10 +1020,10 @@ export class Datepicker  {
 		
 		var currDate = null;
 		var dayCount = 1;
-		for(var i=0;i<numWeeks;i++){
+		for(let i=0;i<numWeeks;i++){
 			week = document.createElement("tr");
-			for(var j=0; j<=6;j++){
-				var day = document.createElement("td");
+			for(let j=0; j<=6;j++){
+				let day = document.createElement("td");
 				if(	(i===0 && first > j) ||														//No imprime los días de la primera semana anteriores al día 1 del mes
 					(i===numWeeks-1 && ((first+numDays)%7) > 0 && j >= ((first + numDays)%7))	// No imprime los días de la última semana posteriores al último día del mes
 				){
@@ -1284,7 +1284,7 @@ export class Datepicker  {
 				selectedItem = this.nuevaFecha.getSeconds();
 			}			
 			
-			for(var i = 0; i< 60; i++){
+			for(let i = 0; i< 60; i++){
 				angle = 360/60;	
 				var e = document.createElement("div");
 				e.className = "orzk-dp_time_min_element";
@@ -1296,7 +1296,7 @@ export class Datepicker  {
 				e.style.transform       = 'rotate('+(angle*i)+'deg)'; 
 				
 				if(i%5 === 0){
-					var h = document.createElement("div");
+					let h = document.createElement("div");
 					h.id = "dp_minute_"+(i);
 					h.className = "orzk-dp_time_element";				
 					h.appendChild(document.createTextNode(this.padInteger(i,2)));	
@@ -1473,12 +1473,14 @@ export class Datepicker  {
 				}else{				
 					time = ':'+this.padInteger(d.getSeconds(),2);
 				}
+				/* falls through */
 			case 2:
 				if(format===true && this.dpCurrWindow === "time" && this.timeWindow==="minutes"){
 					time = ':<span class="orzk-dp_time_display_selected">'+this.padInteger(d.getMinutes(),2)+'</span>' + time;
 				}else{		
 					time = ':'+this.padInteger(d.getMinutes(),2) + time;
 				}
+				/* falls through */
 			case 1:
 				if(this.timeFormat === 'h'){
 					time += ":00";
@@ -1488,6 +1490,9 @@ export class Datepicker  {
 				}else{		
 					time = this.padInteger(d.getHours(),2) + time;
 				}
+				/* falls through */
+			default:
+				break;
 		}
 		return time;
 	}
@@ -1532,7 +1537,7 @@ export class Datepicker  {
 					if(fecha.length !== 3){
 						return false;
 					}
-					for(var i = 0; i< 4; i++){
+					for(let i = 0; i< 4; i++){
 						if(typeof(hora[i]) == "undefined" || this.timeFormat.length <= i){
 							hora.push(0);
 						}
@@ -1570,11 +1575,11 @@ export class Datepicker  {
 	}
 
 	setStartDate (){
-		var result = new Date();
+		let result = new Date();
 		
 		if(this.inputDate !== null){			
 			if(this.inputDate.value.length > 0){
-				var result = this.createDate(this.inputDate.value);				
+				result = this.createDate(this.inputDate.value);				
 				if(result !== false){
 					if(!this.isDate(result)){
 						result = new Date();					
