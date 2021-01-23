@@ -9,21 +9,7 @@ import {
 import { Spinner } from '../common/spinner'
 import { getWorklogList} from '../../../application/getWorklogList'
 import { Worklog } from '../../../domain/worklog'
-import { Link } from 'react-router-dom'
-import { common, color } from '../../../styles/theme'
-import styled from 'styled-components'
 
-// const ListItem = styled.li`
-//     list-style: none;
-//     padding: 1rem;
-//     margin: 1rem;
-//     border-style: solid;
-//     border-width: 1px;
-//     border-color: ${color.orange};
-//     background-color: ${color.orange};
-//     color: ${color.white};
-//     ${common.roundedCorners()};
-// `
 
 const WorklogListItem = (props: {worklog: Worklog } ) => {    
     

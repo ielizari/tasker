@@ -9,9 +9,6 @@ import {
 } from '../common/list'
 import { TaskObject, TaskDetail, ConstObjectToSelectOptionsArray } from '../../../domain/task'
 import { getTaskList } from '../../../application/getTaskList'
-import styled from 'styled-components'
-import { color, common } from '../../../styles/theme';
-import { Link } from "react-router-dom";
 import { FaFilter, FaPlus, FaMinus } from 'react-icons/fa'
 
 import { Spinner } from '../common/spinner'
