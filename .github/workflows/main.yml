@@ -33,6 +33,6 @@ jobs:
         server: 86.109.178.128
         username: cust_a0128u0121
         password: ${{ secrets.ftp_password }}
-        local-dir: ./public
-        server-dir: httpdocs/tasker
+        local-dir: ./public/
+        server-dir: httpdocs/tasker/
         dry-run: true 
