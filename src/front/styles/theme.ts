@@ -103,7 +103,7 @@ export const color = {
   bckOrange: '#ec9416',
   lightOrange: '#fba72f',
   darkOrange: '#b36c06',
-  success: '#48b03d',
+  success: '#9aeb36',
   background: '#c8cad0',
   headerBackground: '#1d502f',
   headerColor: '#c8cad0',

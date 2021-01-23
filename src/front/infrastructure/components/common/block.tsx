@@ -4,7 +4,7 @@ import {common, font, color } from '../../../styles/theme'
 import { BlockActions } from '../common/block-actions'
 
 export const BlockContainer = styled.div`
-    margin: 1rem;
+    margin: 1.5rem;
     border-style: solid;
     border-color: #f00;
     border-width: 1px;
