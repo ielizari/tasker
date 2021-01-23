@@ -10,21 +10,21 @@ interface renderOptions {
 
 
 export const renderWithProviders = async(
-    ui: React.ReactNode,
-    { route }: renderOptions = {},
+  ui: React.ReactNode,
+  { route }: renderOptions = {},
 ) => {
-  try{
-    const history = createMemoryHistory()
-      if (route) {
-        history.push(route)
-      }
-      
-      render(      
-        <SyncProvider>
-          <Router history={history}>{ui}</Router>
-        </SyncProvider>
-      )
-  }catch(e){
-    throw e
-  }
+try{
+  const history = createMemoryHistory()
+    if (route) {
+      history.push(route)
+    }
+    
+    render(      
+      <SyncProvider>
+        <Router history={history}>{ui}</Router>
+      </SyncProvider>
+    )
+}catch(e){
+  throw e
+}
 }

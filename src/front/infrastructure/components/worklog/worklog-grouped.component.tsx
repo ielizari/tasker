@@ -153,13 +153,16 @@ export const WorklogGrouped = (props: {className?: string, worklog: WorklogObjec
     },[props.worklog])
 
     React.useEffect(() => {
+        let cancelled = false
         if(worklog){
             getWorklogGrouped(worklog.worklog.id).then(
                 result => {
-                    if(!result.hasError){
-                        setGroupedData(result.data)
-                    }else{
-                        console.log(result.error)
+                    if(!cancelled){
+                        if(!result.hasError){
+                            setGroupedData(result.data)
+                        }else{
+                            console.log(result.error)
+                        }
                     }
                 },
                 error => {
@@ -167,6 +170,8 @@ export const WorklogGrouped = (props: {className?: string, worklog: WorklogObjec
                 }
             )
         }
+
+        return () => cancelled = true
     }, [worklog, props.worklog])
 
     return (

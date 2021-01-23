@@ -16,7 +16,7 @@ export const handlers = [
                 "title":"Hacer la compra",
                 "description": "Comprar huevos, leche, cebollas",
                 "createdDate": "2020-11-10T11:45:00.000Z",
-                "limitDate": "2020-12-01T08:45:00.000Z",
+                "limitDate": "2020-12-01T10:45:00.000Z",
                 "author": "Iñaki",
                 "authorId": "1",
                 "status": "1",
@@ -42,6 +42,7 @@ export const handlers = [
                 ctx.json(ApiResponseBuilder(200,[],false))
             )
         }else{ 
+            console.log("Imprimiendo todo",filters)
             let result :Array<TaskObject> = [
                 {
                     task: {            
@@ -50,7 +51,7 @@ export const handlers = [
                         "title":"Hacer la compra",
                         "description": "Comprar huevos, leche, cebollas",
                         "createdDate": "2020-11-10T11:45:00.000Z",
-                        "limitDate": "2020-12-01T08:45:00.000Z",
+                        "limitDate": "2020-12-01T10:45:00.000Z",
                         "author": "Iñaki",
                         "authorId": "1",
                         "status": "1",
@@ -99,7 +100,7 @@ export const handlers = [
             "title":"Hacer la compra",
             "description": "Comprar huevos, leche, cebollas",
             "createdDate": "2020-11-10T11:45:00.000Z",
-            "limitDate": "2020-12-01T08:45:00.000Z",
+            "limitDate": "2020-12-01T10:45:00.000Z",
             "author": "Iñaki",
             "authorId": "1",
             "status": "1",
@@ -165,8 +166,8 @@ export const handlers = [
                 "parent":"",
                 "title":"Hacer la compra",
                 "description": "Comprar huevos, leche, cebollas",
-                "createdDate": "2020-11-10T10:45:01+0200",
-                "limitDate": "2020-12-01T10:45:01+0200",
+                "createdDate": "2020-11-10T11:45:01.000Z",
+                "limitDate": "2020-12-01T10:45:01.000Z",
                 "author": "Iñaki",
                 "authorId": "1",
                 "status": "1",
@@ -205,36 +206,57 @@ export const handlers = [
 
     rest.get(process.env.PUBLIC_URL + '/api/worklogs/1',(req, res, ctx) => {     
         const worklog: Worklog = {            
-            "id":"1",
-            "createdDate": "05/11/2020 08:00",
-            "startDatetime":"05/11/2020 09:00",
-            "endDatetime":"05/11/2020 16:30",
-            "title":"Compra 05-11-20",
-            "tags": []
+            id:"1",
+            createdDate: "05/11/2020 08:00",
+            startDatetime:"05/11/2020 09:00",
+            endDatetime:"05/11/2020 16:30",
+            title:"Compra 05-11-20",
+            tags: []
+        }
+        const task : TaskDetail = {
+            id:"1",
+            parent:"",
+            title:"Hacer la compra",
+            description: "Comprar huevos, leche, cebollas",
+            createdDate: "2020-11-10T11:45:01.000Z",
+            limitDate: "2020-12-01T10:45:01.000Z",
+            author: "Iñaki",
+            authorId: "1",
+            status: "1",
+            priority: "3",
+            tags: ["compra","casa","comida"]
         }
         const childJobs: Array<JobObject> = [
-            // {
-            //     "id":"1",
-            //     "worklog":"1",
-            //     "task":"1",
-            //     "startDatetime":"2020-11-05T08:00:00.000Z",
-            //     "endDatetime":"2020-11-05T09:30:00.000Z",
-            //     "title":"Carnicería",
-            //     "description":"Jamón serrano, pechugas de pollo",
-            //     "type":"Análisis",
-            //     "tags": ["Jamón serrano", "pechugas de pollo"]
-            // },
-            // {
-            //     "id":"2",
-            //     "worklog":"1",
-            //     "task":"1",
-            //     "startDatetime":"2020-11-05T09:30:00.000Z",
-            //     "endDatetime":"2020-11-05T10:30:00.000Z",
-            //     "title":"Frutería",
-            //     "description":"Manzanas, Plátanos, Mandarinas",
-            //     "type":"Análisis",
-            //     "tags": ["Manzanas", "Plátanos", "Mandarinas"]
-            // }
+            { 
+                job: {
+                    id:"1",
+                    worklog:"1",
+                    task:"1",
+                    startDatetime:"2020-11-05T08:00:00.000Z",
+                    endDatetime:"2020-11-05T09:30:00.000Z",
+                    title:"Carnicería",
+                    description:"Jamón serrano, pechugas de pollo",
+                    type:"Análisis",
+                    tags: ["Jamón serrano", "pechugas de pollo"]
+                },
+                task: task,
+                worklog: worklog
+            },
+            {
+                job: {
+                    id:"2",
+                    worklog:"1",
+                    task:"1",
+                    startDatetime:"2020-11-05T09:30:00.000Z",
+                    endDatetime:"2020-11-05T10:30:00.000Z",
+                    title:"Frutería",
+                    description:"Manzanas, Plátanos, Mandarinas",
+                    type:"Análisis",
+                    tags: ["Manzanas", "Plátanos", "Mandarinas"]
+                },            
+                task: task,
+                worklog: worklog
+            }
         ]
 
         const worklogObject : WorklogObject= {
@@ -274,7 +296,7 @@ export const handlers = [
     rest.post(process.env.PUBLIC_URL + '/api/worklogs/add',(req,res,ctx) =>{
         const worklog: Worklog = req.body as Worklog
         
-        worklog.createdDate = "2000-01-01T00:00:00+0200"
+        worklog.createdDate = "2000-01-01T01:00:00.000Z"
         const worklogresponse: WorklogObject = {
             worklog: worklog,
             childJobs: []
@@ -305,6 +327,107 @@ export const handlers = [
             ctx.json(ApiResponseBuilder(200,worklogobject,false))            
         )
         
+    }),
+
+    rest.put(process.env.PUBLIC_URL + '/api/worklogs/close', (req, res, ctx) => {
+        try{
+            const worklog: Worklog | null = req.body ? req.body as Worklog : null
+                        
+            return res(
+                ctx.status(200),
+                ctx.json(ApiResponseBuilder(200,worklog,false))
+            )
+        }catch(e){
+            return res(
+                ctx.status(500),
+                ctx.json(ApiResponseBuilder(500,{},true,e.message))
+            )
+        }
+    }),
+
+    rest.put(process.env.PUBLIC_URL + '/api/worklogs/reopen', (req, res, ctx) => {
+        try{
+            const worklog: Worklog | null = req.body ? req.body as Worklog : null
+            
+            return res(
+                ctx.status(200),
+                ctx.json(ApiResponseBuilder(200,worklog,false))
+            )
+        }catch(e){
+            return res(
+                ctx.status(500),
+                ctx.json(ApiResponseBuilder(500,{},true,e.message))
+            )
+        }
+    }),
+
+    rest.get(process.env.PUBLIC_URL + '/api/worklogs/1/grouped',(req,res,ctx) =>{
+        try{            
+            let result = {
+                title: "root",
+                id: "0",
+                timeInSeconds: 9000,
+                hasRunningJob: false,
+                jobs: [],
+                childTasks: [
+                    {
+                        title: "Hacer la compra",
+                        id: "1",
+                        timeInSeconds: 9000,
+                        hasRunningJob: false,
+                        jobs: [
+                            {
+                                "id":"1",
+                                "worklog":"1",
+                                "task":"1",
+                                "startDatetime":"2020-11-05T08:00:00.000Z",
+                                "endDatetime":"2020-11-05T09:30:00.000Z",
+                                "title":"Carnicería",
+                                "description":"Jamón serrano, pechugas de pollo",
+                                "type":"Análisis",
+                                "tags": ["Jamón serrano", "pechugas de pollo"]
+                            },
+                            {
+                                "id":"2",
+                                "worklog":"1",
+                                "task":"1",
+                                "startDatetime":"2020-11-05T09:30:00.000Z",
+                                "endDatetime":"2020-11-05T10:30:00.000Z",
+                                "title":"Frutería",
+                                "description":"Manzanas, Plátanos, Mandarinas",
+                                "type":"Análisis",
+                                "tags": ["Manzanas", "Plátanos", "Mandarinas"]
+                            }
+                        ],
+                        childTasks: []
+                    }
+                ]
+            }
+            return res(
+                ctx.status(200),
+                ctx.json(ApiResponseBuilder(200,result,false))
+            )
+            
+        }catch(e){
+            return res(
+                ctx.status(500),
+                ctx.json(ApiResponseBuilder(500,{},true,e.message))
+            )
+        }
+    }),
+    rest.get(process.env.PUBLIC_URL + '/api/worklogs/11111/grouped',(req,res,ctx) =>{
+        try{            
+            return res(
+                ctx.status(400),
+                ctx.json(ApiResponseBuilder(400,{},true,'Id de parte no válido'))
+            )
+            
+        }catch(e){
+            return res(
+                ctx.status(500),
+                ctx.json(ApiResponseBuilder(500,{},true,e.message))
+            )
+        }
     }),
 
     rest.get(process.env.PUBLIC_URL + '/api/db/exists', (req, res, ctx) => {

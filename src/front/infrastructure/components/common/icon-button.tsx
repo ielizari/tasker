@@ -48,6 +48,7 @@ const TextWrapper = styled.div`
 export const IconButton = (props) => {
     const [text, setText] = React.useState('')  
     const [Icon, setIcon] = React.useState(null)
+    const [type, setType] = React.useState(null)
 
     React.useEffect(()=> {
         setIcon(props.icon)
@@ -56,6 +57,10 @@ export const IconButton = (props) => {
     React.useEffect(()=> {
         setText(props.text)
     },[props.text])
+
+    React.useEffect(() => {
+        setType(props.type || 'button')
+    },[props.type])
     
 
     return (
@@ -64,7 +69,7 @@ export const IconButton = (props) => {
             onClick={props.onClick}
             role="button"
             aria-label={props.text}
-            type={props.type}
+            type={type}
         >
             <IconWrapper className={props.className}>{Icon}</IconWrapper>       
             {text && 

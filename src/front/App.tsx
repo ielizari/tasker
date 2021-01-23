@@ -26,22 +26,30 @@ function App() {
   const [loading, setLoading] = React.useState<boolean>(false)
   
   React.useEffect(()=>{
+      let cancelled = false
       setLoading(true)
       existsDb().then(
           result => {
-              if(!result.hasError){
-                  setSync({sync:true, existsDb: result.data})
-              }else{
-                  setSync({sync:true, existsDb: false})
-              }
-              setLoading(false)
+            if(!cancelled){
+                setLoading(false)
+                if(!result.hasError){
+                    setSync({sync:true, existsDb: result.data})
+                }else{
+                    setSync({sync:true, existsDb: false})
+                }         
+              }     
           },
           error => {
-            console.log(error)
-            setSync({sync:true, existsDb: false})
-            setLoading(false)
+            if(!cancelled){
+              setLoading(false)
+              console.log(error)
+              setSync({sync:true, existsDb: false})
+            }
+            
           }
       )
+
+      return () => cancelled = true
   }, [setSync])
 
   return (

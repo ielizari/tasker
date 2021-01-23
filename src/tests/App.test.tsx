@@ -4,14 +4,14 @@ import App from '../front/App';
 import { renderWithProviders } from './test-utils'
 import userEvent from '@testing-library/user-event'
 import { act } from 'react-dom/test-utils';
-import { doesNotReject } from 'assert';
+import {ISOStringToFormatedDate} from '../lib/date.utils'
 
-beforeEach(() => {
+afterEach(() => {
   jest.resetAllMocks();
 });
 
 describe("Lista de tareas", () =>{
-  beforeEach(()=>{
+  afterEach(()=>{
     jest.resetAllMocks();
   });
   it("Muestra lista de tareas", async()=>{
@@ -40,11 +40,11 @@ describe("Lista de tareas", () =>{
     })
     
     expect(await screen.findByText(/Hacer la compra/i)).toBeInTheDocument()
-    expect(await screen.findByText(/KYB - ID 167: PET/i)).not.toBeInTheDocument()    
+    expect(await screen.queryByText(/KYB - ID 167: PET/i)).not.toBeInTheDocument()    
   })
 
   it("Cuando se elimina el contenido del buscador y se vuelve a pulsar el botón 'Filtrar', se muestra la lista de tareas sin filtrar", async()=>{
-    renderWithProviders(<App />, {route: '/tasks'})
+    await renderWithProviders(<App />, {route: '/tasks'})
 
     await act(async () => {
       userEvent.type(await screen.findByPlaceholderText(/Buscar.../i),"Hacer la compra")
@@ -84,7 +84,7 @@ describe("Lista de tareas", () =>{
 })
 
 describe("Detalle de tarea", () => {
-  beforeEach(()=>{
+  afterEach(()=>{
     jest.resetAllMocks();
   });
   it("Muestra todos los campos de una tarea", async() => {
@@ -223,7 +223,7 @@ describe("Editar tarea", () => {
       expect(await screen.findByLabelText('title')).toHaveValue("Hacer la compra")
       expect(await screen.findByLabelText('description')).toHaveValue("Comprar huevos, leche, cebollas")
       expect(await screen.findByLabelText('author')).toHaveValue("Iñaki")
-      expect(await screen.findByLabelText('limitDate')).toHaveValue("01/12/2020 09:45")
+      expect(await screen.findByLabelText('limitDate')).toHaveValue(ISOStringToFormatedDate("2020-12-01T10:45:00.000Z")) //"01/12/2020 09:45"
       expect(await screen.findByLabelText('status')).toHaveValue("1")
       expect(await screen.findByLabelText('status')).toHaveTextContent("Pendiente")
       expect(await screen.findByLabelText('priority')).toHaveValue("3")
@@ -243,8 +243,9 @@ describe("Editar tarea", () => {
 })
 
 describe("Lista de partes de trabajo", () =>{
-  beforeEach(()=>{
-    jest.clearAllMocks()
+  afterEach(()=>{
+    //jest.resetModules()
+    //jest.clearAllMocks()
     jest.resetAllMocks()
   });
   
@@ -267,7 +268,7 @@ describe("Lista de partes de trabajo", () =>{
     })    
     
     await act(async() => {
-      userEvent.click(await screen.queryByLabelText(/Filtrar/i))
+      userEvent.click(await screen.findByLabelText(/Filtrar/i))
     })
     
     
@@ -393,7 +394,7 @@ describe("Nuevo parte", () => {
 })
 
 describe("Detalle de parte", () => {
-  beforeEach(()=>{
+  afterEach(()=>{
     jest.resetAllMocks();
   });
   it("Muestra todos los campos de un parte", async() => {
@@ -406,6 +407,32 @@ describe("Detalle de parte", () => {
 
       expect(await screen.queryByText(/Esta acción es irreversible. ¿Desea continuar?/i)).not.toBeInTheDocument()
     
+  })  
+
+  it("Muestra los botones de editar, borrar y añadir trabajo al ver el detalle de un parte", async () => {
+    renderWithProviders(<App />, {route: '/worklogs/1'})
+
+    expect(await screen.findByLabelText(/Editar/i)).toBeInTheDocument()
+    expect(await screen.findByLabelText(/Borrar/i)).toBeInTheDocument()
+    expect(await screen.findAllByLabelText(/Añadir trabajo/i)).toHaveLength(1)    
+  })
+
+  it("El botón 'Editar' carga la url worklogs/edit/1", async() => {
+    renderWithProviders(<App />, {route: 'worklogs/1'})
+    expect(await screen.findByLabelText(/Editar/i)).toHaveAttribute('href','/worklogs/edit/1')
+  })
+
+  // it("El botón 'Añadir trabajo' carga la url jobs/new/1", async() => {
+  //   renderWithProviders(<App />, {route: 'worklogs/1'})
+  //   expect(await screen.findByLabelText(/Añadir trabajo/i)).toHaveAttribute('href','/worklogs/new/1')
+  // })
+
+  it("El botón 'Borrar' muestra diálogo de confirmación", async() => {   
+    renderWithProviders(<App />, {route: 'worklogs/1'})  
+    userEvent.click(await screen.findByLabelText(/Borrar/i))
+    expect(await screen.queryByText(/Esta acción es irreversible. ¿Desea continuar?/i)).toBeInTheDocument()
+    expect(await screen.queryByLabelText(/Aceptar/i)).toBeInTheDocument()
+    expect(await screen.queryByLabelText(/Cancelar/i)).toBeInTheDocument()
   })
 
   it("Muestra mensaje 'El parte no existe' si se busca un id que no existe", async() => {
@@ -413,33 +440,8 @@ describe("Detalle de parte", () => {
     expect(await screen.findByText(/El parte no existe/i)).toBeInTheDocument();
   })
 
-  it("Muestra los botones de editar, borrar y añadir trabajo al ver el detalle de un parte", async () => {
-    renderWithProviders(<App />, {route: '/worklogs/1'})
-    expect(await screen.findByLabelText(/Editar/i)).toBeInTheDocument()
-    expect(await screen.findByLabelText(/Borrar/i)).toBeInTheDocument()
-    expect(await screen.findAllByLabelText(/Añadir trabajo/i)).toHaveLength(1)
-  })
-
-  it("El botón 'Editar' carga la url worklogs/edit/1", async() => {
-    renderWithProviders(<App />, {route: 'worklogs/1'})
-    expect(await screen.findByLabelText(/Editar/i)).toHaveAttribute('href','/worklogs/edit/1')
-  })
-/*
-  it("El botón 'Añadir trabajo' carga la url jobs/new/1", async() => {
-    renderWithProviders(<App />, {route: 'worklogs/1'})
-    expect(await screen.findByLabelText(/Añadir trabajo/i)).toHaveAttribute('href','/worklogs/new/1')
-  })*/
-
-  it("El botón 'Borrar' muestra diálogo de confirmación", async() => {   
-    await renderWithProviders(<App />, {route: 'worklogs/1'})  
-    userEvent.click(await screen.findByLabelText(/Borrar/i))
-    expect(await screen.queryByText(/Esta acción es irreversible. ¿Desea continuar?/i)).toBeInTheDocument()
-    expect(await screen.queryByLabelText(/Aceptar/i)).toBeInTheDocument()
-    expect(await screen.queryByLabelText(/Cancelar/i)).toBeInTheDocument()
-  })
-
   it("Al pulsar 'Aceptar' en el diálogo de confirmación de la acción 'Borrar', se borra el parte", async() => {   
-    await renderWithProviders(<App />, {route: 'worklogs/1'})  
+    renderWithProviders(<App />, {route: 'worklogs/1'})  
     await act(async () => {
       userEvent.click(await screen.findByLabelText(/Borrar/i))
     })    

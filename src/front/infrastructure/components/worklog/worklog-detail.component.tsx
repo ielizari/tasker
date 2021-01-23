@@ -97,6 +97,7 @@ export const WorklogDetailComponent = (props) => {
         setConfirmedDelete(true)   
     }
 
+    
     const changeHandler = (worklog: WorklogObject) => {
         setWorklog(worklog)
     }

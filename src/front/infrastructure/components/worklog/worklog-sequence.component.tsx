@@ -124,7 +124,6 @@ export const RunningElapsedTime = (props: {start, initialSeconds?}) => {
 export const WorklogSequence = (props: {worklog: WorklogObject, worklogChangeHandler?}) => {
     const syncCtx = React.useContext(SyncStateContext)
     const {setSync} = syncCtx
-
     const [ worklogObj, setWorklogObj ] = React.useState<WorklogObject>(props.worklog)
     const [ jobView, setJobView ] = React.useState<boolean>(false)
     const [ editJob, setEditJob ] = React.useState<Job>(null)
@@ -451,6 +450,7 @@ export const WorklogSequence = (props: {worklog: WorklogObject, worklogChangeHan
                         type="button"
                         icon={FaPlus}            
                     /> 
+                    
                     {worklogObj.worklog.endDatetime === '' &&           
                         (!pausedJob ?
                             <IconButton

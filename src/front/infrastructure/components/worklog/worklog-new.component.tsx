@@ -97,6 +97,8 @@ export const WorklogNewComponent = (props) => {
                 addWorklog(values)
                 .then(                            
                     (result) => {
+                        helpers.setSubmitting(false); 
+                        setLoading(false)
                         if(!result.hasError){
                             setSync({sync: false})
                             setSubmitSuccess(result.data.worklog);                                        
@@ -106,9 +108,7 @@ export const WorklogNewComponent = (props) => {
 
                             setSubmitSuccess(null);
                             setError(new Error(result.error));                                      
-                        }
-                        helpers.setSubmitting(false); 
-                        setLoading(false)
+                        }                        
                     },
                     (error) => {
                         console.log(error)
@@ -122,6 +122,8 @@ export const WorklogNewComponent = (props) => {
                 updateWorklog(values)
                 .then(                            
                     (result) => {
+                        helpers.setSubmitting(false); 
+                        setLoading(false)
                         if(!result.hasError){              
                             setSync({sync: false})                          
                             setSubmitSuccess(result.data.worklog); 
@@ -131,9 +133,7 @@ export const WorklogNewComponent = (props) => {
                         }else{
                             setSubmitSuccess(null);
                             setError(new Error(result.error));                                      
-                        }
-                        helpers.setSubmitting(false); 
-                        setLoading(false)
+                        }                        
                     },
                     (error) => {
                         console.log(error)
