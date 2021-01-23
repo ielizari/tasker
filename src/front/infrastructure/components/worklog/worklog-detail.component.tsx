@@ -10,7 +10,7 @@ import { BlockActions } from '../common/block-actions'
 import { FaEdit, FaTrashAlt, FaPlus } from 'react-icons/fa'
 import { Modal } from '../common/modal'
 import { Link } from 'react-router-dom'
-import { BlockContainer } from '../common/block'
+import { BlockContainer, BlockHeaderComponent } from '../common/block'
 import { WorklogSequence } from './worklog-sequence.component'
 import { WorklogGrouped } from './worklog-grouped.component'
 import { SyncStateContext} from '../../../application/contexts/dbSyncContext'
@@ -195,14 +195,14 @@ export const WorklogDetailComponent = (props) => {
                 onClose={closeModal}
                 content="Esta acción es irreversible. ¿Desea continuar?"
                 type="confirm"
-                action={handleDelete} />
+                action={handleDelete} />            
             {loading ? <Spinner /> : ''}
-            <h3 className="section-title">Detalle de parte</h3>
             {deleteSuccess !== null ? 
                 <div aria-label='success-message' className='message-success'>{deleteSuccess} <Link to={'/worklogs'}>Volver a la lista</Link></div>
                 :
                 <>
-                <BlockActions 
+                <BlockHeaderComponent 
+                    title='Detalle de parte'
                     actions={actions}
                 />
                 {error !== null ?

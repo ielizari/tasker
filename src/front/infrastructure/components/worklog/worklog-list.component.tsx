@@ -1,6 +1,11 @@
 import React from 'react'
 import { FaPlus, FaFilter } from 'react-icons/fa'
 import { BlockContainer, BlockHeaderComponent, BlockEmptyComponent} from '../common/block'
+import {
+    ListContainer, 
+    ListItem,
+    ListItemTitleLink, 
+} from '../common/list'
 import { Spinner } from '../common/spinner'
 import { getWorklogList} from '../../../application/getWorklogList'
 import { Worklog } from '../../../domain/worklog'
@@ -8,26 +13,26 @@ import { Link } from 'react-router-dom'
 import { common, color } from '../../../styles/theme'
 import styled from 'styled-components'
 
-const ListItem = styled.li`
-    list-style: none;
-    padding: 1rem;
-    margin: 1rem;
-    border-style: solid;
-    border-width: 1px;
-    border-color: ${color.orange};
-    background-color: ${color.orange};
-    color: ${color.white};
-    ${common.roundedCorners()};
-`
+// const ListItem = styled.li`
+//     list-style: none;
+//     padding: 1rem;
+//     margin: 1rem;
+//     border-style: solid;
+//     border-width: 1px;
+//     border-color: ${color.orange};
+//     background-color: ${color.orange};
+//     color: ${color.white};
+//     ${common.roundedCorners()};
+// `
 
 const WorklogListItem = (props: {worklog: Worklog } ) => {    
     
     return(
-        <ul>
-            <Link to={`/worklogs/${props.worklog.id}`}>
-                <ListItem>{props.worklog.title}</ListItem>
-            </Link>
-        </ul>
+        <ListItem>
+            <ListItemTitleLink to={`/worklogs/${props.worklog.id}`}>
+                {props.worklog.title}
+            </ListItemTitleLink>
+        </ListItem>
     )
 }
 
@@ -121,13 +126,17 @@ export const WorklogListComponent = ( props ) => {
                 actions={actions}
             />
             {loading && <Spinner />}
-            {worklogs.length ? 
+            {worklogs.length ?                 
                 (error!==null ? 
                     <div>Error: {error.message?error.message:'unknown error'}</div> 
                     :
-                    worklogs.map((item: Worklog) => (
-                        <WorklogListItem key={item.id} worklog={item} />
-                    ))
+                    <ListContainer>
+                    {
+                        worklogs.map((item: Worklog) => (                            
+                            <WorklogListItem key={item.id} worklog={item} />
+                        ))
+                    }
+                    </ListContainer>
                 )
                 :
                 <BlockEmptyComponent />

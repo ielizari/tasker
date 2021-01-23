@@ -1,6 +1,6 @@
 import React from 'react'
 import styled from 'styled-components'
-import { color } from '../../../styles/theme'
+import { color, font } from '../../../styles/theme'
 import { dateToFormattedDate, elapsedTime, formatElapsedTime, formattedDateToDate, formattedDateToISOString, ISOStringToFormatedDate } from '../../../../lib/date.utils'
 
 import { WorklogObject } from '../../../domain/worklog'
@@ -30,12 +30,14 @@ const ButtonSequenceContainer = styled.div`
 const SequenceTable = styled.table`
     width: 100%;
     color: ${color.veryDarkGrey};
+    ${font.base()};
     
     & thead > tr {
         border-style: solid;
         border-width: 1px;
         border-color: ${color.veryDarkGrey};
-        background-color: ${color.lightOrange};
+        background-color: ${color.tableHeaderBackground};
+        color: ${color.tableHeaderColor};        
     }
     & tbody > tr {
         border-style: solid;
@@ -75,7 +77,9 @@ const DayRow = styled.tr`
     background-color: ${color.lightGreen};
     text-align: center;
 `
-
+const RunningTimer = styled.div`
+    font-weight: bold;
+`
 interface Pause {
     startDatetime: string
     endDatetime: string
@@ -115,9 +119,9 @@ export const RunningElapsedTime = (props: {start, initialSeconds?}) => {
       }, [initialSeconds,start]);   
     
     return(
-        <>
+        <RunningTimer>
             {diff}
-        </>
+        </RunningTimer>
     )
 }
 

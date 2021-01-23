@@ -11,7 +11,8 @@ import { DbSync } from '../db-sync'
 const Head = styled.nav`
     display: flex;
     flex-direction: row;
-    background-color: ${color.orange};
+    background-color: ${color.headerBackground};
+    color: ${color.headerColor};
     padding: 0.5rem 1.5rem;
 `;
 const LinkLogo = styled(Link)`

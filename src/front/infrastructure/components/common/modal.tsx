@@ -15,6 +15,7 @@ const DialogWrapper = styled.div`
     display: flex;
     justify-content: center;
     align-items: center;
+    overflow: scroll;
     position: fixed;
     top: 0;
     bottom: 0;

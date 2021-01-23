@@ -1,5 +1,7 @@
 import React from 'react';
 import './App.css';
+import styled from 'styled-components'
+import { color } from './styles/theme'
 import {  
   Switch,
   Route,
@@ -19,7 +21,10 @@ import { existsDb } from './application/existsDatabase'
 
 import { RunningWorklogsProvider } from '../front/application/contexts/runningWorklogsContext'
 
-
+const AppContainer = styled.div`
+  background-color: ${color.background};
+  min-height: 100%;
+`
 function App() {
   const syncCtx = React.useContext(SyncStateContext)
   const {sync, setSync} = syncCtx
@@ -54,7 +59,7 @@ function App() {
 
   return (
     <RunningWorklogsProvider>
-    
+      <AppContainer>
       {loading ? <Spinner /> : ''}     
 
       {!sync.existsDb ?
@@ -81,6 +86,7 @@ function App() {
         </Switch>
         </>
       }
+      </AppContainer>
     </RunningWorklogsProvider>
   );
 }

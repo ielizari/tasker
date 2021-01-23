@@ -10,7 +10,7 @@ export const GlobalStyle = createGlobalStyle`
         min-height: 100vh;
         font-family: Arial, Helvetica, 'Open Sans', sans-serif;
         ${font.base()};        
-        color: ${color.white};
+        background-color: ${color.background};
     }
     .icon-spin {
         -webkit-animation: icon-spin 1s infinite linear;
