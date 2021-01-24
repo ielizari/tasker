@@ -107,6 +107,7 @@ export const color = {
   background: '#c8cad0',
   headerBackground: '#1d502f',
   headerColor: '#c8cad0',
+  headerBorderColor: '#b4991c',
   blockBackground: '#fff',
   blockTitleBackground: '#1eb12f',
   blockTitleColor: '#e4e4e4',

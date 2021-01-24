@@ -2,7 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { Logo } from './logo'
 import '../../../App.css';
-import { font, color } from '../../../styles/theme';
+import { font, color, common } from '../../../styles/theme';
 import {
   Link
 } from "react-router-dom";
@@ -14,6 +14,10 @@ const Head = styled.nav`
     background-color: ${color.headerBackground};
     color: ${color.headerColor};
     padding: 0.5rem 1.5rem;
+    border-style: solid;
+    border-width: 0 0 5px 0;
+    border-color: ${color.headerBorderColor};
+    ${common.shadow()};
 `;
 const LinkLogo = styled(Link)`
     display: flex;
