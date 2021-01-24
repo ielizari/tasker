@@ -1,0 +1,10 @@
+# Redirects server routes to isomorphic app routes, so the pages load on browser refresh 
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+  RewriteRule ^index\.html$ - [L]
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteCond %{REQUEST_FILENAME} !-l
+  RewriteRule . tasker/index.html [L]
+</IfModule>

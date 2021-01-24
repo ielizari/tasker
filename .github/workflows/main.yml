@@ -4,7 +4,7 @@ on:
     branches: 
       - master
 
-name: 🚀 Deploy website on push
+name: 🚀 Deploy website to production server on master push
 jobs:
   web-deploy:
     name: 🎉 Deploy
@@ -18,9 +18,12 @@ jobs:
       with:
         node-version: '12'
 
-    - name: 🔨 Build Project
+    - name: 🔨 Install packages
       run: |
         npm install
+
+    - name: 🔨 Build Project
+      run: |
         npm run build
 
     - name: 🔨 Run tests

@@ -420,12 +420,7 @@ describe("Detalle de parte", () => {
   it("El botón 'Editar' carga la url worklogs/edit/1", async() => {
     renderWithProviders(<App />, {route: 'worklogs/1'})
     expect(await screen.findByLabelText(/Editar/i)).toHaveAttribute('href','/worklogs/edit/1')
-  })
-
-  // it("El botón 'Añadir trabajo' carga la url jobs/new/1", async() => {
-  //   renderWithProviders(<App />, {route: 'worklogs/1'})
-  //   expect(await screen.findByLabelText(/Añadir trabajo/i)).toHaveAttribute('href','/worklogs/new/1')
-  // })
+  })  
 
   it("El botón 'Borrar' muestra diálogo de confirmación", async() => {   
     renderWithProviders(<App />, {route: 'worklogs/1'})  
