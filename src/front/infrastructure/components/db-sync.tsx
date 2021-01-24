@@ -13,8 +13,8 @@ const ExportButton = styled.button`
     ${common.roundedCorners('50%')};
     border-style: solid;
     border-width: 2px;
-    border-color: ${color.darkOrange};
-    color: ${color.darkOrange};
+    border-color: ${color.saveIconColor};
+    color: ${color.saveIconColor};
     background-color: rgba(0,0,0,0);
     animation-name: iconglow;
     animation-duration: 2s;
@@ -22,12 +22,10 @@ const ExportButton = styled.button`
 
     @keyframes iconglow {
         from {
-            color: ${color.darkOrange};
-            border-color: ${color.darkOrange};
+            opacity: 0;
         }
         to {
-            color: ${color.white};
-            border-color: ${color.white};
+            opacity: 100;
         }
     }
 `

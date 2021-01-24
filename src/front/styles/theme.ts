@@ -30,7 +30,7 @@ export const font = {
 
   small(weight = fontWeight.regular) {
     return css`
-      font-family: 'Arial, Helvetica, sans-serif';
+      font-family: 'Arial, Helvetica, sans-serif !important';
       font-size: ${rem(12.64)};
       line-height: ${rem(17)};
       font-weight: ${weight};
@@ -39,7 +39,7 @@ export const font = {
 
   base(weight = fontWeight.regular) {
     return css`
-      font-family: 'Arial, Helvetica, sans-serif';
+      font-family: 'Arial, Helvetica, sans-serif !important';
       font-size: ${rem(16)};
       line-height: ${rem(22)};
       font-weight: ${weight};
@@ -48,7 +48,7 @@ export const font = {
 
   h4(weight = fontWeight.regular) {
     return css`
-      font-family: 'Arial, Helvetica, sans-serif';
+      font-family: 'Arial, Helvetica, sans-serif !important';
       font-size: ${rem(18)};
       line-height: ${rem(25)};
       font-weight: ${weight};
@@ -57,7 +57,7 @@ export const font = {
 
   h3(weight = fontWeight.regular) {
     return css`
-      font-family: 'Arial, Helvetica, sans-serif';
+      font-family: 'Arial, Helvetica, sans-serif !important';
       font-size: ${rem(25.63)};
       line-height: ${rem(35)};
       font-weight: ${weight};
@@ -66,7 +66,7 @@ export const font = {
 
   h2(weight = fontWeight.regular) {
     return css`
-      font-family: 'Arial, Helvetica, sans-serif';
+      font-family: 'Arial, Helvetica, sans-serif !important';
       font-size: ${rem(36.41)};
       line-height: ${rem(50)};
       font-weight: ${weight};
@@ -75,7 +75,7 @@ export const font = {
 
   h1(weight = fontWeight.regular) {
     return css`
-      font-family: 'Arial, Helvetica, sans-serif';
+      font-family: 'Arial, Helvetica, sans-serif !important';
       font-size: ${rem(41.83)};
       line-height: ${rem(50)};
       font-weight: ${weight};
@@ -99,10 +99,20 @@ export const color = {
   darkGrey: '#9b9b9b',
   veryDarkGrey: '#585858',
   white: '#FFFFFF',
-  orange: '#ec9416',
+  orange: '#1d502f',
+  bckOrange: '#ec9416',
   lightOrange: '#fba72f',
   darkOrange: '#b36c06',
-  success: '#48b03d',
+  success: '#9aeb36',
+  background: '#c8cad0',
+  headerBackground: '#1d502f',
+  headerColor: '#c8cad0',
+  blockBackground: '#fff',
+  blockTitleBackground: '#1eb12f',
+  blockTitleColor: '#e4e4e4',
+  tableHeaderBackground: '#1a9380',
+  tableHeaderColor: '#d8d9de',
+  saveIconColor: '#c9e311'
 };
 
 const radius = {
@@ -180,6 +190,11 @@ export const common = {
   greenButton(){
     return css`
       background-color: #48b03d;
+    `
+  },
+  blockTitleGradient(){
+    return css`
+      background-image: linear-gradient(to right, ${color.blockTitleBackground}, ${color.headerBackground})
     `
   }
 }

@@ -1,59 +1,20 @@
 import React from 'react'
+import {
+    ListContainer, 
+    ListItem, 
+    ListItemExpand, 
+    ListItemTitleResult, 
+    ListChildContainer,
+    ListItemTitleLink
+} from '../common/list'
 import { TaskObject, TaskDetail, ConstObjectToSelectOptionsArray } from '../../../domain/task'
 import { getTaskList } from '../../../application/getTaskList'
-import styled from 'styled-components'
-import { color, common } from '../../../styles/theme';
-import { Link } from "react-router-dom";
 import { FaFilter, FaPlus, FaMinus } from 'react-icons/fa'
 
 import { Spinner } from '../common/spinner'
 
 import { BlockHeaderComponent, BlockContainer, BlockEmptyComponent } from '../common/block'
 
-const TaskListContainer = styled.div`
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    padding: 1rem;
-`
-
-const ListItem = styled.div`
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    border-style: solid;
-    border-width: 1px;
-    border-color: ${color.orange};
-    background-color: ${color.orange};
-    color: ${color.white};
-    ${common.roundedCorners()};
-`
-
-const ListItemTitleLink = styled(Link)`
-    width: 100%;
-    padding: 1rem;
-`
-const ListItemTitleResult = styled.div`
-    width: 100%;
-    padding: 1rem;
-    cursor: pointer;
-`
-
-const ListItemExpand = styled.div`
-    display: inline-flex;
-    padding: 1rem;
-    cursor: pointer;
-    justify-content: center;
-    align-items: center;
-    gap: 0.3rem;
-    background-color: ${color.darkOrange};
-`
-const TaskChildContainer = styled.div`
-    display: flex;
-    flex-direction: column;
-    padding-left: 1rem;
-    gap: 1rem;
-`
 
 const TaskListItem = (props: {item: TaskObject, resultHandler? } ) => {
     const [showChildren, setShowChildren] = React.useState<boolean>(false)  
@@ -99,9 +60,9 @@ const TaskListItem = (props: {item: TaskObject, resultHandler? } ) => {
                 }           
             </ListItem>
             {showChildren && 
-                <TaskChildContainer>
+                <ListChildContainer>
                     <TaskListWidget tasks={childrenTasks} resultHandler={props.resultHandler}/>
-                </TaskChildContainer>
+                </ListChildContainer>
             }
         </>
     )
@@ -218,7 +179,7 @@ export const TaskListComponent = (props) => {
             />
             {loading && <Spinner />}            
             
-            <TaskListContainer>
+            <ListContainer>
             {tasks.length ? 
                 (error!==null ? 
                     <div>Error: {error.message?error.message:'unknown error'}</div> 
@@ -228,7 +189,7 @@ export const TaskListComponent = (props) => {
                 :
                 <BlockEmptyComponent />
             }
-            </TaskListContainer>
+            </ListContainer>
         </BlockContainer>
         )
         

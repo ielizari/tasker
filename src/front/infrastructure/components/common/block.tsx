@@ -4,18 +4,20 @@ import {common, font, color } from '../../../styles/theme'
 import { BlockActions } from '../common/block-actions'
 
 export const BlockContainer = styled.div`
-    margin: 1rem;
+    margin: 1.5rem;
     border-style: solid;
-    border-color: #000;
+    border-color: #f00;
     border-width: 1px;
     ${common.roundedCorners()};
+    background-color: ${color.blockBackground}
 `
 
 const BlockTitle = styled.div`
     ${font.h3()};
-    color: ${color.white};
-    background-color: ${color.orange};
+    color: ${color.blockTitleColor};
+    background-color: ${color.blockTitleBackground};
     ${common.roundedCornersTop()};
+    ${common.blockTitleGradient()};
     padding: 1rem;
 `
 export const BlockContent = styled.div`
