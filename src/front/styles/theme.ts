@@ -30,7 +30,7 @@ export const font = {
 
   small(weight = fontWeight.regular) {
     return css`
-      font-family: 'Arial, Helvetica, sans-serif !important';
+      font-family: Arial, Helvetica, sans-serif;
       font-size: ${rem(12.64)};
       line-height: ${rem(17)};
       font-weight: ${weight};
@@ -39,7 +39,7 @@ export const font = {
 
   base(weight = fontWeight.regular) {
     return css`
-      font-family: 'Arial, Helvetica, sans-serif !important';
+      font-family: Arial, Helvetica, sans-serif;
       font-size: ${rem(16)};
       line-height: ${rem(22)};
       font-weight: ${weight};
@@ -48,7 +48,7 @@ export const font = {
 
   h4(weight = fontWeight.regular) {
     return css`
-      font-family: 'Arial, Helvetica, sans-serif !important';
+      font-family: Arial, Helvetica, sans-serif;
       font-size: ${rem(18)};
       line-height: ${rem(25)};
       font-weight: ${weight};
@@ -57,7 +57,7 @@ export const font = {
 
   h3(weight = fontWeight.regular) {
     return css`
-      font-family: 'Arial, Helvetica, sans-serif !important';
+      font-family: Arial, Helvetica, sans-serif;
       font-size: ${rem(25.63)};
       line-height: ${rem(35)};
       font-weight: ${weight};
@@ -66,7 +66,7 @@ export const font = {
 
   h2(weight = fontWeight.regular) {
     return css`
-      font-family: 'Arial, Helvetica, sans-serif !important';
+      font-family: Arial, Helvetica, sans-serif;
       font-size: ${rem(36.41)};
       line-height: ${rem(50)};
       font-weight: ${weight};
@@ -75,7 +75,7 @@ export const font = {
 
   h1(weight = fontWeight.regular) {
     return css`
-      font-family: 'Arial, Helvetica, sans-serif !important';
+      font-family: Arial, Helvetica, sans-serif;
       font-size: ${rem(41.83)};
       line-height: ${rem(50)};
       font-weight: ${weight};

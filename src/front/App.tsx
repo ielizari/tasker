@@ -16,6 +16,7 @@ import { TasksView } from './infrastructure/views/tasks.view.component'
 import { WorklogView } from './infrastructure/views/worklog.view.component'
 import { SetupApp } from './infrastructure/views/setup-app.component'
 import { Settings } from './infrastructure/views/settings.component'
+import { About } from './infrastructure/views/about.component'
 
 import { existsDb } from './application/existsDatabase'
 
@@ -91,8 +92,5 @@ function App() {
   );
 }
 
-function About() {
-  return <h2>About</h2>;
-}
 
 export default App;

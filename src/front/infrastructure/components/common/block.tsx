@@ -10,7 +10,7 @@ export const BlockContainer = styled.div`
     border-width: 1px;
     ${common.roundedCorners()};
     background-color: ${color.blockBackground};
-    ${common.shadow("10px","10px","10px")};
+    ${common.shadow("10px","10px","10px","10px")};
 `
 
 const BlockTitle = styled.div`
