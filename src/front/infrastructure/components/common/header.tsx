@@ -13,7 +13,7 @@ const Head = styled.nav`
     flex-direction: row;
     background-color: ${color.headerBackground};
     color: ${color.headerColor};
-    padding: 0.5rem 1.5rem;
+    padding: 1.5rem;
 `;
 const LinkLogo = styled(Link)`
     display: flex;

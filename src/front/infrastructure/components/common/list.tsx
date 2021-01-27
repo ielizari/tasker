@@ -42,6 +42,7 @@ export const ListItemExpand = styled.div`
     cursor: pointer;
     justify-content: center;
     align-items: center;
+    border-width: 0 !important;
     gap: 0.3rem;
     background-color: ${color.blockTitleBackground};
     color: ${color.white};
@@ -50,5 +51,15 @@ export const ListChildContainer = styled.div`
     display: flex;
     flex-direction: column;
     padding-left: 1rem;
-    gap: 1rem;
+
+    & div {
+        border-style: solid;
+        border-width: 0 0 1px 0 !important;
+        border-color: ${color.orange};
+    }
+
+    & div:last-child, div:first-child {
+        border-width: 0 !important;
+    }
+    
 `
