@@ -32,7 +32,7 @@ export const RunningWorklogsWidget = () => {
     const [worklogs, setWorklogs] = React.useState<Array<Worklog>>([])
 
     React.useEffect(()=> {
-        getWorklogList({endDatetime: ''}).then(
+        getWorklogList({where: {endDatetime: ''}}).then(
             result => {                
                 if(!result.hasError){
                     setWorklogs(result.data)
@@ -81,7 +81,7 @@ export const RunningWorklogsTable = () => {
     const [worklogs, setWorklogs] = React.useState<Array<Worklog>>([])
 
     React.useEffect(()=> {
-        getWorklogList({endDatetime: ''}).then(
+        getWorklogList({where: {endDatetime: ''}}).then(
             result => {                
                 if(!result.hasError){
                     console.log(result.data)

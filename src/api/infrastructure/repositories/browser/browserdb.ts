@@ -2,7 +2,7 @@ import lowdb from 'lowdb'
 import LocalStorage from 'lowdb/adapters/LocalStorage'
 
 import { TaskDetail, TaskObject } from '../../../domain/task'
-import { WorklogObject, Worklog, WorklogDB } from '../../../domain/worklog'
+import { WorklogObject, Worklog, WorklogDB, WorklogsFilter, OrderObject } from '../../../domain/worklog'
 import { Job, JobObject } from '../../../domain/job'
 import { mapWorklogToApiWorklog, mapApiWorklogToWorklogDb, mapApiTaskToTaskDb } from '../../../application/dtos/dbToApiDto'
 
@@ -99,13 +99,13 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
         }
     }
 
-    getTasks(filter: Partial<TaskDetail> = {}, order = []): Array<TaskObject>  {
+    getTasks(filter: Partial<TaskDetail> = {}, order = [], orderDirection = []): Array<TaskObject>  {
         let search = JSON.parse(filter as string)
         const tasks = db.get('tasks').filter(task => 
             ((!search.parent && !(typeof(search.parent)==='string')) || task.parent === search.parent )&&
             (!search.title || task.title.toLowerCase().includes(search.title.toLowerCase()))
         )
-        .sortBy(order)
+        .orderBy(order,orderDirection)
         .value()
         
         const result : Array<TaskObject>= []
@@ -178,13 +178,33 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
         }
     }
 
-    getWorklogs(filter: Partial<Worklog> = {}): Array<Worklog>  {
-        const search = JSON.parse(filter as string)
+    getWorklogs(filter: WorklogsFilter): Array<Worklog>  {
+        const search = JSON.parse(filter as string) as WorklogsFilter
+        const where: Partial<Worklog> = search.where ? search.where : {}
+        const order: OrderObject = search.order ? search.order : {}
+        let orderFields = []
+        let orderDirections = []
+        if(search.order){
+            if(order.orderByFields){
+                orderFields = order.orderByFields
+                if(order.orderDirections){
+                    orderDirections = order.orderDirections
+                }else{
+                    for(let i=0; i<orderFields.length; i++){
+                        orderDirections.push('asc')
+                    }
+                }
+            }
+        }
+
+        console.log(search, orderFields,orderDirections)
         const worklogs = db.get('worklogs').filter(wl => 
-            (!search.title || wl.title.toLowerCase().includes(search.title.toLowerCase())) &&
-            ((!search.endDatetime && !(typeof(search.endDatetime)==='string')) || wl.endDatetime === search.endDatetime)
+            (!where.title || wl.title.toLowerCase().includes(where.title.toLowerCase())) &&
+            ((!where.endDatetime && !(typeof(where.endDatetime)==='string')) || wl.endDatetime === where.endDatetime)
             //(!search.endDatetime && isEmpty(search.endDatetime) && wl.endDatetime === search.endDatetime)
-        ).value()
+        )
+        .orderBy(orderFields,orderDirections)
+        .value()
         const result : Array<Worklog>= []
         worklogs.forEach((worklog: Worklog) => {
             result.push({

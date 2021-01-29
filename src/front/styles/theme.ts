@@ -104,13 +104,16 @@ export const color = {
   lightOrange: '#fba72f',
   darkOrange: '#b36c06',
   success: '#9aeb36',
-  background: '#c8cad0',
-  headerBackground: '#1d502f',
-  headerColor: '#c8cad0',
+  background: '#ededed',
+  headerBackground: '#74b15a',
+  headerColor: '#153d04',
   headerBorderColor: '#b4991c',
+
   blockBackground: '#fff',
-  blockTitleBackground: '#1eb12f',
-  blockTitleColor: '#e4e4e4',
+  blockBorder: '#153d04',
+  blockTitleBackground: '#74b15a',
+  blockTitleColor: '#153d04',
+
   tableHeaderBackground: '#1a9380',
   tableHeaderColor: '#d8d9de',
   saveIconColor: '#c9e311'

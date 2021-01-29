@@ -1,5 +1,5 @@
 import { TaskDetail, TaskObject } from '../domain/task'
-import { Worklog, WorklogObject } from '../domain/worklog'
+import { Worklog, WorklogObject, WorklogsFilter } from '../domain/worklog'
 import { Job, JobObject } from '../domain/job'
 import { Schema } from '../infrastructure/repositories/browser/browserdb'
 
@@ -22,13 +22,13 @@ export interface TaskerRepository{
     setDbLastExported(date: string): boolean
     isDbSynced(): boolean
 
-    getTasks(filter?: Partial<TaskDetail>): Array<TaskObject>
+    getTasks(filter?: Partial<TaskDetail>, order?: Array<string>, orderDirection?: Array<string>): Array<TaskObject>
     addTask(task: TaskDetail): TaskObject
     getTaskById(id: string): TaskObject
     deleteTask(id: string): boolean 
     updateTask(task: TaskDetail): TaskObject
 
-    getWorklogs(filter?: Partial<Worklog>): Array<Worklog>
+    getWorklogs(filter?: WorklogsFilter): Array<Worklog>
     addWorklog(worklog: Worklog): WorklogObject
     getWorklogById(id: string): WorklogObject
     deleteWorklog(id: string): boolean 

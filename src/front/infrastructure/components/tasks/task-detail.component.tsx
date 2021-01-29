@@ -12,7 +12,7 @@ import { FaEdit, FaTrashAlt, FaPlus } from 'react-icons/fa'
 import { Modal } from '../common/modal'
 import { Link } from 'react-router-dom'
 import { dateToFormattedDate } from '../../../../lib/date.utils'
-import { BlockContainer } from '../common/block'
+import { BlockContainer, BlockHeaderComponent } from '../common/block'
 import { SyncStateContext} from '../../../application/contexts/dbSyncContext'
  
 const TaskDetailContainer = styled.ul`
@@ -181,7 +181,11 @@ export const TaskDetailComponent = (props) => {
             return () => cancelled = true
     },[taskid])
     
-    return (        
+    return ( 
+        <>
+        {deleteSuccess !== null ? 
+            <div aria-label='success-message' className='message-success'>{deleteSuccess} <Link to={'/tasks'}>Volver a la lista</Link></div>
+            :       
         <BlockContainer>
             <Modal 
                 title="Eliminar tarea" 
@@ -191,14 +195,10 @@ export const TaskDetailComponent = (props) => {
                 type="confirm"
                 action={handleDelete} />
             {loading ? <Spinner /> : ''}
-            <h3 className="section-title">Detalle de tarea</h3>
-            {deleteSuccess !== null ? 
-                <div aria-label='success-message' className='message-success'>{deleteSuccess} <Link to={'/tasks'}>Volver a la lista</Link></div>
-                :
-                <>
-                <BlockActions 
-                    actions={actions}
-                />
+            <BlockHeaderComponent 
+                title='Detalle de tarea'
+                actions={actions}
+            />       
                 {error !== null ?
                     <ErrorMessage>{error.message}</ErrorMessage>
                     :
@@ -281,9 +281,8 @@ export const TaskDetailComponent = (props) => {
                     :   
                         <div></div>
                 }
-                </>
-            }    
-                
         </BlockContainer>
+        }
+        </>
     )   
 }

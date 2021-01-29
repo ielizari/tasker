@@ -5,17 +5,11 @@ import { Link } from 'react-router-dom'
 export const ListContainer = styled.div`
     display: flex;
     flex-direction: column;
-    padding: 1rem;
-
-    & div {
-        border-style: solid;
-        border-width: 0 1px 1px 1px;
-        border-color: ${color.orange};
+    margin: 1rem;    
+    border-width: 1px 0 0 0;
+    border-color: ${color.black};
+    border-style: solid;
     }
-    & div:first-child {
-        border-width: 1px;
-    }
-    
 `
 
 export const ListItem = styled.div`
@@ -23,7 +17,11 @@ export const ListItem = styled.div`
     flex-direction: row;
     align-items: center;    
     background-color: ${color.lightGrey};
-    color: ${color.black};
+    color: ${color.black}; 
+    border-width: 0 1px 1px 1px !important;
+    border-color: ${color.black};
+    border-style: solid;
+    
 `
 
 export const ListItemTitleLink = styled(Link)`
@@ -51,15 +49,11 @@ export const ListChildContainer = styled.div`
     display: flex;
     flex-direction: column;
     padding-left: 1rem;
-
-    & div {
-        border-style: solid;
-        border-width: 0 0 1px 0 !important;
-        border-color: ${color.orange};
-    }
-
-    & div:last-child, div:first-child {
-        border-width: 0 !important;
+    border-style: solid;
+    border-width: 0 0 1px 0;
+    border-color: ${color.black};
+    & div:last-child{
+        border-width: 0 1px 0 1px !important;
     }
     
 `

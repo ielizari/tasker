@@ -36,8 +36,8 @@ const DialogHeader = styled.div`
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    background-color: ${color.orange};
-    color: ${color.white};
+    background-color: ${color.blockTitleBackground};
+    color: ${color.blockTitleColor};
     padding: 0.75rem
 `
 const HeaderTitle = styled.h3`

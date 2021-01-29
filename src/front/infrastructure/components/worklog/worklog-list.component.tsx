@@ -8,7 +8,7 @@ import {
 } from '../common/list'
 import { Spinner } from '../common/spinner'
 import { getWorklogList} from '../../../application/getWorklogList'
-import { Worklog } from '../../../domain/worklog'
+import { Worklog, WorklogsFilter } from '../../../domain/worklog'
 
 
 const WorklogListItem = (props: {worklog: Worklog } ) => {    
@@ -27,8 +27,7 @@ export const WorklogListComponent = ( props ) => {
     const [error, setError] = React.useState<Error | null>(null)
     const [loading, setLoading] = React.useState<boolean>(false)
     const [actions, setActions] = React.useState<Array<any>>([])
-    const [filters, setFilters ] = React.useState<Partial<any>>(props.filter ||{})
-
+    const [filters, setFilters ] = React.useState<WorklogsFilter>(props.filter ||{})
     
     React.useEffect(() => {
         let cancelled = false
@@ -93,9 +92,9 @@ export const WorklogListComponent = ( props ) => {
     },[filters])
 
     const searchHandler = (values) => {
-        const filter: Partial<Worklog> = {}
+        const filter: WorklogsFilter = {where: {}, order: {orderByFields: ['startDatetime'], orderDirections: ['desc']}}
         if(values.actionBarSearch){
-            filter.title = values.actionBarSearch
+            filter.where.title = values.actionBarSearch
         }
         setFilters(filter)
     }

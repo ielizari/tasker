@@ -6,11 +6,10 @@ import { BlockActions } from '../common/block-actions'
 export const BlockContainer = styled.div`
     margin: 1.5rem;
     border-style: solid;
-    border-color: #f00;
+    border-color: ${color.blockBorder};
     border-width: 1px;
     ${common.roundedCorners()};
     background-color: ${color.blockBackground};
-    ${common.shadow("10px","10px","10px","10px")};
 `
 
 const BlockTitle = styled.div`

@@ -8,25 +8,25 @@ import {
 } from "react-router-dom";
 import { DbSync } from '../db-sync'
 
-const Head = styled.nav`
+export const Head = styled.nav`
     display: flex;
     flex-direction: row;
     background-color: ${color.headerBackground};
     color: ${color.headerColor};
     padding: 1.5rem;
 `;
-const LinkLogo = styled(Link)`
+export const LinkLogo = styled(Link)`
     display: flex;
     align-items: center;
 `;
 
-const LogoBox = styled.div`
+export const LogoBox = styled.div`
     display: flex;
     align-items: center;
     ${font.h1()}
 `;
 
-const LogoImg = styled(Logo)`
+export const LogoImg = styled(Logo)`
     width: 40px;
     height: 40px;
     color: #fff;
@@ -66,10 +66,10 @@ export const Header = () =>{
                         <Link to="/worklogs">Partes</Link>
                     </MenuItem>
                     <MenuItem>
-                        <Link to="/settings">Settings</Link>
+                        <Link to="/settings">Ajustes</Link>
                     </MenuItem>       
                     <MenuItem>
-                        <Link to="/about">About</Link>
+                        <Link to="/about">Acerca de</Link>
                     </MenuItem>                    
                 </Menu>
                 <SyncWarning><DbSync /></SyncWarning>       

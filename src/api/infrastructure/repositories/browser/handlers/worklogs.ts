@@ -1,13 +1,13 @@
 import { rest } from 'msw'
 import { isEmpty } from 'lodash'
-import { Worklog, WorklogObject } from '../../../../domain/worklog'
+import { Worklog, WorklogObject, WorklogsFilter } from '../../../../domain/worklog'
 import { getTaskerRepository } from '../../../../application/taskerRepository'
 import { ApiResponse, ApiResponseBuilder } from '../../../../domain/api-response'
 import { ISOStringToFormatedDate } from '../../../../../lib/date.utils'
 
 export const worklogHandlers = [
     rest.post(process.env.PUBLIC_URL + '/api/worklogs',(req, res, ctx) => { 
-        const filters = req.body ? req.body as Partial<Worklog> : {}  
+        const filters = req.body ? req.body as WorklogsFilter : {}         
         const worklogs : Array<Worklog> = getTaskerRepository().getWorklogs(filters)
         
         const response : ApiResponse = {
