@@ -1,4 +1,4 @@
-import { Worklog, WorklogsFilter} from './../domain/worklog'
+import { WorklogsFilter} from './../domain/worklog'
 import { ApiResponse } from '../../api/domain/api-response'
  
 export const getWorklogList = async (filters?: WorklogsFilter): Promise<ApiResponse> => {

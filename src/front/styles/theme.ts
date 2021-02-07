@@ -39,10 +39,10 @@ export const font = {
 
   base(weight = fontWeight.regular) {
     return css`
-      font-family: Arial, Helvetica, sans-serif;
-      font-size: ${rem(16)};
-      line-height: ${rem(22)};
-      font-weight: ${weight};
+      font-family: Arial, Helvetica, sans-serif !important;
+      font-size: ${rem(16)} !important;
+      line-height: ${rem(22)} !important;
+      font-weight: ${weight} !important;
     `;
   },
 
@@ -104,6 +104,7 @@ export const color = {
   lightOrange: '#fba72f',
   darkOrange: '#b36c06',
   success: '#9aeb36',
+
   background: '#ededed',
   headerBackground: '#74b15a',
   headerColor: '#153d04',
@@ -116,7 +117,10 @@ export const color = {
 
   tableHeaderBackground: '#1a9380',
   tableHeaderColor: '#d8d9de',
-  saveIconColor: '#c9e311'
+  saveIconColor: '#c9e311',
+
+  buttonBackground: '#6fcb46',
+  buttonBackgroundHighlight: '#7ed956',
 };
 
 const radius = {
@@ -196,6 +200,27 @@ export const common = {
       background-color: #48b03d;
     `
   },
+
+  blockButton(){
+    return css`
+      display: flex;
+      margin: 1rem;
+      padding: 1rem;
+      justify-content: center;
+      background-color: ${color.buttonBackground};
+      color: ${color.lightGrey} !important;
+      ${common.roundedCorners()} 
+      text-align: center;
+      border-style: none;
+      cursor: pointer;
+      transition: background-color .5s;
+
+      :hover{
+        background-color: ${color.buttonBackgroundHighlight};
+      }
+    `
+  },
+
   blockTitleGradient(){
     return css`
       background-image: linear-gradient(to right, ${color.blockTitleBackground}, ${color.headerBackground})

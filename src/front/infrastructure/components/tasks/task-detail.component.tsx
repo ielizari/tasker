@@ -7,7 +7,6 @@ import { TaskPriority, TaskStatus, ConstObjectToSelectOptionsArray } from '../..
 import { getTask } from '../../../application/getTask'
 import { deleteTask } from '../../../application/deleteTask'
 import { Spinner } from '../common/spinner'
-import { BlockActions } from '../common/block-actions'
 import { FaEdit, FaTrashAlt, FaPlus } from 'react-icons/fa'
 import { Modal } from '../common/modal'
 import { Link } from 'react-router-dom'

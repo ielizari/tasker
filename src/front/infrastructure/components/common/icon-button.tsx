@@ -71,7 +71,7 @@ export const IconButton = (props) => {
             aria-label={props.text}
             type={type}
         >
-            <IconWrapper className={props.className}>{Icon}</IconWrapper>       
+            <IconWrapper>{Icon}</IconWrapper>       
             {text && 
                 <TextWrapper>{text}</TextWrapper>
             }
@@ -105,7 +105,7 @@ export const IconLink = (props) => {
             role="button"
             aria-label={text}
             >
-            <IconWrapper className={props.className}>{Icon}</IconWrapper>
+            <IconWrapper>{Icon}</IconWrapper>
             {text && 
                 <TextWrapper>{text}</TextWrapper>
             }

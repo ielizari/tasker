@@ -1,5 +1,6 @@
 import React from 'react';
 import { screen } from '@testing-library/react';
+import selectEvent from 'react-select-event'
 import App from '../front/App';
 import { renderWithProviders } from './test-utils'
 import userEvent from '@testing-library/user-event'
@@ -152,8 +153,11 @@ describe("Nueva tarea", () => {
       expect(await screen.findByLabelText('description')).toHaveValue("")
       expect(await screen.findByLabelText('author')).toHaveValue("")
       expect(await screen.findByLabelText('limitDate')).toHaveValue("")
-      expect(await screen.findByLabelText('status')).toHaveValue("1")
-      expect(await screen.findByLabelText('priority')).toHaveValue("1")
+      
+      expect(await screen.getByRole("form")).toHaveFormValues({ status: "1" })
+      expect(await screen.getByTestId("status")).toHaveTextContent("Pendiente")
+      expect(await screen.getByRole("form")).toHaveFormValues({ priority: "1" })
+      expect(await screen.getByTestId("priority")).toHaveTextContent("Baja")
   }) 
 
   it("Al enviar el formulario de nueva tarea vacío se muestra error en los campos obligatorios", async() => {
@@ -218,16 +222,16 @@ describe("Nueva tarea", () => {
 
 describe("Editar tarea", () => {
     it("Muestra el formulario de edición de tareas y carga los datos de la tarea seleccionada", async () => {
-      renderWithProviders(<App />, {route: '/tasks/edit/1'})
-      
+      renderWithProviders(<App />, {route: '/tasks/edit/1'})    
+
       expect(await screen.findByLabelText('title')).toHaveValue("Hacer la compra")
       expect(await screen.findByLabelText('description')).toHaveValue("Comprar huevos, leche, cebollas")
       expect(await screen.findByLabelText('author')).toHaveValue("Iñaki")
       expect(await screen.findByLabelText('limitDate')).toHaveValue(ISOStringToFormatedDate("2020-12-01T10:45:00.000Z")) //"01/12/2020 09:45"
-      expect(await screen.findByLabelText('status')).toHaveValue("1")
-      expect(await screen.findByLabelText('status')).toHaveTextContent("Pendiente")
-      expect(await screen.findByLabelText('priority')).toHaveValue("3")
-      expect(await screen.findByLabelText('priority')).toHaveTextContent("Alta")
+      expect(await screen.getByRole("form")).toHaveFormValues({ status: "1" })
+      expect(await screen.getByTestId("status")).toHaveTextContent("Pendiente")
+      expect(await screen.getByRole("form")).toHaveFormValues({ priority: "3" })
+      expect(await screen.getByTestId("priority")).toHaveTextContent("Alta")
     })
 
     it("Muestra mensaje de éxito al pulsar el botón 'Guardar' actualizar los datos de la tarea", async () => {
@@ -266,7 +270,7 @@ describe("Lista de partes de trabajo", () =>{
     await act(async () => {
       userEvent.type(await screen.findByPlaceholderText(/Buscar.../i),"Compra 15-11-20")
     })    
-    
+    console.log(".")
     await act(async() => {
       userEvent.click(await screen.findByLabelText(/Filtrar/i))
     })

@@ -10,6 +10,13 @@ import { Spinner } from '../common/spinner'
 import { getWorklogList} from '../../../application/getWorklogList'
 import { Worklog, WorklogsFilter } from '../../../domain/worklog'
 
+const defaultFilter: WorklogsFilter = {
+    where: {}, 
+    order: {
+        orderByFields:['startDatetime'],
+        orderDirections:['desc']
+    }
+}
 
 const WorklogListItem = (props: {worklog: Worklog } ) => {    
     
@@ -27,7 +34,7 @@ export const WorklogListComponent = ( props ) => {
     const [error, setError] = React.useState<Error | null>(null)
     const [loading, setLoading] = React.useState<boolean>(false)
     const [actions, setActions] = React.useState<Array<any>>([])
-    const [filters, setFilters ] = React.useState<WorklogsFilter>(props.filter ||{})
+    const [filters, setFilters ] = React.useState<WorklogsFilter>(props.filter || defaultFilter)
     
     React.useEffect(() => {
         let cancelled = false
@@ -43,7 +50,7 @@ export const WorklogListComponent = ( props ) => {
                 view: 'actionBar',
                 type: 'form',         
                 key: 'actionBarFilterForm',   
-                initValues: {actionBarSearch: ''},
+                initValues: {actionBarSearch: '', orderItems: 'startDesc'},
                 onSubmit: searchHandler,
                 validation: validation,
                 items: [
@@ -51,6 +58,20 @@ export const WorklogListComponent = ( props ) => {
                         type: 'text',
                         id: 'actionBarSearch',
                         placeholder: 'Buscar...'
+                    },
+                    {
+                        type: 'select',
+                        id: 'orderItems',
+                        selOptions: [
+                            {
+                                label: 'Últimos creados primero',
+                                value: 'startDesc',
+                            },
+                            {
+                                label: 'Actividad reciente',
+                                value: 'activityDesc'
+                            }
+                        ]
                     },
                     {        
                         id: 'filterBtn',
@@ -92,6 +113,7 @@ export const WorklogListComponent = ( props ) => {
     },[filters])
 
     const searchHandler = (values) => {
+        console.log(values)
         const filter: WorklogsFilter = {where: {}, order: {orderByFields: ['startDatetime'], orderDirections: ['desc']}}
         if(values.actionBarSearch){
             filter.where.title = values.actionBarSearch

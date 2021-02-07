@@ -1,5 +1,5 @@
 import { TaskDetail, TaskObject } from '../domain/task'
-import { Worklog, WorklogObject, WorklogsFilter } from '../domain/worklog'
+import { Worklog, WorklogObject } from '../domain/worklog'
 import { Job, JobObject } from '../domain/job'
 import { Schema } from '../infrastructure/repositories/browser/browserdb'
 
@@ -9,6 +9,17 @@ export interface FileDownload {
     blob: string,
     filename: string
 }
+
+export interface OrderObject {
+    orderByFields?: Array<string>
+    orderDirections?: Array<string>
+}
+
+export interface WorklogsFilter {
+    where?: Partial<Worklog>
+    order?: OrderObject    
+}
+
 export interface TaskerRepository{
     newId(table: string): string
     

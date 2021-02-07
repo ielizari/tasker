@@ -1,18 +1,20 @@
 import React from 'react'
 import styled from 'styled-components'
-import { color, common } from '../../../../styles/theme';
-import { Formik, Form, Field, useField } from 'formik'
+import { color, common, font } from '../../../../styles/theme';
+import { Formik, Form, Field, useField, FieldProps } from 'formik'
 import { IconButton, IconLink } from '../icon-button'
 import { ModalWithComponent } from '../modal'
-
+import Select, {Option, ReactSelectProps} from 'react-select'
 import { FaCalendar } from 'react-icons/fa'
 import  {Datepicker}  from '../../../../../lib/orzkDatepicker/datepicker'
 import '../../../../../lib/orzkDatepicker/datepicker.css'
 
 export const FormActionBarWrapper = styled(Form)`
-    display: inline-flex;
+    display: flex;
     flex-direction: row;
     color: ${color.black};
+    flex-wrap: nowrap;
+    flex-grow: 1;
 `
 
 export const FormWrapper = styled(Form)`
@@ -23,10 +25,43 @@ export const FormWrapper = styled(Form)`
 `
 export const FormItemWrapper = styled.div`
     display: flex;
+    width: 100%;
     justify-content: center;
     flex-direction: column;
     margin: 0.5rem;
 `
+export const FormItemWrapperInline = styled.div`
+    display: flex;
+    width: 100%;
+    justify-content: center;
+    flex-direction: row;
+    margin: 0.5rem;
+`
+// const HiddenCheckbox = styled.input.attrs({ type: 'checkbox' })`
+//   border: 0;
+//   clip: rect(0 0 0 0);
+//   clippath: inset(50%);
+//   height: 1px;
+//   margin: -1px;
+//   overflow: hidden;
+//   padding: 0;
+//   position: absolute;
+//   white-space: nowrap;
+//   width: 1px;
+// `
+// const StyledCheckbox = styled.div`
+//   display: inline-block;
+//   width: 16px;
+//   height: 16px;
+//   background: ${(props:any) => props.checked ? 'salmon' : 'papayawhip'};
+//   border-radius: 3px;
+//   transition: all 150ms;
+// `
+// const CheckboxContainer = styled.div`
+//   display: inline-block;
+//   vertical-align: middle;
+// `
+
 export const FormButtons = styled.div`
     display: flex;
     flex-direction: row;
@@ -198,25 +233,80 @@ export const FormDateInput :React.FC<any> = ({label, minDate, maxDate, ...props}
     )
 }
 
-export const FormSelect: React.FC<any> = ({ label, selOptions, ...props }) => {
-    const [field, meta] = useField(props);  
+export const FormSelect: React.FC<ReactSelectProps & FieldProps> = ({ label, selOptions, ...props }) => {
+    const [field, meta, {setValue}] = useField(props); 
+    const [options, setOptions] = React.useState(selOptions || [])
+
+
+    React.useEffect(() => {
+        setOptions(selOptions)
+    },[selOptions])
+
+    const customStyles = {
+        option: (provided, state) => ({
+            ...provided,
+          }),
+        control: (provided, state) => ({
+            ...provided,
+            width: '100%',
+            borderColor: `${color.grey}`,
+            minHeight: '0',
+            font: `${font.base()}`,
+            padding: '0'
+        }),
+        singleValue: (provided, state) => {
+            const opacity = state.isDisabled ? 0.5 : 1;
+            const transition = 'opacity 300ms';
+            const fontSize = '0.75rem'
+            const padding = '0.5rem'
+        
+            return { ...provided, opacity, transition, fontSize, padding };
+        },
+        valueContainer: (provided, state) => ({
+            ...provided,
+            padding: '1px'
+        }),
+        dropdownIndicator: (provided, state) => ({
+            ...provided,
+            padding: '1px 8px'
+        })
+        
+    }
     
     return ( 
-        <FormItemWrapper>
-            <label htmlFor={props.id || props.name}>{label}</label> 
-            <Field as="select" {...field} {...props} aria-label={props.id || props.name}>
-                {selOptions &&
-                    selOptions.map((item) =>
-                        <option key={item.value} value={item.value}>{item.label}</option>
-                    )
-                }
-            </Field> 
+        <FormItemWrapper data-testid={props.id}>
+            <label htmlFor={props.id || props.name}>{label}</label>
+            <Select
+                options={selOptions}
+                name={field.name}
+                styles={customStyles}
+                value={options ? options.find(option => option.value === field.value) : ''}
+                onChange={(option: Option) => {setValue(option.value)}}
+                onBlur={field.onBlur}
+                aria-label={field.name}
+            />             
             {meta.touched && meta.error ? ( 
                 <div aria-label={'validate_' + (props.id || props.name)} className="form-item-error">{meta.error}</div> 
             ) : null} 
         </FormItemWrapper>
     ); 
   };
+
+    export const FormCheckbox :React.FC<any> = ({label, ...props}) => {
+        const [field, meta] = useField(props)
+    
+        return (
+            <FormItemWrapperInline>
+                <label>      
+                    <Field type="checkbox" {...field} {...props} aria-label={props.id || props.name}/>
+                    {label && <label htmlFor={props.id || props.name}>{label}</label>}
+                </label>  
+                {meta.touched && meta.error ? (
+                    <div aria-label={'validate_' + (props.id || props.name)} className="form-item-error">{meta.error}</div>
+                ): null}
+            </FormItemWrapperInline>
+        )
+    }
 
   export const FormFileupload: React.FC<any> = ({label, ...props}) => {
       const [field, meta,{setValue}] = useField(props)
@@ -300,7 +390,7 @@ export const FormBuilder: React.FC<any> = (props) => {
             >
                 {(props) =>  {
                     return (                           
-                        <FormActionBarWrapper>
+                        <FormActionBarWrapper role="form">
                             {
                                 items.map((item) => {
                                     if(item.type === 'text'){                                        
@@ -327,11 +417,20 @@ export const FormBuilder: React.FC<any> = (props) => {
                                         return (
                                             <FormSelect
                                                 label={item.label}
-                                                selOptions={item.selectOptions}
+                                                selOptions={item.selOptions}
                                                 name={item.id}
                                                 id={item.id}
                                                 key={item.id}        
                                             />   
+                                        )
+                                    }else if (item.type === 'checkbox'){
+                                        return (
+                                            <FormCheckbox 
+                                                label={item.label}
+                                                name={item.id}
+                                                id={item.id}
+                                                key={item.id}
+                                            />
                                         )
                                     }else if(item.type === 'file'){
                                         return(
@@ -369,12 +468,13 @@ export const FormBuilder: React.FC<any> = (props) => {
                 initialValues={props.initValues}               
                 validate = {props.validation}
                 onSubmit = {(values,{setSubmitting, resetForm}) => {
+                    console.log("Vamooos",values)
                     props.onSubmit(values,{setSubmitting, resetForm})
                 }}            
             >
                 {props =>  {
                     return (                           
-                        <FormWrapper>
+                        <FormWrapper role="form">
                             {
                                 items.map((item) => {
                                     if(item.type === 'text'){                                        
@@ -407,6 +507,15 @@ export const FormBuilder: React.FC<any> = (props) => {
                                                 name={item.id}
                                                 key={item.id}        
                                             />   
+                                        )
+                                    }else if (item.type === 'checkbox'){
+                                        return (
+                                            <FormCheckbox 
+                                                label={item.label}
+                                                name={item.id}
+                                                id={item.id}
+                                                key={item.id}
+                                            />
                                         )
                                     }else if(item.type === 'selectFromComponent'){
                                         return (

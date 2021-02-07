@@ -1,7 +1,7 @@
 import { rest } from 'msw'
 import taskData from './tasks.json'
 import { TaskDetail, TaskObject } from '../../front/domain/task-detail'
-import { Worklog, WorklogObject} from '../../front/domain/worklog'
+import { Worklog, WorklogObject, WorklogsFilter} from '../../front/domain/worklog'
 import { JobObject } from '../../front/domain/job'
 import { ApiResponseBuilder} from '../../api/domain/api-response'
 
@@ -184,19 +184,22 @@ export const handlers = [
     }),
 
     rest.post(process.env.PUBLIC_URL + '/api/worklogs',(req, res, ctx) => {       
-        const filters : Partial<Worklog> = req.body ? JSON.parse(req.body as string) : {}
-        
-        if(filters.title === 'Compra 15-11-20'){
-            return res(
-                ctx.status(200),
-                ctx.json(ApiResponseBuilder(200,taskData.worklogs.filter((worklog)=>worklog.title === filters.title),false))
-            )
-        }else if(filters.title === 'Parte que no existe'){
-            return res(
-                ctx.status(200),
-                ctx.json(ApiResponseBuilder(200,[],false))
-            )
+        const filters : WorklogsFilter= req.body ? JSON.parse(req.body as string) : {}
+        console.log(filters)
+        if(Object.keys(filters.where).length){
+            if(filters.where.title === 'Compra 15-11-20'){
+                return res(
+                    ctx.status(200),
+                    ctx.json(ApiResponseBuilder(200,taskData.worklogs.filter((worklog)=>worklog.title === filters.where.title),false))
+                )
+            }else if(filters.where.title === 'Parte que no existe'){
+                return res(
+                    ctx.status(200),
+                    ctx.json(ApiResponseBuilder(200,[],false))
+                )
+            }
         }else{
+            console.log("pfffff")
             return res(
                 ctx.status(200),
                 ctx.json(ApiResponseBuilder(200,taskData.worklogs,false))

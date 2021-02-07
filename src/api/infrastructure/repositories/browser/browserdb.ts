@@ -2,11 +2,11 @@ import lowdb from 'lowdb'
 import LocalStorage from 'lowdb/adapters/LocalStorage'
 
 import { TaskDetail, TaskObject } from '../../../domain/task'
-import { WorklogObject, Worklog, WorklogDB, WorklogsFilter, OrderObject } from '../../../domain/worklog'
+import { WorklogObject, Worklog, WorklogDB} from '../../../domain/worklog'
 import { Job, JobObject } from '../../../domain/job'
 import { mapWorklogToApiWorklog, mapApiWorklogToWorklogDb, mapApiTaskToTaskDb } from '../../../application/dtos/dbToApiDto'
 
-import { TaskerRepository, setTaskerRepository, FileDownload } from '../../../application/taskerRepository'
+import { TaskerRepository, setTaskerRepository, FileDownload,  WorklogsFilter, OrderObject  } from '../../../application/taskerRepository'
 import { isEmpty } from 'lodash'
 import { elapsedTime, ISOStringToFormatedDate } from 'src/lib/date.utils'
 
@@ -178,26 +178,34 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
         }
     }
 
+    getOrderByItems = (order: OrderObject) => {
+        let orderFields = []
+        let orderDirections = []
+        if(order.orderByFields){
+            orderFields = order.orderByFields
+            if(order.orderDirections){
+                orderDirections = order.orderDirections
+            }else{
+                for(let i=0; i<orderFields.length; i++){
+                    orderDirections.push('asc')
+                }
+            }
+        }
+        
+        let result = {
+            orderFields: orderFields,
+            orderDirections: orderDirections
+        }
+        return result
+    }
     getWorklogs(filter: WorklogsFilter): Array<Worklog>  {
         const search = JSON.parse(filter as string) as WorklogsFilter
         const where: Partial<Worklog> = search.where ? search.where : {}
         const order: OrderObject = search.order ? search.order : {}
-        let orderFields = []
-        let orderDirections = []
-        if(search.order){
-            if(order.orderByFields){
-                orderFields = order.orderByFields
-                if(order.orderDirections){
-                    orderDirections = order.orderDirections
-                }else{
-                    for(let i=0; i<orderFields.length; i++){
-                        orderDirections.push('asc')
-                    }
-                }
-            }
-        }
 
-        console.log(search, orderFields,orderDirections)
+        const {orderFields, orderDirections} = this.getOrderByItems(order)
+
+        
         const worklogs = db.get('worklogs').filter(wl => 
             (!where.title || wl.title.toLowerCase().includes(where.title.toLowerCase())) &&
             ((!where.endDatetime && !(typeof(where.endDatetime)==='string')) || wl.endDatetime === where.endDatetime)

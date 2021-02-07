@@ -1,4 +1,6 @@
 import React from 'react'
+import styled from 'styled-components'
+import { common } from '../../../styles/theme'
 import {
     ListContainer, 
     ListItem, 
@@ -7,14 +9,18 @@ import {
     ListChildContainer,
     ListItemTitleLink
 } from '../common/list'
-import { TaskObject, TaskDetail, ConstObjectToSelectOptionsArray } from '../../../domain/task'
+import { TaskObject, TaskDetail } from '../../../domain/task'
 import { getTaskList } from '../../../application/getTaskList'
 import { FaFilter, FaPlus, FaMinus } from 'react-icons/fa'
+import { IconLink } from '../common/icon-button'
 
 import { Spinner } from '../common/spinner'
 
 import { BlockHeaderComponent, BlockContainer, BlockEmptyComponent } from '../common/block'
 
+const AddTaskButton = styled(IconLink)`
+   ${common.blockButton()};
+`
 
 const TaskListItem = (props: {item: TaskObject, resultHandler? } ) => {
     const [showChildren, setShowChildren] = React.useState<boolean>(false)  
@@ -104,13 +110,7 @@ export const TaskListComponent = (props) => {
     React.useEffect(() => {  
         let cancelled = false
         setLoading(true)
-        let actionItems = [
-            {
-                icon: FaPlus,
-                text: 'Nueva tarea',
-                route: `/tasks/new`,
-                type: 'link'
-            },
+        let actionItems = [            
             {
                 view: 'actionBar',
                 type: 'form',         
@@ -119,6 +119,12 @@ export const TaskListComponent = (props) => {
                 onSubmit: searchHandler,
                 validation: validation,
                 items: [
+                    // {
+                    //     type: 'checkbox',
+                    //     id: 'tasklistGroup',
+                    //     label: 'Agrupar',
+                    //     value: true
+                    // },
                     {
                         type: 'text',
                         id: 'actionBarSearch',
@@ -126,14 +132,18 @@ export const TaskListComponent = (props) => {
                     },
                     {
                         type: 'select',
-                        id: 'actionBarOrder',
-                        selOptions: ConstObjectToSelectOptionsArray( {
-                            low:        { label: "Baja",    value: "1"},
-                            medum:      { label: "Media",   value: "2"},
-                            high:       { label: "Alta",    value: "3"},
-                            extreme:    { label: "Extrema", value: "4"}
-                        })
-                    },
+                        id: 'orderItems',
+                        selOptions: [
+                            {
+                                label: 'Últimos creados primero',
+                                value: 'startDesc',
+                            },
+                            {
+                                label: 'Actividad reciente',
+                                value: 'activityDesc'
+                            }
+                        ]
+                    },                    
                     {        
                         id: 'filterBtn',
                         type: 'submit',
@@ -190,6 +200,12 @@ export const TaskListComponent = (props) => {
                 <BlockEmptyComponent />
             }
             </ListContainer>
+            <AddTaskButton
+                icon={FaPlus}
+                text='Nueva tarea'
+                route={`/tasks/new`}
+                type='link'
+            />
         </BlockContainer>
         )
         
