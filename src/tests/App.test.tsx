@@ -404,7 +404,7 @@ describe("Detalle de parte", () => {
   it("Muestra todos los campos de un parte", async() => {
     renderWithProviders(<App />, {route: '/worklogs/1'})
 
-      expect(await screen.findByText(/Compra 05-11-20/i)).toBeInTheDocument();
+      expect(await screen.findByText(/Compra 05-11-21/i)).toBeInTheDocument();
       expect(await screen.findByText(/05\/11\/2020 08:00/i)).toBeInTheDocument();
       expect(await screen.findByText(/05\/11\/2020 09:00/i)).toBeInTheDocument();
       expect(await screen.findByText(/05\/11\/2020 16:30/i)).toBeInTheDocument();
