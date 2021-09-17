@@ -5,6 +5,7 @@ import { useParams} from 'react-router-dom'
 import { TaskObject } from '../../../domain/task-detail'
 import { TaskPriority, TaskStatus, ConstObjectToSelectOptionsArray } from '../../../domain/task-definitions'
 import { getTask } from '../../../application/getTask'
+import { getTaskGroupedData } from '../../../application/getTaskGroupedData'
 import { deleteTask } from '../../../application/deleteTask'
 import { Spinner } from '../common/spinner'
 import { FaEdit, FaTrashAlt, FaPlus } from 'react-icons/fa'
@@ -13,6 +14,7 @@ import { Link } from 'react-router-dom'
 import { dateToFormattedDate } from '../../../../lib/date.utils'
 import { BlockContainer, BlockHeaderComponent } from '../common/block'
 import { SyncStateContext} from '../../../application/contexts/dbSyncContext'
+import { StatsTotalSpentTimeComponent } from '../statistics/stats-total-spent-time.component'
  
 const TaskDetailContainer = styled.ul`
 `;
@@ -157,6 +159,15 @@ export const TaskDetailComponent = (props) => {
                             setTask(null)
                         }else{
                             console.log(result.data)
+                            getTaskGroupedData(taskid).then(
+                                result => {
+                                    console.log("wadafak",result)
+                                },
+                                error => {
+
+                                }
+                            )
+
                             let status = ConstObjectToSelectOptionsArray(TaskStatus).filter(i => i.value === result.data.task.status)
                             setStatusLabel(status.length ? status[0].label : '')
                             let priority = ConstObjectToSelectOptionsArray(TaskPriority).filter(i => i.value === result.data.task.priority)
@@ -274,7 +285,14 @@ export const TaskDetailComponent = (props) => {
                                     '-'
                                 }                                
                                 </TaskDetailValue>
-                            </TaskDetailItem>                           
+                            </TaskDetailItem>
+
+                            <TaskDetailItem>
+                                <TaskDetailKey>Estadísticas:</TaskDetailKey>
+                                <TaskDetailValue>
+                                    <StatsTotalSpentTimeComponent title="Tiempo total" task={task.task} />
+                                </TaskDetailValue>
+                            </TaskDetailItem>
                         </TaskDetailContainer>
                         
                     :   

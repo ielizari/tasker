@@ -104,4 +104,27 @@ export const taskHandlers = [
             )
         }
     }),
+
+    rest.get(process.env.PUBLIC_URL + '/api/tasks/:taskid/grouped',(req,res,ctx) =>{
+        try{
+            const taskid = req.params.taskid || '';
+            if(taskid !== ''){
+                let result = getTaskerRepository().getTaskGroupedData(taskid)
+                return res(
+                    ctx.status(200),
+                    ctx.json(ApiResponseBuilder(200,result,false))
+                )
+            }else{
+                return res(
+                    ctx.status(400),
+                    ctx.json(ApiResponseBuilder(400,{},true,'Id de parte no válido'))
+                )
+            }
+        }catch(e){
+            return res(
+                ctx.status(500),
+                ctx.json(ApiResponseBuilder(500,{},true,e.message))
+            )
+        }
+    }),
 ]

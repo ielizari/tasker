@@ -318,7 +318,7 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
                         ISOStringToFormatedDate(job.endDatetime)
                     )/1000
                 : 0                
-                result.timeInSeconds += timeInSeconds
+                
                 if(job.task){
                     result = mergeTaskTrees(getTaskTree(job.task,timeInSeconds,job),result)
                 }else{
@@ -327,9 +327,19 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
                         result.hasRunningJob = true
                     }
                 }
-            })            
-            console.log(result)
+                result.timeInSeconds += timeInSeconds
+            })
             return result            
+        }catch(e){
+            throw e
+        }
+    }
+
+    getTaskGroupedData(id: string): any {
+        try{
+            //let tree = getDirectChildTasksTree(id)
+            let tree = getChildTasksTree(id)
+            return tree
         }catch(e){
             throw e
         }
@@ -595,7 +605,7 @@ const getTaskTree = (taskid: string, time: number, job: Job = null, childTask: T
                 hasRunningJob = true
             }
         }else{
-            if(childTask.hasRunningJob === true){
+            if(childTask &&   childTask.hasRunningJob === true){
                 hasRunningJob = true
             }
         }
@@ -730,4 +740,96 @@ const checkOverlappingJobs = (job: Job, jobs: Array<JobObject>): boolean => {
     }
 
     return false
+}
+
+const getChildTasksTree = (taskid: string): TaskTreeItem => {
+    let childs = db.get('tasks').filter({parent: taskid}).value()
+    let jobs = db.get('jobs').filter({task: taskid}).value()
+    let task = db.get('tasks').find({id: taskid}).value()
+
+    let result = emptyTaskTree()
+    result.id = taskid
+    result.title = task.title
+    result.jobs = jobs
+
+    jobs.forEach(job => {
+        if(!job.endDatetime){
+            result.hasRunningJob = true
+        }
+        result.timeInSeconds += job.endDatetime ?
+            elapsedTime(
+                ISOStringToFormatedDate(job.startDatetime),
+                ISOStringToFormatedDate(job.endDatetime)
+            )/1000
+        : 0
+    })
+
+    childs.forEach(child => {
+        let childTask = getChildTasksTree(child.id)
+        if(childTask.hasRunningJob){
+            result.hasRunningJob = true
+        }
+        result.childTasks.push(childTask)
+        result.timeInSeconds += childTask.timeInSeconds
+    })
+    return result
+}
+
+const getDirectChildTasksTree = (taskid: string): TaskTreeItem => {
+    let childs = db.get('tasks').filter({parent: taskid}).value()
+    let jobs = db.get('jobs').filter({task: taskid}).value()
+    let task = db.get('tasks').find({id: taskid}).value()
+
+    let result = emptyTaskTree()
+    result.id = taskid
+    result.title = task.title
+    result.jobs = jobs
+
+    jobs.forEach(job => {
+        if(!job.endDatetime){
+            result.hasRunningJob = true
+        }
+        result.timeInSeconds += job.endDatetime ? 
+            elapsedTime(
+                ISOStringToFormatedDate(job.startDatetime),
+                ISOStringToFormatedDate(job.endDatetime)
+            )/1000
+        : 0
+    })
+
+    childs.forEach(child => {
+        let childIds = getAllChildTasksIds(child.id)
+        let childJobs = db.get('jobs').filter((v) => childIds.includes(v.task)).value()
+        let childObject = emptyTaskTree()
+        childObject.id = child.id
+        childObject.title = child.title
+
+        childJobs.forEach(job => {
+            if(!job.endDatetime){
+                childObject.hasRunningJob = true
+                result.hasRunningJob = true
+            }
+            childObject.timeInSeconds += job.endDatetime ? 
+                elapsedTime( 
+                    ISOStringToFormatedDate(job.startDatetime),
+                    ISOStringToFormatedDate(job.endDatetime)
+                )/1000
+            : 0
+        })
+        result.timeInSeconds += childObject.timeInSeconds
+        result.childTasks.push(childObject)
+    })
+    return result
+}
+
+const getAllChildTasksIds = (taskid: string): Array<string> => {
+    let childs = db.get('tasks').filter({parent: taskid}).value()
+    let result = []
+
+    childs.forEach(child => {
+        result.push(child.id)
+        result.concat(getAllChildTasksIds(child.id))
+    })
+
+    return result
 }

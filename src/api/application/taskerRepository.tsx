@@ -36,6 +36,7 @@ export interface TaskerRepository{
     getTasks(filter?: Partial<TaskDetail>, order?: Array<string>, orderDirection?: Array<string>): Array<TaskObject>
     addTask(task: TaskDetail): TaskObject
     getTaskById(id: string): TaskObject
+    getTaskGroupedData(id: string): any
     deleteTask(id: string): boolean 
     updateTask(task: TaskDetail): TaskObject
 

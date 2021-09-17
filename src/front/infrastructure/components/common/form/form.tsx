@@ -468,7 +468,6 @@ export const FormBuilder: React.FC<any> = (props) => {
                 initialValues={props.initValues}               
                 validate = {props.validation}
                 onSubmit = {(values,{setSubmitting, resetForm}) => {
-                    console.log("Vamooos",values)
                     props.onSubmit(values,{setSubmitting, resetForm})
                 }}            
             >

@@ -1,5 +1,6 @@
 import React from 'react'
 import styled from 'styled-components'
+import {Link } from 'react-router-dom'
 import { color } from '../../../styles/theme'
 import { Job} from 'src/front/domain/job'
 import { WorklogObject } from 'src/front/domain/worklog'
@@ -100,7 +101,7 @@ const GroupedNode = (props: {node: TaskTreeItem, runningJobHandler?}) => {
                     :
                     <Expand onClick={showChildrenItems}>+</Expand>
                 }
-                <NodeInfoTitle>{node.title !== '' ? node.title : 'Sin título'}</NodeInfoTitle>
+                <NodeInfoTitle><Link to={`/tasks/${node.id}`}>{node.title !== '' ? node.title : 'Sin título'}</Link></NodeInfoTitle>
                 <span>
                 {node.hasRunningJob && runningJobStart ?
                     <RunningElapsedTime start={runningJobStart} initialSeconds={nodeElapsedSeconds}/>
