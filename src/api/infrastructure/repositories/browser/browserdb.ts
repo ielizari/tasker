@@ -318,7 +318,7 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
                         ISOStringToFormatedDate(job.endDatetime)
                     )/1000
                 : 0                
-                
+
                 if(job.task){
                     result = mergeTaskTrees(getTaskTree(job.task,timeInSeconds,job),result)
                 }else{
@@ -774,7 +774,7 @@ const getChildTasksTree = (taskid: string): TaskTreeItem => {
     })
     return result
 }
-
+/*
 const getDirectChildTasksTree = (taskid: string): TaskTreeItem => {
     let childs = db.get('tasks').filter({parent: taskid}).value()
     let jobs = db.get('jobs').filter({task: taskid}).value()
@@ -821,7 +821,7 @@ const getDirectChildTasksTree = (taskid: string): TaskTreeItem => {
     })
     return result
 }
-
+*/
 const getAllChildTasksIds = (taskid: string): Array<string> => {
     let childs = db.get('tasks').filter({parent: taskid}).value()
     let result = []
