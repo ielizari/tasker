@@ -33,8 +33,8 @@ jobs:
     - name: 📂 Sync files
       uses: SamKirkland/FTP-Deploy-Action@4.0.0
       with:
-        server: 86.109.178.128
-        username: cust_a0128u0121
+        server:  ${{ secrets.ftp_url }}
+        username:  ${{ secrets.ftp_user }}
         password: ${{ secrets.ftp_password }}
         local-dir: ./build/
         server-dir: httpdocs/tasker/
