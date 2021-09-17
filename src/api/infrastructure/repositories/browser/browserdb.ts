@@ -821,7 +821,7 @@ const getDirectChildTasksTree = (taskid: string): TaskTreeItem => {
     })
     return result
 }
-*/
+
 const getAllChildTasksIds = (taskid: string): Array<string> => {
     let childs = db.get('tasks').filter({parent: taskid}).value()
     let result = []
@@ -833,3 +833,4 @@ const getAllChildTasksIds = (taskid: string): Array<string> => {
 
     return result
 }
+*/
