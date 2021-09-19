@@ -87,7 +87,10 @@ const GroupedNode = (props: {node: TaskTreeItem, runningJobHandler?}) => {
 
     React.useEffect(()=> {
         if(props.runningJobHandler){
-            props.runningJobHandler(runningJobStart)
+            // Si el nodo tiene algún job activo, se comprueba que runningJobStart no sea nulo antes de pasarlo al handler de los componentes padre
+            if(node && node.hasRunningJob && runningJobStart){
+                props.runningJobHandler(runningJobStart)
+            }
         }      
     },[runningJobStart,props])    
 
