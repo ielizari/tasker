@@ -345,6 +345,10 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
         }
     }
 
+    getTaskGroupedDataByDate(data: TaskTreeItem): any {
+
+    }
+    
     getJobs(filter: Partial<Job> = {}): Array<JobObject>  {
         let search = {}
         if(typeof filter === 'string'){

@@ -52,7 +52,7 @@ const ChildJobs = styled.div`
     padding-left: 2rem;
     color: ${color.blue};
 `
-const GroupedNode = (props: {node: TaskTreeItem, runningJobHandler?}) => {
+export const GroupedNode = (props: {node: TaskTreeItem, runningJobHandler?}) => {
     const [node, setNode] = React.useState<TaskTreeItem>(null)
     const [showChildren, setShowChildren] = React.useState<boolean>(true)
     const [nodeElapsedSeconds, setNodeElapsedSeconds] = React.useState<number>(0)

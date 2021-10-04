@@ -15,6 +15,7 @@ import { dateToFormattedDate } from '../../../../lib/date.utils'
 import { BlockContainer, BlockHeaderComponent } from '../common/block'
 import { SyncStateContext} from '../../../application/contexts/dbSyncContext'
 import { StatsTotalSpentTimeComponent } from '../statistics/stats-total-spent-time.component'
+import { GroupedNode } from '../worklog/worklog-grouped.component'
  
 const TaskDetailContainer = styled.ul`
 `;
@@ -89,6 +90,7 @@ export const TaskDetailComponent = (props) => {
     const [statusLabel, setStatusLabel ] = React.useState<string>('')
     const [priorityLabel, setPriorityLabel ] = React.useState<string>('')
     const [confirmedDelete, setConfirmedDelete ] = React.useState<boolean>(false)
+    const [groupedData, setGroupedData] = React.useState(null)
     
     const handleDelete = () => {
         setOpened(false)
@@ -162,6 +164,7 @@ export const TaskDetailComponent = (props) => {
                             getTaskGroupedData(taskid).then(
                                 result => {
                                     console.log("wadafak",result)
+                                    setGroupedData(result.data)
                                 },
                                 error => {
 
@@ -291,6 +294,14 @@ export const TaskDetailComponent = (props) => {
                                 <TaskDetailKey>Estadísticas:</TaskDetailKey>
                                 <TaskDetailValue>
                                     <StatsTotalSpentTimeComponent title="Tiempo total" task={task.task} />
+                                </TaskDetailValue>
+                            </TaskDetailItem>
+                            <TaskDetailItem>
+                                <TaskDetailKey>Resumen agrupado:</TaskDetailKey>
+                                <TaskDetailValue>
+                                    {groupedData &&
+                                        <GroupedNode node={groupedData}/>
+                                    }
                                 </TaskDetailValue>
                             </TaskDetailItem>
                         </TaskDetailContainer>
