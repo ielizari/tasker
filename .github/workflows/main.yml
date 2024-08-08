@@ -1,7 +1,7 @@
 # This is a basic workflow to help you get started with Actions
-on: 
+on:
   push:
-    branches: 
+    branches:
       - master
 
 name: 🚀 Deploy website to production server on master push
@@ -12,11 +12,11 @@ jobs:
     steps:
     - name: 🚚 Get latest code
       uses: actions/checkout@v2.3.2
-      
-    - name: Use Node.js 12
+
+    - name: Use Node.js 18.15.0
       uses: actions/setup-node@v2-beta
       with:
-        node-version: '12'
+        node-version: '18.15.0'
 
     - name: 🔨 Install packages
       run: |
@@ -28,8 +28,8 @@ jobs:
 
     - name: 🔨 Run tests
       run: |
-        npm run test      
-        
+        npm run test
+
     - name: 📂 Sync files
       uses: SamKirkland/FTP-Deploy-Action@4.0.0
       with:
@@ -38,4 +38,4 @@ jobs:
         password: ${{ secrets.ftp_password }}
         local-dir: ./build/
         server-dir: httpdocs/tasker/
-        dry-run: false 
+        dry-run: false
