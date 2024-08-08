@@ -1,0 +1,38 @@
+{
+  "rootDir": "src/tests",
+  "include": [
+    "**/*spec.js",
+    "**/*.test.tsx"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/.git/**"
+  ],
+  "outputDir": "report",
+  "coverage": [
+    {
+      "name": "PEGGY",
+      "id": "peggy",
+      "rules": [
+        {
+          "label": "PEGGY",
+          "tags": ["peggy"],
+          "children": [
+            {
+              "label": "Javascript Syntax",
+              "tags": [["javascript"], ["syntax"]]
+            },
+            {
+              "label": "DocBlocks",
+              "tags": ["docblock"]
+            },
+            {
+              "label": "Autotags",
+              "tags": ["autotag"]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

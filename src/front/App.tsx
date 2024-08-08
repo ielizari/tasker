@@ -2,7 +2,7 @@ import React from 'react';
 import './App.css';
 import styled from 'styled-components'
 import { color } from './styles/theme'
-import {  
+import {
   Switch,
   Route,
 } from "react-router-dom";
@@ -30,51 +30,48 @@ function App() {
   const syncCtx = React.useContext(SyncStateContext)
   const {sync, setSync} = syncCtx
   const [loading, setLoading] = React.useState<boolean>(false)
-  
-  React.useEffect(()=>{
-      let cancelled = false
-      setLoading(true)
-      existsDb().then(
-          result => {
-            if(!cancelled){
-                setLoading(false)
-                if(!result.hasError){
-                    setSync({sync:true, existsDb: result.data})
-                }else{
-                    setSync({sync:true, existsDb: false})
-                }         
-              }     
-          },
-          error => {
-            if(!cancelled){
-              setLoading(false)
-              console.log(error)
-              setSync({sync:true, existsDb: false})
-            }
-            
-          }
-      )
 
-      return () => cancelled = true
+  React.useEffect((): void => {
+    let cancelled = false
+    setLoading(true)
+    existsDb().then(
+      result => {
+        if(!cancelled){
+          setLoading(false)
+          if(!result.hasError){
+              setSync({sync:true, existsDb: result.data})
+          }else{
+              setSync({sync:true, existsDb: false})
+          }
+        }
+      },
+      error => {
+        if(!cancelled){
+          setLoading(false)
+          console.log(error)
+          setSync({sync:true, existsDb: false})
+        }
+      }
+    )
   }, [setSync])
 
   return (
     <RunningWorklogsProvider>
       <AppContainer>
-      {loading ? <Spinner /> : ''}     
+      {loading ? <Spinner /> : ''}
 
       {!sync.existsDb ?
         <SetupApp />
       :
         <>
-        <Header/>        
+        <Header/>
         <Switch>
             <Route path="/about">
               <About />
-            </Route>    
+            </Route>
             <Route path="/settings">
               <Settings />
-            </Route>           
+            </Route>
             <Route path="/tasks">
               <TasksView />
             </Route>
