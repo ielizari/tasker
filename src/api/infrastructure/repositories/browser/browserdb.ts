@@ -535,8 +535,8 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
     isDbSynced = () : boolean => {
         try{
             let metadata = db.get('metadata').value()
-            let lastModified = metadata[0].lastModified
-            let lastExported = metadata[0].lastExported
+            let lastModified = metadata[0]?.lastModified ?? ''
+            let lastExported = metadata[0]?.lastExported ?? ''
 
             if(isEmpty(lastModified)){
                 return true
@@ -565,24 +565,17 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
     
     loadDataToDB = (data: Schema) => {
         this.clearDB()
-        console.log(data)
-        const tasks : Array<TaskDetail> = data.tasks
-        for(let i=0; i< tasks.length; i++){     
-            db.get('tasks').push(tasks[i]).write()
-        }        
-        const worklogs: Array<Worklog> = data.worklogs
-        for(let i=0; i< worklogs.length; i++){      
-            db.get('worklogs').push(worklogs[i]).write()
-        }     
-        const jobs: Array<Job> = data.jobs
-        for(let i=0; i< jobs.length; i++){      
-            db.get('jobs').push(jobs[i]).write()
-        } 
         const metadata : Array<metadataDB> = data.metadata
-        for(let i=0; i<metadata.length; i++){
-            db.get('metadata').push(metadata[i]).write()
-        }
-        
+        db.set('metadata', metadata).write()
+
+        const tasks : Array<TaskDetail> = data.tasks
+        db.set('tasks', tasks).write()
+
+        const worklogs: Array<Worklog> = data.worklogs
+        db.set('worklogs', worklogs).write()
+
+        const jobs: Array<Job> = data.jobs
+        db.set('jobs', jobs).write()
     }
 }
 

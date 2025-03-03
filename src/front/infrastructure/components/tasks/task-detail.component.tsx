@@ -158,10 +158,8 @@ export const TaskDetailComponent = (props) => {
               setError(new Error(result.error))
               setTask(null)
             }else{
-              console.log(result.data)
               getTaskGroupedData(taskid).then(
                 result => {
-                  console.log("wadafak",result)
                   setGroupedData(result.data)
                 },
                 error => {

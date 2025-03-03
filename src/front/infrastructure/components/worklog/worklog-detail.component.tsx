@@ -178,10 +178,6 @@ export const WorklogDetailComponent = (props) => {
       )
   },[worklogid])
 
-  React.useEffect(() => {
-    console.log("WL Detail",worklog)
-  },[worklog])
-
   return (
     <BlockContainer>
       <Modal
