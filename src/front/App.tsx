@@ -16,6 +16,7 @@ import { TasksView } from './infrastructure/views/tasks.view.component'
 import { WorklogView } from './infrastructure/views/worklog.view.component'
 import { SetupApp } from './infrastructure/views/setup-app.component'
 import { Settings } from './infrastructure/views/settings.component'
+import { CalendarView } from './infrastructure/views/calendar.component'
 import { About } from './infrastructure/views/about.component'
 
 import { existsDb } from './application/existsDatabase'
@@ -66,21 +67,24 @@ function App() {
         <>
         <Header/>
         <Switch>
-            <Route path="/about">
-              <About />
-            </Route>
-            <Route path="/settings">
-              <Settings />
-            </Route>
-            <Route path="/tasks">
-              <TasksView />
-            </Route>
-            <Route path="/worklogs">
-              <WorklogView />
-            </Route>
-            <Route path="/">
-              <Home />
-            </Route>
+          <Route path="/about">
+            <About />
+          </Route>
+          <Route path="/settings">
+            <Settings />
+          </Route>
+          <Route path="/tasks">
+            <TasksView />
+          </Route>
+          <Route path="/worklogs">
+            <WorklogView />
+          </Route>
+          <Route path="/calendars">
+            <CalendarView />
+          </Route>
+          <Route path="/">
+            <Home />
+          </Route>
         </Switch>
         </>
       }

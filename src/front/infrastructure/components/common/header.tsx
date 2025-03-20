@@ -37,7 +37,7 @@ const Menu = styled.ul`
     display: flex;
     flex-direction: row;
     justify-content: flex-start;
-    align-items: center;  
+    align-items: center;
 `;
 const MenuItem = styled.li`
     margin: 0 1.5rem;
@@ -49,31 +49,34 @@ const SyncWarning = styled.div`
 `
 
 export const Header = () =>{
-    return(
-        <>            
-            <Head>                
-                <LogoBox>
-                    <LinkLogo to="/">
-                        <LogoImg/>
-                        TASKER
-                    </LinkLogo>
-                 </LogoBox>
-                <Menu>                        
-                    <MenuItem>
-                        <Link to="/tasks">Tareas</Link>
-                    </MenuItem>
-                    <MenuItem>
-                        <Link to="/worklogs">Partes</Link>
-                    </MenuItem>
-                    <MenuItem>
-                        <Link to="/settings">Ajustes</Link>
-                    </MenuItem>       
-                    <MenuItem>
-                        <Link to="/about">Acerca de</Link>
-                    </MenuItem>                    
-                </Menu>
-                <SyncWarning><DbSync /></SyncWarning>       
-            </Head>
-        </>
-    );
+  return(
+    <>
+      <Head>
+        <LogoBox>
+          <LinkLogo to="/">
+              <LogoImg/>
+              TASKER
+          </LinkLogo>
+        </LogoBox>
+        <Menu>
+          <MenuItem>
+            <Link to="/tasks">Tareas</Link>
+          </MenuItem>
+          <MenuItem>
+            <Link to="/worklogs">Partes</Link>
+          </MenuItem>
+          <MenuItem>
+            <Link to="/calendars">Calendarios</Link>
+          </MenuItem>
+          <MenuItem>
+            <Link to="/settings">Ajustes</Link>
+          </MenuItem>
+          <MenuItem>
+            <Link to="/about">Acerca de</Link>
+          </MenuItem>
+        </Menu>
+        <SyncWarning><DbSync /></SyncWarning>
+      </Head>
+    </>
+  );
 }

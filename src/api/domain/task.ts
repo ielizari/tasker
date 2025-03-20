@@ -1,3 +1,5 @@
+import { Calendar } from './calendar'
+
 export interface TaskDetail {
     id: string,
     parent: string,
@@ -9,13 +11,15 @@ export interface TaskDetail {
     authorId: string,
     status: string,
     priority: string,
-    tags: Array<string>
+    tags: Array<string>,
+    calendars?: Array<string>
 }
 
 export interface TaskObject {
     task: TaskDetail,
     parentTask: TaskDetail | null,
-    childTasks: Array<TaskDetail>
+    childTasks: Array<TaskDetail>,
+    calendars: Array<Calendar>,
 }
 
 export interface TaskItem {

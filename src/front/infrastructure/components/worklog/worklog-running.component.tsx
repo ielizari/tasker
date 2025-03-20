@@ -84,7 +84,6 @@ export const RunningWorklogsTable = () => {
         getWorklogList({where: {endDatetime: ''}}).then(
             result => {                
                 if(!result.hasError){
-                    console.log(result.data)
                     setWorklogs(result.data)
                 }else{
                     console.log(result.error)

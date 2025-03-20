@@ -1,4 +1,5 @@
 import { Job } from './job'
+import { Calendar } from './calendar'
 
 export const TaskStatus = {
     pending:        { label: "Pendiente",   value: "1"},
@@ -53,7 +54,8 @@ export interface TaskDetail {
     authorId: string,
     status: string,
     priority: string,
-    tags: Array<string>
+    tags: Array<string>,
+    calendars?: Array<string>
 }
 
 export interface TaskObject {

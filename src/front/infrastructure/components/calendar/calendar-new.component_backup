@@ -1,0 +1,312 @@
+ import React from 'react'
+import { Calendar } from '../../../domain/calendar'
+import { addCalendar } from '../../../application/addCalendar'
+import { updateCalendar } from '../../../application/updateCalendar'
+import { getCalendar } from '../../../application/getCalendar'
+import { Link, useParams } from 'react-router-dom'
+import { FaCheck, FaTimes} from 'react-icons/fa'
+import { Spinner } from '../common/spinner'
+import { BlockContainer, BlockHeaderComponent} from '../common/block'
+import { SyncStateContext} from '../../../application/contexts/dbSyncContext'
+
+import { FormBuilder } from '../common/form/form'
+
+import '../../../../lib/orzkDatepicker/datepicker.css'
+import { isValidDateTime } from '../../../../lib/date.utils'
+
+const emptyCalendar: Calendar = {
+  id: '',
+  title: '',
+  enabled: false,
+  scheduling: {
+    weekHours: { sunday: 0, monday: 0, tuesday: 0, wednesday: 0, thursday: 0, friday: 0, saturday: 0},
+  }
+}
+
+
+export interface CalendarProps {
+  calendarid: string,
+}
+
+export const CalendarNewComponent = (props) => {
+  let { calendarid } = useParams<CalendarProps>()
+  const syncCtx = React.useContext(SyncStateContext)
+  const {setSync} = syncCtx
+
+  const [submitSuccess, setSubmitSuccess] = React.useState<Calendar>(null)
+  const [mode, setMode] = React.useState(props.mode || 'new')
+  const [calendar, setCalendar] = React.useState<Calendar | null>(emptyCalendar)
+  const [error, setError] = React.useState<Error | null>(null)
+  const [loading, setLoading] = React.useState<boolean>(false)
+  const [title, setTitle] = React.useState<string>('Nuevo calendario')
+
+  let formItems =
+     [
+      {
+        type: 'text',
+        id: 'title',
+        label: 'Título'
+      },
+      {
+        type: 'checkbox',
+        id: 'enabled',
+        label: 'Activo'
+      },
+      {
+        type: 'date',
+        id: 'startDate',
+        label: 'Inicio',
+        mode: 'date'
+      },
+      {
+        type: 'date',
+        id: 'startDatetime',
+        label: 'Fin',
+        mode: 'date'
+      },
+      {
+        type: 'fieldset',
+        label: 'Horarios',
+        id: 'scheduling',
+        items: [
+          {
+            type: 'fieldset',
+            label: 'Días de la semana',
+            id: 'weekHours',
+            border: true,
+            controls: true,
+            items: [
+              {
+                type: 'group',
+                items: [
+                  {
+                    type: 'group',
+                    direction: 'row',
+                    fullwidth: false,
+                    id: 'weekHours-date-group',
+                    items: [
+                      {
+                        type: 'date',
+                        id: 'startWeekDate',
+                        label: 'Inicio',
+                        mode: 'date'
+                      },
+                      {
+                        type: 'date',
+                        id: 'endWeekDate',
+                        label: 'Fin',
+                        mode: 'date'
+                      },
+                    ]
+                  },
+                  {
+                    type: 'group',
+                    direction: 'row',
+                    fullwidth: false,
+                    id: 'weekHours-days-group',
+                    items: [
+                      {
+                        type: 'number',
+                        id: 'monday',
+                        label: 'Lun',
+                      },
+                      {
+                        type: 'number',
+                        id: 'tuesday',
+                        label: 'Mar'
+                      },{
+                        type: 'number',
+                        id: 'wednesday',
+                        label: 'Mié'
+                      },{
+                        type: 'number',
+                        id: 'thursday',
+                        label: 'Jue'
+                      },{
+                        type: 'number',
+                        id: 'friday',
+                        label: 'Vie'
+                      },{
+                        type: 'number',
+                        id: 'saturday',
+                        label: 'Sáb'
+                      },{
+                        type: 'number',
+                        id: 'sunday',
+                        label: 'Dom'
+                      },
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        type: 'buttons',
+        buttons: [
+          {
+            id: 'submitBtn',
+            type: 'submit',
+            icon: FaCheck,
+            label: 'Guardar',
+            className: 'form-button-submit button-icon'
+          },
+          {
+            id: 'cancelBtn',
+            type: 'link',
+            route: '/calendars',
+            icon: FaTimes,
+            label: 'Cancelar',
+            className: 'form-button-cancel button-icon'
+          }
+        ]
+      }
+     ]
+
+  const validate = (values) => {
+    const errors : Partial<Calendar> = {}
+    if(!values.title){
+      errors.title = 'Campo obligatorio'
+    }
+
+    return errors
+  }
+
+  const onSubmit = (values: Calendar, helpers) => {
+
+    setLoading(true)
+      if(mode === 'new'){
+        addCalendar(values)
+        .then(
+          (result) => {
+            helpers.setSubmitting(false);
+            setLoading(false)
+            if(!result.hasError){
+              setSync({sync: false})
+              setSubmitSuccess(result.data.calendar);
+              setError(null);
+              helpers.resetForm({})
+            }else{
+
+              setSubmitSuccess(null);
+              setError(new Error(result.error));
+            }
+          },
+          (error) => {
+            console.log(error)
+            helpers.setSubmitting(false);
+            setSubmitSuccess(null);
+            setError(error);
+            setLoading(false)
+          }
+        )
+      }else if(mode === 'edit'){
+        updateCalendar(values)
+        .then(
+          (result) => {
+            helpers.setSubmitting(false);
+            setLoading(false)
+            if(!result.hasError){
+              setSync({sync: false})
+              setSubmitSuccess(result.data.calendar);
+              setCalendar(null)
+              setCalendar(result.data.calendar)
+              setError(null);
+            }else{
+              setSubmitSuccess(null);
+              setError(new Error(result.error));
+            }
+          },
+          (error) => {
+            console.log(error)
+            helpers.setSubmitting(false);
+            setSubmitSuccess(null);
+            setError(error);
+            setLoading(false)
+          }
+        )
+      }
+  }
+
+  React.useEffect(()=> {
+    setMode(props.mode)
+  },[props.mode])
+
+  React.useEffect(()=> {
+    if(mode === 'edit'){
+      setTitle('Editar calendario')
+    } else {
+      setTitle('Nuevo calendario')
+    }
+  },[mode])
+
+  React.useEffect((): void => {
+    let cancelled = false
+    if(calendarid){
+      setLoading(true)
+      getCalendar(calendarid)
+      .then(
+        (result) => {
+          if(!cancelled){
+            if(result.hasError){
+              setError(new Error(result.error))
+              setCalendar(null)
+            }else{
+              if(mode === 'edit'){
+                setCalendar(result.data.calendar)
+              }else{
+                setCalendar(emptyCalendar)
+              }
+              setError(null)
+              setError(null)
+            }
+
+            setLoading(false)
+          }
+        },
+        (error) => {
+          console.log("error",error)
+          setSubmitSuccess(null)
+          setError(null)
+          setError(error)
+          setCalendar(null)
+          setLoading(false)
+        }
+      )
+    }else{
+      setCalendar(emptyCalendar)
+    }
+  },[calendarid, mode])
+
+  return (
+    <BlockContainer>
+      <BlockHeaderComponent
+        title={title}
+      />
+      {loading ? <Spinner /> : ''}
+
+      {submitSuccess &&
+        <div aria-label='success-message' className='message-success'>
+          El calendario <Link to={'/calendars/'+ submitSuccess.id}>'{submitSuccess.title}'</Link> ha sido {mode === 'new' ? 'creado':'editado'} con éxito.
+        </div>
+      }
+
+      {error &&
+        <div aria-label='error-message' className='message-error'>{error.message}</div>
+      }
+
+      {calendar &&
+        <FormBuilder
+          key = "newCalendarForm"
+          formView = "form"
+          formItems = {formItems}
+          initValues = {calendar}
+          validation = {validate}
+          onSubmit = {onSubmit}
+      />
+      }
+    </BlockContainer>
+  )
+}
