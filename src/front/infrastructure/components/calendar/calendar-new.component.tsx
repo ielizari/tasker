@@ -40,6 +40,10 @@ const WorkHoursForm = styled.div`
   .week-hours__dates {
     display: flex;
     flex-direction: row;
+
+    &>div {
+      width: 100%;
+    }
   }
   .week-hours__days {
     display: flex;

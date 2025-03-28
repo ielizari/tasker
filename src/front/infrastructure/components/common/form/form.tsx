@@ -44,10 +44,11 @@ export const StyledFieldArray = styled.div<{
 `
 
 export const FormItemWrapper = styled.div`
-    display: flex;
-    justify-content: center;
-    flex-direction: column;
-    margin: 0.5rem;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  margin: 0.5rem;
+  flex-grow: 1;
 `
 export const FormItemWrapperInline = styled.div`
     display: flex;
@@ -166,7 +167,15 @@ export const FormNumberInput :React.FC<any> = ({label, ...props}) => {
     )
 }
 
-export const FormSelectFromComponent : React.FC<any> = ({label, buttonLabel, selectedLabel, component, resultHandler, formValues, ...props}) => {
+export const FormSelectFromComponent : React.FC<any> = ({
+  label,
+  buttonLabel,
+  selectedLabel,
+  component,
+  resultHandler,
+  formValues,
+  ...props
+}) => {
     const [field, meta, {setValue, setTouched}] = useField(props)
     const [isOpened, setIsOpened] = React.useState<boolean>(false)
     const [selectLabel, setSelectLabel] = React.useState<string>(props.selectedLabel || '')
@@ -264,7 +273,7 @@ export const FormDateInput :React.FC<any> = ({label, minDate, maxDate, ...props}
     )
 }
 
-export const FormSelect: React.FC<ReactSelectProps & FieldProps> = ({ label, selOptions, ...props }) => {
+export const FormSelect: React.FC<ReactSelectProps & FieldProps> = ({ label, selOptions, handleSelect, ...props }) => {
   const [field, meta, {setValue}] = useField(props);
   const [options, setOptions] = React.useState(selOptions || [])
 
@@ -311,7 +320,7 @@ export const FormSelect: React.FC<ReactSelectProps & FieldProps> = ({ label, sel
         name={field.name}
         styles={customStyles}
         value={options ? options.find(option => option.value === field.value) : ''}
-        onChange={(option: Option) => {setValue(option.value)}}
+        onChange={(option: Option) => {handleSelect(option); setValue(option.value)}}
         onBlur={field.onBlur}
         aria-label={field.name}
       />

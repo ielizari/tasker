@@ -125,11 +125,7 @@ export const TaskNewComponent = (props) => {
                 setTask(null)
               }else{
                 if(mode === 'edit'){
-                  console.log(result.data.task)
                   setTask(mapTaskApiTocomponent(result.data.task))
-                  // if (result.data.calendars?.length) {
-                  //   setCalendar(result.data.calendars[0])
-                  // }
                 }else{
                   setParentTask(mapTaskApiTocomponent(result.data.task))
                   let newTask = Object.assign({},emptyTask)
@@ -187,8 +183,22 @@ export const TaskNewComponent = (props) => {
     }
     const onSubmit = (values: TaskDetail, helpers) => {
       setLoading(true)
+      const submitValues: TaskDetail = {
+        id: values.id,
+        parent: values.parent,
+        title: values.title,
+        description: values.description,
+        createdDate: values.createdDate,
+        limitDate: values.limitDate,
+        author: values.author,
+        authorId: values.authorId,
+        status: values.status,
+        priority: values.priority,
+        tags: values.tags,
+        calendars: values.calendars,
+      }
       if(mode === 'new' || mode==='child'){
-        addTask(values)
+        addTask(submitValues)
           .then(
             (result) => {
               helpers.setSubmitting(false);
@@ -212,7 +222,7 @@ export const TaskNewComponent = (props) => {
             }
           )
       }else if(mode === 'edit'){
-        updateTask(values)
+        updateTask(submitValues)
           .then(
             (result) => {
               helpers.setSubmitting(false);
@@ -221,9 +231,6 @@ export const TaskNewComponent = (props) => {
                 setSubmitSuccess(result.data.task);
                 setTask(null)
                 setTask(result.data.task)
-                // if (result.data.calendars?.length) {
-                //   setCalendar(result.data.calendars[0])
-                // }
                 setSubmitError(null);
                 setSync({sync: false})
               }else{
@@ -232,7 +239,7 @@ export const TaskNewComponent = (props) => {
               }
             },
             (error) => {
-              console.log(error)
+              console.error(error)
               helpers.setSubmitting(false);
               setSubmitSuccess(null);
               setSubmitError(error);
@@ -272,7 +279,7 @@ export const TaskNewComponent = (props) => {
           validate={validate}
         >
           {({ values }) => (
-          <FormWrapper>
+          <FormWrapper role="form">
             <FormTextInput
               name='title'
               label='Título'
@@ -311,7 +318,7 @@ export const TaskNewComponent = (props) => {
               <FormSelectFromComponent
                 id='calendar_selector'
                 name='calendar_selector'
-                buttonLabel='Seleccione un calendario'
+                buttonLabel='Añadir calendario'
                 component={CalendarListComponent}
                 resultHandler={calendarSelectHandler}
                 formValues={values}
