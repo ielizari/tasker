@@ -1,19 +1,19 @@
 import React from 'react'
 import styled from 'styled-components'
-import { color, common } from '../../../styles/theme';
+import { color, common } from 'src/front/styles/theme';
 
-import { TaskDetail } from '../../../domain/task-detail'
-import { Calendar } from '../../../domain/calendar'
-import { TaskStatus, TaskPriority, ConstObjectToSelectOptionsArray } from '../../../domain/task-definitions'
-import { addTask } from '../../../application/addTask'
-import { getTask } from '../../../application/getTask'
-import { updateTask } from '../../../application/updateTask'
+import { TaskDetail } from 'src/front/domain/task-detail'
+import { Calendar } from 'src/front/domain/calendar'
+import { TaskStatus, TaskPriority, ConstObjectToSelectOptionsArray } from 'src/front/domain/task-definitions'
+import { addTask } from 'src/front/application/addTask'
+import { getTask } from 'src/front/application/getTask'
+import { updateTask } from 'src/front/application/updateTask'
 import { Link, useParams } from 'react-router-dom'
 import { FaCheck, FaTimes, FaRedo, FaTrash} from 'react-icons/fa'
-import { Spinner } from '../common/spinner'
-import { BlockContainer, BlockHeaderComponent} from '../common/block'
-import { SyncStateContext} from '../../../application/contexts/dbSyncContext'
-import { CalendarListComponent } from '../calendar/calendar-list.component'
+import { Spinner } from 'src/front/infrastructure/components/common/spinner'
+import { BlockContainer, BlockHeaderComponent} from 'src/front/infrastructure/components/common/block'
+import { SyncStateContext} from 'src/front/application/contexts/dbSyncContext'
+import { CalendarListComponent } from 'src/front/infrastructure/components/calendar/calendar-list.component'
 
 import {
     FormWrapper,

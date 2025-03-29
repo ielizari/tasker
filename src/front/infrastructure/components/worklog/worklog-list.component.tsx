@@ -110,7 +110,6 @@ export const WorklogListComponent = ( props ) => {
   },[filters])
 
   const searchHandler = (values) => {
-    console.log(values)
     const filter: WorklogsFilter = {where: {}, order: {orderByFields: ['startDatetime'], orderDirections: ['desc']}}
     if(values.actionBarSearch){
       filter.where.title = values.actionBarSearch

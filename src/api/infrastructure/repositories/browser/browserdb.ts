@@ -1,7 +1,7 @@
 import lowdb from 'lowdb'
 import LocalStorage from 'lowdb/adapters/LocalStorage'
 
-import { TaskDetail, TaskObject } from '../../../domain/task'
+import { TaskDetail, TaskObject } from 'src/api/domain/task'
 import { WorklogObject, Worklog, WorklogDB} from '../../../domain/worklog'
 import { Job, JobObject } from '../../../domain/job'
 import { Calendar } from '../../../domain/calendar'
@@ -15,7 +15,7 @@ import { CalendarsFilter } from 'src/front/domain/calendar'
 export type metadataDB = {
         created: string,
         lastModified: string,
-        lastExported: string,    
+        lastExported: string,
 }
 
 export type Schema = {
@@ -41,18 +41,18 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
     }
     newId(table: string) : string {
         let res: Array<TaskDetail> | Array<Worklog> | Array<Job> | Array<Calendar>
-        let id: string 
+        let id: string
         switch(table){
             case 'tasks':
-                res = this.orderById(db.get('tasks').value()) as Array<TaskDetail>                
+                res = this.orderById(db.get('tasks').value()) as Array<TaskDetail>
                 id = res.length ? (parseInt(res[res.length-1].id)+1).toString() : '1'
                 break
-            case 'worklogs':               
-                res = this.orderById(db.get('worklogs').value()) as Array<Worklog>                
+            case 'worklogs':
+                res = this.orderById(db.get('worklogs').value()) as Array<Worklog>
                 id = res.length ? (parseInt(res[res.length-1].id)+1).toString() : '1'
                 break
             case 'jobs':
-                res = this.orderById(db.get('jobs').value()) as Array<Job>                
+                res = this.orderById(db.get('jobs').value()) as Array<Job>
                 id = res.length ? (parseInt(res[res.length-1].id)+1).toString() : '1'
                 break
             case 'calendars':
@@ -75,29 +75,29 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
         }
     }
 
-    importDb(db: Schema): boolean{        
+    importDb(db: Schema): boolean{
         try{
             if(this.hasDB()){
                 localStorage.removeItem('db')
             }
             this.initDB('import',db)
         }catch(e){
-            console.log(e)
+            console.error('importdb', e)
             return false
         }
     }
 
-    
+
     exportDb(): FileDownload{
         let lastExportedDate = ''
-        try{            
+        try{
             lastExportedDate = db.get('metadata').value()[0].lastExported
             this.setDbLastExported()
             const data = localStorage.getItem('db')
 
             let jsonObject = JSON.stringify(data)
-            let exportedFilename = `taskerdb_${new Date().getTime()}.txt`            
-            
+            let exportedFilename = `taskerdb_${new Date().getTime()}.txt`
+
             return {blob: jsonObject, filename: exportedFilename}
 
         }catch(e){
@@ -108,13 +108,13 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
 
     getTasks(filter: Partial<TaskDetail> = {}, order = [], orderDirection = []): Array<TaskObject>  {
         let search = JSON.parse(filter as string)
-        const tasks = db.get('tasks').filter(task => 
+        const tasks = db.get('tasks').filter(task =>
             ((!search.parent && !(typeof(search.parent)==='string')) || task.parent === search.parent )&&
             (!search.title || task.title.toLowerCase().includes(search.title.toLowerCase()))
         )
         .orderBy(order,orderDirection)
         .value()
-        
+
         const result : Array<TaskObject>= []
         tasks.forEach((task: TaskDetail) => {
             let taskobject: TaskObject = {
@@ -127,53 +127,53 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
                 taskobject.parentTask = db.get('tasks').find({id: task.parent}).value() || null
             }
             taskobject.childTasks = taskobject.childTasks.concat(db.get('tasks').filter({parent: task.id}).value() || []);
-            
+
             result.push(taskobject)
         })
         return result
     }
-    getTaskById(id: string): TaskObject {    
-        try{    
-            let task = db.get('tasks').find({id: id}).value() || null            
-            let parentTask = null;
-            let childTasks = [];
-            childTasks = childTasks.concat(db.get('tasks').filter({parent: id}).value() || []);
-            if(task && task.parent !== ''){
-                parentTask = db.get('tasks').find({id: task.parent}).value()
-            }
-            const calendars = task?.calendars?.map((calendarid) => {
-                return db.get('calendars').find({id: calendarid}).value()
-            }).filter(item => item) || [];
-
-            const taskObject : TaskObject= {
-                task: task,
-                parentTask: parentTask,
-                childTasks: childTasks,
-                calendars: calendars,
-            }
-            return taskObject
-        }catch (e){
-            throw e
+    getTaskById(id: string): TaskObject {
+      try{
+        const task = db.get('tasks').find({id: id}).value() || null
+        let parentTask: TaskDetail | null = null;
+        let childTasks: Array<TaskDetail> = [];
+        childTasks = childTasks.concat(db.get('tasks').filter({parent: id}).value() || []);
+        if(task && task.parent !== ''){
+          parentTask = db.get('tasks').find({id: task.parent}).value()
         }
+        const calendars: Array<Calendar> = task?.calendars?.map((calendarid) => {
+          return db.get('calendars').find({id: calendarid}).value()
+        }).filter(item => item) || [];
+
+        const taskObject : TaskObject= {
+          task: task,
+          parentTask: parentTask,
+          childTasks: childTasks,
+          calendars: calendars,
+        }
+        return taskObject
+      }catch (e){
+        throw e
+      }
     }
     addTask (task: TaskDetail): TaskObject{
-        try{
-             db.get('tasks').push(mapApiTaskToTaskDb(task)).write()
-             this.setDbLastModified()
-             return this.getTaskById(task.id)
-        }catch(e){
-            throw e
-        }
+      try{
+        db.get('tasks').push(mapApiTaskToTaskDb(task)).write()
+        this.setDbLastModified()
+        return this.getTaskById(task.id)
+      }catch(e){
+        throw e
+      }
     }
 
     updateTask(task: TaskDetail): TaskObject{
-        try{
-            db.get('tasks').find({id: task.id}).assign(mapApiTaskToTaskDb(task)).write()
-            this.setDbLastModified()
-            return this.getTaskById(task.id)
-        }catch(e){
-            throw e
-        }
+      try{
+        db.get('tasks').find({id: task.id}).assign(mapApiTaskToTaskDb(task)).write()
+        this.setDbLastModified()
+        return this.getTaskById(task.id)
+      }catch(e){
+        throw e
+      }
     }
     deleteTask(taskid: string): boolean{
         try{
@@ -203,7 +203,7 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
                 }
             }
         }
-        
+
         let result = {
             orderFields: orderFields,
             orderDirections: orderDirections
@@ -217,8 +217,8 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
 
         const {orderFields, orderDirections} = this.getOrderByItems(order)
 
-        
-        const worklogs = db.get('worklogs').filter(wl => 
+
+        const worklogs = db.get('worklogs').filter(wl =>
             (!where.title || wl.title.toLowerCase().includes(where.title.toLowerCase())) &&
             ((!where.endDatetime && !(typeof(where.endDatetime)==='string')) || wl.endDatetime === where.endDatetime)
             //(!search.endDatetime && isEmpty(search.endDatetime) && wl.endDatetime === search.endDatetime)
@@ -238,10 +238,10 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
         })
         return result
     }
-    
-    getWorklogById(id: string): WorklogObject {    
+
+    getWorklogById(id: string): WorklogObject {
         try{
-            let worklog : Worklog = mapWorklogToApiWorklog(db.get('worklogs').find({id: id}).value()) || null  
+            let worklog : Worklog = mapWorklogToApiWorklog(db.get('worklogs').find({id: id}).value()) || null
             let childJobs = [];
             //childJobs = childJobs.concat(db.get('jobs').filter({worklog: id}).value() || []);
             childJobs = this.getJobs({worklog: id})
@@ -250,15 +250,14 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
                 worklog: worklog,
                 childJobs: childJobs
             }
-            console.log(worklogObject)
             return worklogObject
         }catch (e){
             throw e
         }
     }
-    addWorklog (worklog: Worklog): WorklogObject{  
-        try{   
-             let wl: WorklogDB = mapApiWorklogToWorklogDb(worklog) 
+    addWorklog (worklog: Worklog): WorklogObject{
+        try{
+             let wl: WorklogDB = mapApiWorklogToWorklogDb(worklog)
              db.get('worklogs').push(wl).write()
              this.setDbLastModified()
              return this.getWorklogById(wl.id)
@@ -312,7 +311,7 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
     reopenWorklog(worklog: Worklog): WorklogObject {
         try{
             db.get('worklogs').find({id: worklog.id}).assign(mapApiWorklogToWorklogDb(worklog)).write()
-            
+
             return this.getWorklogById(worklog.id)
         }catch(e){
             throw e
@@ -322,14 +321,14 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
     getWorklogGroupedData(worklogid: string): any {
         try{
             let result : TaskTreeItem = emptyTaskTree()
-            let jobs = db.get('jobs').filter({worklog: worklogid}).value()            
+            let jobs = db.get('jobs').filter({worklog: worklogid}).value()
             jobs.forEach((job: Job) => {
-                let timeInSeconds = job.endDatetime ? 
-                    elapsedTime( 
+                let timeInSeconds = job.endDatetime ?
+                    elapsedTime(
                         ISOStringToFormatedDate(job.startDatetime),
                         ISOStringToFormatedDate(job.endDatetime)
                     )/1000
-                : 0                
+                : 0
 
                 if(job.task){
                     result = mergeTaskTrees(getTaskTree(job.task,timeInSeconds,job),result)
@@ -341,7 +340,7 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
                 }
                 result.timeInSeconds += timeInSeconds
             })
-            return result            
+            return result
         }catch(e){
             throw e
         }
@@ -360,7 +359,7 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
     getTaskGroupedDataByDate(data: TaskTreeItem): any {
 
     }
-    
+
     getJobs(filter: Partial<Job> = {}): Array<JobObject>  {
         let search = {}
         if(typeof filter === 'string'){
@@ -398,12 +397,12 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
         })
         return result
     }
-    getJobById(id: string): JobObject {    
-        try{    
-            let job = db.get('jobs').find({id: id}).value() || null    
+    getJobById(id: string): JobObject {
+        try{
+            let job = db.get('jobs').find({id: id}).value() || null
             let task = null
             let worklog = null
-            
+
             if(job && job.task !== ''){
                 task = db.get('tasks').find({id: job.task}).value()
             }
@@ -422,7 +421,7 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
             throw e
         }
     }
-    addJob (job: Job): JobObject{  
+    addJob (job: Job): JobObject{
         try{
             let jobs: Array<JobObject> = this.getJobs({worklog: job.worklog})
             checkOverlappingJobs(job,jobs)
@@ -526,11 +525,11 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
     }
 
     initDB = (type: string = 'default', dbfile?: Schema) => {
-        if(!this.hasDB()){        
-            console.log("DB vacía")
-            
+        if(!this.hasDB()){
+            console.info("DB vacía")
+
             db.defaults({ tasks: [], worklogs: [], jobs: [], metadata: [], calendars: [] }).write()
-    
+
             if(type === 'example'){
                 this.loadDataToDB(exampleData)
             }else if(type === 'import'){
@@ -542,13 +541,13 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
             }
         }else{
             console.log("DB con registros")
-        }  
+        }
     }
-    
+
     emptyDbObject = () : Schema => {
         let now = new Date().toISOString()
         let metadata : metadataDB = {created: now, lastModified: '', lastExported: ''}
-    
+
         return {
             tasks: [],
             worklogs: [],
@@ -620,13 +619,13 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
     // Es necesario borrar todos los items del objeto lowdb ya que guarda los registros en memoria, por lo que aunque borremos el localstorage
     // los volverá a cargar
     clearDB = () => {
-        db.get('tasks').remove().write()      
-        db.get('worklogs').remove().write()  
+        db.get('tasks').remove().write()
+        db.get('worklogs').remove().write()
         db.get('jobs').remove().write()
         db.get('metadata').remove().write()
         db.get('calendars').remove().write()
     }
-    
+
     loadDataToDB = (data: Schema) => {
         this.clearDB()
         const metadata : Array<metadataDB> = data.metadata
@@ -674,19 +673,19 @@ const getTaskTree = (taskid: string, time: number, job: Job = null, childTask: T
             }
         }
         result = {
-            id: task.id, 
-            title: task.title, 
+            id: task.id,
+            title: task.title,
             timeInSeconds: time,
             hasRunningJob: hasRunningJob,
             jobs: job ? [job] : [],
             childTasks: childTask ? [childTask] : []
         }
         if(!isEmpty(task.parent)){
-            let parent: TaskTreeItem = getTaskTree(task.parent,time,null,result) 
+            let parent: TaskTreeItem = getTaskTree(task.parent,time,null,result)
             return parent
-        }else{   
+        }else{
             root.childTasks.push(result)
-            root.hasRunningJob = result.hasRunningJob    
+            root.hasRunningJob = result.hasRunningJob
             return root
         }
     }catch(e){
@@ -694,7 +693,7 @@ const getTaskTree = (taskid: string, time: number, job: Job = null, childTask: T
     }
 }
 
-const mergeTaskTrees = (source: TaskTreeItem, target: TaskTreeItem): TaskTreeItem =>{    
+const mergeTaskTrees = (source: TaskTreeItem, target: TaskTreeItem): TaskTreeItem =>{
     if(!hasChildTasks(target) && hasChildTasks(source)){
             target.jobs = target.jobs.concat(source.jobs)
             target.hasRunningJob = source.hasRunningJob || target.hasRunningJob
@@ -704,7 +703,7 @@ const mergeTaskTrees = (source: TaskTreeItem, target: TaskTreeItem): TaskTreeIte
             target.jobs = target.jobs.concat(source.jobs)
             target.hasRunningJob = source.hasRunningJob || target.hasRunningJob
             target.timeInSeconds += source.timeInSeconds
-            return target        
+            return target
     }else{
         let commonChilds = itemsPresentInBoth(source,target)
         let missingChilds = itemsMissingInTarget(source,target)
@@ -715,7 +714,7 @@ const mergeTaskTrees = (source: TaskTreeItem, target: TaskTreeItem): TaskTreeIte
                 targetItem = mergeTaskTrees(inCommon[0][0],inCommon[0][1])
             }else{
                 if(inCommon.length > 0){
-                    console.log("Error: No debería haber más de un item en común", inCommon)
+                    console.error("Error: No debería haber más de un item en común", inCommon)
                 }
             }
         })
@@ -723,7 +722,7 @@ const mergeTaskTrees = (source: TaskTreeItem, target: TaskTreeItem): TaskTreeIte
         missingChilds.forEach(item => {
             target.childTasks.push(item)
         })
-       
+
         target.jobs = target.jobs.concat(source.jobs)
         target.hasRunningJob = source.hasRunningJob || target.hasRunningJob
         target.timeInSeconds += source.timeInSeconds
@@ -746,21 +745,21 @@ const itemsPresentInBoth = (source: TaskTreeItem, target: TaskTreeItem) : Array<
     let result: Array<Array<TaskTreeItem>> = []
     let mergedIds: Array<string> = []
     let merge = source.childTasks.concat(target.childTasks)
-    
+
     merge.forEach(item => {
         let commonItems = merge.filter(mergeItem => mergeItem.id === item.id)
         if(commonItems.length === 2){
             if(!mergedIds.includes(item.id)){
                 mergedIds.push(item.id)
                 result.push(commonItems)
-            }            
+            }
         }else{
             if(commonItems.length !== 1){
-                console.log("Error: no debería haber más de un item con el mismo id en un nodo", commonItems)
+                console.error("Error: no debería haber más de un item con el mismo id en un nodo", commonItems)
             }
         }
     })
-    
+
     return result
 }
 
@@ -771,7 +770,7 @@ const itemsMissingInTarget = (source: TaskTreeItem, target: TaskTreeItem): Array
             result.push(sourceItem)
         }
     })
-    
+
     return result
 }
 
@@ -781,8 +780,8 @@ const checkOverlappingJobs = (job: Job, jobs: Array<JobObject>): boolean => {
             return false
         }
         if(job.endDatetime !== ''){
-            if( job.startDatetime < jobItem.job.endDatetime && 
-                job.endDatetime > jobItem.job.startDatetime 
+            if( job.startDatetime < jobItem.job.endDatetime &&
+                job.endDatetime > jobItem.job.startDatetime
             ){
                 return true
             }
@@ -795,10 +794,9 @@ const checkOverlappingJobs = (job: Job, jobs: Array<JobObject>): boolean => {
     })
 
     if(overlappingJobs.length > 0){
-        console.log(overlappingJobs)
-        throw new Error(`El intervalo de tiempo de este trabajo se solapa con uno ya existente: 
-            ${overlappingJobs[0].job.title || 'Sin título'}, 
-            ${overlappingJobs[0].task ? overlappingJobs[0].task.title : 'Sin tarea'}, 
+        throw new Error(`El intervalo de tiempo de este trabajo se solapa con uno ya existente:
+            ${overlappingJobs[0].job.title || 'Sin título'},
+            ${overlappingJobs[0].task ? overlappingJobs[0].task.title : 'Sin tarea'},
             ${ISOStringToFormatedDate(overlappingJobs[0].job.startDatetime)},
             ${ISOStringToFormatedDate(overlappingJobs[0].job.endDatetime)}`)
     }
@@ -859,7 +857,7 @@ const getDirectChildTasksTree = (taskid: string): TaskTreeItem => {
         if(!job.endDatetime){
             result.hasRunningJob = true
         }
-        result.timeInSeconds += job.endDatetime ? 
+        result.timeInSeconds += job.endDatetime ?
             elapsedTime(
                 ISOStringToFormatedDate(job.startDatetime),
                 ISOStringToFormatedDate(job.endDatetime)
@@ -879,8 +877,8 @@ const getDirectChildTasksTree = (taskid: string): TaskTreeItem => {
                 childObject.hasRunningJob = true
                 result.hasRunningJob = true
             }
-            childObject.timeInSeconds += job.endDatetime ? 
-                elapsedTime( 
+            childObject.timeInSeconds += job.endDatetime ?
+                elapsedTime(
                     ISOStringToFormatedDate(job.startDatetime),
                     ISOStringToFormatedDate(job.endDatetime)
                 )/1000

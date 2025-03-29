@@ -49,7 +49,7 @@ function App() {
       error => {
         if(!cancelled){
           setLoading(false)
-          console.log(error)
+          console.error('existsdb', error)
           setSync({sync:true, existsDb: false})
         }
       }

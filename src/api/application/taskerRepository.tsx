@@ -1,8 +1,8 @@
-import { TaskDetail, TaskObject } from '../domain/task'
-import { Worklog, WorklogObject } from '../domain/worklog'
-import { Job, JobObject } from '../domain/job'
-import { Calendar } from '../domain/calendar'
-import { Schema } from '../infrastructure/repositories/browser/browserdb'
+import { TaskDetail, TaskObject } from 'src/api/domain/task'
+import { Worklog, WorklogObject } from 'src/api/domain/worklog'
+import { Job, JobObject } from 'src/api/domain/job'
+import { Calendar } from 'src/api/domain/calendar'
+import { Schema } from 'src/api/infrastructure/repositories/browser/browserdb'
 import { CalendarsFilter } from 'src/front/domain/calendar'
 
 let repository: TaskerRepository

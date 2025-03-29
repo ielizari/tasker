@@ -44,10 +44,11 @@ const ErrorMessage = styled.div`
 
 const TaskChildrenContainer = styled.div`
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  flex-wrap: wrap;
   gap: 0.5rem;
 
-  & a{
+  & a {
     display: inline-flex;
     background-color: ${color.orange};
     ${common.roundedCorners()};
@@ -241,6 +242,22 @@ export const TaskDetailComponent = (props) => {
               </TaskDetailItem>
               <TaskDetailItem>
                 <TaskDetailKey>Tags:</TaskDetailKey>
+                <TaskDetailValue>
+                {task.task.tags.length ?
+                  <TaskTagsContainer>
+                  {
+                    task.task.tags.map((tag) => {
+                      return <div key={tag}>{tag}</div>
+                    })
+                  }
+                  </TaskTagsContainer>
+                  :
+                  '-'
+                }
+                </TaskDetailValue>
+              </TaskDetailItem>
+              <TaskDetailItem>
+                <TaskDetailKey>Calendarios:</TaskDetailKey>
                 <TaskDetailValue>
                 {task.task.tags.length ?
                   <TaskTagsContainer>

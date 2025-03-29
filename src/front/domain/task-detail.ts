@@ -1,3 +1,4 @@
+import { Calendar } from 'src/front/domain/calendar'
 export interface TaskDetail {
   id: string,
   parent: string,
@@ -11,6 +12,10 @@ export interface TaskDetail {
   priority: string,
   tags: Array<string>,
   calendars?: Array<string>
+}
+
+export type TaskComponent = Omit<TaskDetail, 'calendars'> & {
+  calendars?: Array<Calendar>
 }
 
 export interface TaskObject {

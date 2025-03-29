@@ -99,7 +99,7 @@ export const color = {
   darkGrey: '#9b9b9b',
   veryDarkGrey: '#585858',
   white: '#FFFFFF',
-  orange: '#1d502f',
+  orange: '#f59205',
   bckOrange: '#ec9416',
   lightOrange: '#fba72f',
   darkOrange: '#b36c06',

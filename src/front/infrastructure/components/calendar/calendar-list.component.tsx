@@ -139,7 +139,6 @@ export const CalendarListComponent = (props) => {
   },[filters])
 
   const searchHandler = (values) => {
-    console.log(values)
     const filter: CalendarsFilter = {where: {}, order: {orderByFields: ['startDatetime'], orderDirections: ['desc']}}
     if(values.actionBarSearch){
       filter.where.title = values.actionBarSearch

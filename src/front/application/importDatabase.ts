@@ -29,7 +29,6 @@ export const importDb = async (db: importForm): Promise<ApiResponse> => {
     let dbfile = null
     await readFile(db.dbfile).then(
         result => {
-            console.log(result)
             dbfile = result
         },
         error => {            

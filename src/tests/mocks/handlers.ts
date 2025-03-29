@@ -42,7 +42,6 @@ export const handlers = [
                 ctx.json(ApiResponseBuilder(200,[],false))
             )
         }else{
-            console.log("Imprimiendo todo",filters)
             let result :Array<TaskObject> = [
                 {
                     task: {
@@ -185,7 +184,6 @@ export const handlers = [
 
     rest.post(process.env.PUBLIC_URL + '/api/worklogs',(req, res, ctx) => {
         const filters : WorklogsFilter= req.body ? JSON.parse(req.body as string) : {}
-        console.log(filters)
         if(Object.keys(filters.where).length){
             if(filters.where.title === 'Compra 15-11-20'){
                 return res(

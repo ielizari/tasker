@@ -18,7 +18,7 @@ import { TaskListComponent } from '../tasks/task-list.component'
 import { getTask } from 'src/front/application/getTask'
 import { Modal } from '../common/modal'
 
-const emptyJob: Job = {    
+const emptyJob: Job = {
         id: '',
         task: '',
         worklog: '',
@@ -27,7 +27,7 @@ const emptyJob: Job = {
         startDatetime: '',
         endDatetime: '',
         type: '',
-        tags: []    
+        tags: []
 }
 
 export const JobNewComponent = (props) => {
@@ -39,7 +39,7 @@ export const JobNewComponent = (props) => {
     const [job, setJob] = React.useState<Job>(null)
     const [loading, setLoading] = React.useState<boolean>(false)
     const [title, setTitle] = React.useState<string>('Nuevo trabajo')
-    const [submitError, setSubmitError] = React.useState<Error | null>(null)    
+    const [submitError, setSubmitError] = React.useState<Error | null>(null)
     const [mode, setMode] = React.useState(props.mode || 'new')
     const [isOpened, setOpened] = React.useState<boolean>(false)
 
@@ -47,7 +47,7 @@ export const JobNewComponent = (props) => {
         setWorklog(props.worklog)
     },[props.worklog])
 
-    React.useEffect(()=> {     
+    React.useEffect(()=> {
         if(props.job){
             if(!isEmpty(props.job.task)){
                 setLoading(true)
@@ -61,7 +61,7 @@ export const JobNewComponent = (props) => {
                             console.log(result.error)
                         }
                         setJob(mapApiJobToComponent(props.job))
-                        setMode('edit')                                           
+                        setMode('edit')
                     },
                     error => {
                         setLoading(false)
@@ -70,15 +70,15 @@ export const JobNewComponent = (props) => {
                 )
             }else{
                 setJob(mapApiJobToComponent(props.job))
-                setMode('edit')  
+                setMode('edit')
             }
         }else{
             setJob(emptyJob)
             setMode('new')
-        }       
+        }
     },[props.job])
 
-    
+
     const closeModal = () => {  setOpened(false)}
     const openModal = () => { setOpened(true)}
 
@@ -110,7 +110,7 @@ export const JobNewComponent = (props) => {
             setTitle('Nuevo trabajo')
         }
     },[mode])
-    
+
     const taskSelectHandler = (task: TaskDetail) => {
         return({
             value: task.id,
@@ -146,7 +146,7 @@ export const JobNewComponent = (props) => {
         {
             type: 'buttons',
             buttons: [
-                {        
+                {
                     id: 'submitBtn',
                     type: 'submit',
                     icon: FaCheck,
@@ -170,18 +170,18 @@ export const JobNewComponent = (props) => {
                     className: 'form-button-cancel button-icon'
                 }
             ]
-        }            
+        }
      ]
 
      const validate = (values) => {
         const errors : Partial<Job> = {}
-        
+
         if(!values.startDatetime){
             errors.startDatetime = 'Campo obligatorio'
         }else if(!isValidDateTime(values.startDatetime)){
             errors.startDatetime = 'Formato de fecha y hora no válido'
         }
-       
+
         if(values.strtDatetime && !isValidDateTime(values.startDatetime)){
             errors.startDatetime = 'Formato de fecha y hora no válido'
         }
@@ -190,23 +190,22 @@ export const JobNewComponent = (props) => {
     }
     const onSubmit = (values: Job, helpers) => {
         values.worklog = worklog.id
-        console.log(values)
-        
+
         setLoading(true)
         if(mode === 'new'){
             addJob(values).then(
                 (result) => {
-                    helpers.setSubmitting(false); 
+                    helpers.setSubmitting(false);
                     setLoading(false)
 
-                    if(!result.hasError){    
-                        setSync({sync: false})                             
+                    if(!result.hasError){
+                        setSync({sync: false})
                         setSubmitError(null)
                         helpers.resetForm({})
                         props.submit()
                     }else{
-                        setSubmitError(new Error(result.error));                                      
-                    }                
+                        setSubmitError(new Error(result.error));
+                    }
                 },
                 (error) => {
                     console.log(error)
@@ -218,17 +217,17 @@ export const JobNewComponent = (props) => {
         }else if(mode === 'edit'){
             updateJob(values).then(
                 (result) => {
-                    helpers.setSubmitting(false); 
+                    helpers.setSubmitting(false);
                     setLoading(false)
                     console.log(result)
-                    if(!result.hasError){    
-                        setSync({sync: false})                             
+                    if(!result.hasError){
+                        setSync({sync: false})
                         setSubmitError(null)
                         helpers.resetForm({})
                         props.submit()
                     }else{
-                        setSubmitError(new Error(result.error));                                      
-                    }                
+                        setSubmitError(new Error(result.error));
+                    }
                 },
                 (error) => {
                     console.log(error)
@@ -240,25 +239,25 @@ export const JobNewComponent = (props) => {
         }
     }
     return (
-        <BlockContainer>         
-            <Modal 
-                title="Eliminar tarea" 
-                isOpened={isOpened} 
+        <BlockContainer>
+            <Modal
+                title="Eliminar tarea"
+                isOpened={isOpened}
                 onClose={closeModal}
                 content="Esta acción es irreversible. ¿Desea continuar?"
                 type="confirm"
-                action={handleDeleteJob} />   
-            <BlockHeaderComponent 
+                action={handleDeleteJob} />
+            <BlockHeaderComponent
                 title={title}
-            />  
+            />
             {loading ? <Spinner /> : ''}
 
             {submitError &&
                 <div aria-label='error-message' className='message-error'>{submitError.message}</div>
             }
-            
+
             {job &&
-                <FormBuilder 
+                <FormBuilder
                     key = "newJobForm"
                     formView = "form"
                     formItems = {formItems}
@@ -267,7 +266,7 @@ export const JobNewComponent = (props) => {
                     onSubmit = {onSubmit}
                 />
             }
-        
+
         </BlockContainer>
     )
 }

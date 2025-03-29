@@ -35,7 +35,6 @@ const TaskListItem = (props: {item: TaskObject, resultHandler? } ) => {
             console.log(result.error);
             setChildrenTasks([])
           }else{
-            console.log(result)
             setChildrenTasks(result.data)
           }
           setLoading(false)
