@@ -1,7 +1,7 @@
-import { TaskDetail, TaskObject } from 'src/api/domain/task'
+import { TaskDetail, TaskObject, TaskDB } from 'src/api/domain/task'
 import { Worklog, WorklogObject } from 'src/api/domain/worklog'
 import { Job, JobObject } from 'src/api/domain/job'
-import { Calendar } from 'src/api/domain/calendar'
+import { Calendar, CalendarTime } from 'src/api/domain/calendar'
 import { Schema } from 'src/api/infrastructure/repositories/browser/browserdb'
 import { CalendarsFilter } from 'src/front/domain/calendar'
 
@@ -38,6 +38,7 @@ export interface TaskerRepository{
   getTasks(filter?: Partial<TaskDetail>, order?: Array<string>, orderDirection?: Array<string>): Array<TaskObject>
   addTask(task: TaskDetail): TaskObject
   getTaskById(id: string): TaskObject
+  getTaskCalendars(task: TaskDB): Array<Calendar>
   getTaskGroupedData(id: string): any
   deleteTask(id: string): boolean
   updateTask(task: TaskDetail): TaskObject
@@ -59,6 +60,7 @@ export interface TaskerRepository{
 
   getCalendars(filter?: Partial<CalendarsFilter>): Array<Calendar>
   getCalendarById(id: string): Calendar
+  getCalendarStatus(calendarid: string): CalendarTime
   addCalendar(calendar: Calendar): Calendar
   updateCalendar(calendar: Calendar): Calendar
   deleteCalendar(id: string): boolean

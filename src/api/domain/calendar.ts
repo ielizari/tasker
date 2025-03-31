@@ -6,6 +6,7 @@ export interface Calendar {
   endDate: string,
   workHours: Array<CalendarWeek>,
   eligibleHolidays: number,
+  status?: CalendarTime,
 }
 
 export interface CalendarDB {
@@ -35,4 +36,14 @@ export type CalendarDay = {
   workHours: number,
   date: string,
   events?: Array<Event>
+}
+
+export type CalendarTime = {
+  expectedTotalTime: number,
+  currentExpectedTime: number,
+  workedTime: number,
+  // currentWeekExpectedTime: number,
+  // currentWeekWorkTime: number,
+  // currentMonthExpectedTime: number,
+  // currentMonthWorkTime: number,
 }

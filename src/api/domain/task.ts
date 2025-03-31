@@ -12,8 +12,12 @@ export interface TaskDetail {
     status: string,
     priority: string,
     tags: Array<string>,
-    calendars?: Array<string>
+    calendars?: Array<Calendar>
 }
+
+export interface TaskDB extends Omit<TaskDetail, 'calendars'> {
+    calendars?: Array<string>
+  }
 
 export interface TaskObject {
     task: TaskDetail,

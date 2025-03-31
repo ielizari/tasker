@@ -259,14 +259,14 @@ export const TaskDetailComponent = (props) => {
               <TaskDetailItem>
                 <TaskDetailKey>Calendarios:</TaskDetailKey>
                 <TaskDetailValue>
-                {task.task.tags.length ?
-                  <TaskTagsContainer>
+                {task.calendars?.length ?
+                  <TaskChildrenContainer>
                   {
-                    task.task.tags.map((tag) => {
-                      return <div key={tag}>{tag}</div>
+                    task.calendars.map((calendar) => {
+                      return <Link to={`/calendars/${calendar.id}`} key={calendar.title}>{calendar.title}</Link>
                     })
                   }
-                  </TaskTagsContainer>
+                  </TaskChildrenContainer>
                   :
                   '-'
                 }

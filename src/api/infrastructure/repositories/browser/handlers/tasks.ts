@@ -89,7 +89,6 @@ export const taskHandlers = [
       if(isEmpty(task.id)) {
         throw new Error('Es necesario proporcionar el id de la tarea a editar')
       }
-
       const result: TaskObject = getTaskerRepository().updateTask(task)
       return res(
         ctx.status(200),

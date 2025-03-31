@@ -29,7 +29,8 @@ export const handlers = [
             const taskObject : TaskObject= {
                 task: task,
                 parentTask: parentTask,
-                childTasks: childTasks
+                childTasks: childTasks,
+                calendars: []
             }
 
             return res(
@@ -55,10 +56,11 @@ export const handlers = [
                         "authorId": "1",
                         "status": "1",
                         "priority": "3",
-                        "tags": ["compra","casa","comida"]
+                        "tags": ["compra","casa","comida"],
                     },
                     parentTask: null,
-                    childTasks: []
+                    childTasks: [],
+                    calendars: []
                 },
                 {
                     task: {
@@ -75,7 +77,8 @@ export const handlers = [
                         "tags": ["KYB","PET","ID-167"]
                     },
                     parentTask: null,
-                    childTasks: []
+                    childTasks: [],
+                    calendars: []
                 }
             ]
 
@@ -112,7 +115,8 @@ export const handlers = [
         const taskObject : TaskObject= {
             task: task,
             parentTask: parentTask,
-            childTasks: childTasks
+            childTasks: childTasks,
+            calendars: []
         }
 
         return res(
@@ -127,7 +131,8 @@ export const handlers = [
         const taskresponse: TaskObject = {
             task: task,
             childTasks: [],
-            parentTask: null
+            parentTask: null,
+            calendars: []
         }
         if(task.description === 'success'){
             return res(
@@ -148,7 +153,8 @@ export const handlers = [
         const taskobject: TaskObject = {
             task: null,
             childTasks: [],
-            parentTask: null
+            parentTask: null,
+            calendars: []
         }
         taskobject.task = req.body as TaskDetail
 

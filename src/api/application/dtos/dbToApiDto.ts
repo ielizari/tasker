@@ -1,10 +1,24 @@
 import { WorklogDB, Worklog } from '../../domain/worklog'
 import { Job, JobDB} from '../../domain/job'
 import { formattedDateToISOString, ISOStringToFormatedDate } from '../../../lib/date.utils'
-import { TaskDetail, TaskDB } from 'src/front/domain/task-detail'
+import { TaskDetail, TaskDB } from 'src/api/domain/task'
 import { Calendar, CalendarDB } from '../../domain/calendar'
+import { getTaskerRepository } from 'src/api/application/taskerRepository'
 
-export const mapTaskToApiTask = (task: TaskDB): TaskDetail => {
+export const mapApiTaskToTaskDb = (task: TaskDetail): TaskDB => {
+  const dates = {
+    createdDate: formattedDateToISOString(task.createdDate),
+    limitDate: formattedDateToISOString(task.limitDate),
+  }
+  const calendars = task.calendars?.map((calendar) => calendar.id)
+  return {
+    ...task,
+    ...dates,
+    calendars,
+  }
+}
+
+export const mapTaskDbToApiTask = (task: TaskDB): TaskDetail => {
   if(!task){
     return null
   }
@@ -13,21 +27,12 @@ export const mapTaskToApiTask = (task: TaskDB): TaskDetail => {
     limitDate: ISOStringToFormatedDate(task.limitDate),
   }
 
-  return {
-    ...task,
-    ...dates,
-  }
-}
-
-export const mapApiTaskToTaskDb = (task: TaskDetail): TaskDB => {
-  const dates = {
-    createdDate: formattedDateToISOString(task.createdDate),
-    limitDate: formattedDateToISOString(task.limitDate),
-  }
+  const calendars = getTaskerRepository().getTaskCalendars(task)
 
   return {
     ...task,
     ...dates,
+    calendars,
   }
 }
 

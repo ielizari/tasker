@@ -6,6 +6,7 @@ export type Calendar = {
   endDate: string,
   workHours: Array<CalendarWeek>,
   eligibleHolidays: number,
+  status?: CalendarTime,
 }
 
 export type CalendarWeek = {

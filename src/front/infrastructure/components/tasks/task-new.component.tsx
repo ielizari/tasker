@@ -23,10 +23,10 @@ import {
     FormDateInput,
     FormButtons, } from '../common/form/form'
     import { IconButton, IconLink } from '../common/icon-button'
-import { Formik, Field, Form, ErrorMessage, FieldArray } from 'formik';
+import { Formik, FieldArray } from 'formik';
 import { isValidDateTime } from '../../../../lib/date.utils'
 
-import { mapTaskApiTocomponent } from '../../../application/dtos/taskApiToComponent.dto'
+import { mapTaskApiTocomponent } from 'src/front/application/dtos/taskApiToComponent.dto'
 
 const emptyTask: TaskDetail = {
   id: '',

@@ -3,7 +3,6 @@ import styled from 'styled-components'
 import { color, common } from '../../../styles/theme'
 import { useParams} from 'react-router-dom'
 import { Calendar } from '../../../domain/calendar'
-import { TaskPriority, TaskStatus, ConstObjectToSelectOptionsArray } from '../../../domain/task-definitions'
 import { getCalendar } from '../../../application/getCalendar'
 import { deleteCalendar } from '../../../application/deleteCalendar'
 import { Spinner } from '../common/spinner'
@@ -200,6 +199,18 @@ export const CalendarDetailComponent = (props) => {
               <DetailItem>
                 <DetailKey>Estado:</DetailKey>
                 <DetailValue>{calendar.enabled ? 'Activo' : 'Inactivo'}</DetailValue>
+              </DetailItem>
+              <DetailItem>
+                <DetailKey>Horas totales:</DetailKey>
+                <DetailValue>{calendar.status.expectedTotalTime / 3600}</DetailValue>
+              </DetailItem>
+              <DetailItem>
+                <DetailKey>Horas actuales:</DetailKey>
+                <DetailValue>{calendar.status.currentExpectedTime / 3600}</DetailValue>
+              </DetailItem>
+              <DetailItem>
+                <DetailKey>Horas trabajadas:</DetailKey>
+                <DetailValue>{calendar.status.workedTime / 3600} ({(calendar.status.currentExpectedTime - calendar.status.workedTime) /3600})</DetailValue>
               </DetailItem>
               <DetailItem>
                 <DetailKey>Horarios:</DetailKey>

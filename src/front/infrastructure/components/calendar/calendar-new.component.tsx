@@ -1,6 +1,6 @@
  import React from 'react'
 import styled from 'styled-components'
-import { Calendar, CalendarWeek, CalendarTime } from '../../../domain/calendar'
+import { Calendar, CalendarWeek } from '../../../domain/calendar'
 import { addCalendar } from '../../../application/addCalendar'
 import { updateCalendar } from '../../../application/updateCalendar'
 import { getCalendar } from '../../../application/getCalendar'
@@ -16,13 +16,11 @@ import {
   FormNumberInput,
   FormCheckbox,
   FormDateInput,
-  StyledFieldArray,
   FormButtons,
 } from '../common/form/form'
 import { IconButton } from '../common/icon-button'
 
 import '../../../../lib/orzkDatepicker/datepicker.css'
-import { isValidDateTime, formattedDateToDate } from '../../../../lib/date.utils'
 import { mapCalendarApiTocomponent } from '../../../application/dtos/calendarApiToComponent.dto'
 
 const FormCheckboxWrapper = styled.div`
@@ -103,10 +101,8 @@ export const CalendarNewComponent = (props) => {
   const [error, setError] = React.useState<Error | null>(null)
   const [loading, setLoading] = React.useState<boolean>(false)
   const [title, setTitle] = React.useState<string>('Nuevo calendario')
-  const [time, setTime] = React.useState<CalendarTime | null>(null)
 
   const validate = (values) => {
-    setTime(calculateTime(values))
     const errors : Partial<Calendar> = {}
     if(!values.title){
       errors.title = 'Campo obligatorio'
@@ -114,40 +110,6 @@ export const CalendarNewComponent = (props) => {
 
     return errors
   }
-
-  const calculateTime = (values: Calendar): CalendarTime => {
-    const times = {
-      expectedTotalTime: 0,
-      currentExpectedTime: 0,
-      workedTime: 0,
-    }
-    if (!values) return times;
-
-    const initialTime = formattedDateToDate(values.workHours[0].startDate)
-    const endTime = formattedDateToDate(values.workHours[0].endDate)
-    if (!(initialTime && endTime)) return times;
-    while(initialTime <= endTime) {
-      const workhours = values.workHours.filter((range) => initialTime >= formattedDateToDate(range.startDate) && initialTime <= formattedDateToDate(range.endDate))
-      if (workhours.length) {
-        const item = workhours[workhours.length - 1];
-        if (item && !item.isHoliday) {
-          if (initialTime.getDay() === 0) times.expectedTotalTime += item.sunday
-          if (initialTime.getDay() === 1) times.expectedTotalTime += item.monday
-          if (initialTime.getDay() === 2) times.expectedTotalTime += item.tuesday
-          if (initialTime.getDay() === 3) times.expectedTotalTime += item.wednesday
-          if (initialTime.getDay() === 4) times.expectedTotalTime += item.thursday
-          if (initialTime.getDay() === 5) times.expectedTotalTime += item.friday
-          if (initialTime.getDay() === 6) times.expectedTotalTime += item.saturday
-        }
-      }
-      initialTime.setDate(initialTime.getDate() + 1)
-    }
-    return times
-  }
-
-  React.useEffect(() => {
-    setTime(calculateTime(calendar))
-  }, [calendar])
 
   const onSubmit = (values: Calendar, helpers) => {
 
@@ -308,8 +270,6 @@ export const CalendarNewComponent = (props) => {
                 label='Vacaciones a elegir'
                 type='number'
               />
-              <div>Horas totales: {time?.expectedTotalTime || 0}</div>
-              <div>Horas hasta la actualidad: {time?.currentExpectedTime || 0}</div>
               <div>
                 <div>Horarios</div>
                 <WorkHoursForm>

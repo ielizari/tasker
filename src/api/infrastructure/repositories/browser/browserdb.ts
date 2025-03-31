@@ -1,25 +1,25 @@
 import lowdb from 'lowdb'
 import LocalStorage from 'lowdb/adapters/LocalStorage'
 
-import { TaskDetail, TaskObject } from 'src/api/domain/task'
-import { WorklogObject, Worklog, WorklogDB} from '../../../domain/worklog'
-import { Job, JobObject } from '../../../domain/job'
-import { Calendar } from '../../../domain/calendar'
-import { mapWorklogToApiWorklog, mapApiWorklogToWorklogDb, mapApiTaskToTaskDb } from '../../../application/dtos/dbToApiDto'
+import { TaskDetail, TaskObject, TaskDB } from 'src/api/domain/task'
+import { WorklogObject, Worklog, WorklogDB} from 'src/api/domain/worklog'
+import { Job, JobObject } from 'src/api/domain/job'
+import { Calendar, CalendarDB, CalendarTime } from 'src/api/domain/calendar'
+import { mapWorklogToApiWorklog, mapApiWorklogToWorklogDb, mapApiTaskToTaskDb, mapTaskDbToApiTask } from 'src/api/application/dtos/dbToApiDto'
 
-import { TaskerRepository, setTaskerRepository, FileDownload,  WorklogsFilter, OrderObject  } from '../../../application/taskerRepository'
+import { TaskerRepository, setTaskerRepository, FileDownload,  WorklogsFilter, OrderObject  } from 'src/api/application/taskerRepository'
 import { isEmpty } from 'lodash'
 import { elapsedTime, ISOStringToFormatedDate } from 'src/lib/date.utils'
 import { CalendarsFilter } from 'src/front/domain/calendar'
 
 export type metadataDB = {
-        created: string,
-        lastModified: string,
-        lastExported: string,
+    created: string,
+    lastModified: string,
+    lastExported: string,
 }
 
 export type Schema = {
-    tasks: Array<TaskDetail>
+    tasks: Array<TaskDB>
     worklogs: Array<Worklog>
     jobs: Array<Job>
     calendars?: Array<Calendar>
@@ -32,7 +32,7 @@ const adapter = new LocalStorage<Schema>('db')
 export const db = lowdb(adapter)
 
 export class LowdbLocalstorageRepository implements TaskerRepository {
-    orderById(input: Array<TaskDetail | Worklog | Job | Calendar>): Array<TaskDetail | Worklog | Job | Calendar> {
+    orderById(input: Array<TaskDB | Worklog | Job | Calendar>): Array<TaskDB | Worklog | Job | Calendar> {
         return input?.sort((a,b) => {
             if(parseInt(a.id) > parseInt(b.id)){
                 return 1
@@ -40,11 +40,11 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
         }) || []
     }
     newId(table: string) : string {
-        let res: Array<TaskDetail> | Array<Worklog> | Array<Job> | Array<Calendar>
+        let res: Array<TaskDB> | Array<Worklog> | Array<Job> | Array<Calendar>
         let id: string
         switch(table){
             case 'tasks':
-                res = this.orderById(db.get('tasks').value()) as Array<TaskDetail>
+                res = this.orderById(db.get('tasks').value()) as Array<TaskDB>
                 id = res.length ? (parseInt(res[res.length-1].id)+1).toString() : '1'
                 break
             case 'worklogs':
@@ -108,10 +108,11 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
 
     getTasks(filter: Partial<TaskDetail> = {}, order = [], orderDirection = []): Array<TaskObject>  {
         let search = JSON.parse(filter as string)
-        const tasks = db.get('tasks').filter(task =>
+        const tasks: Array<TaskDetail> = db.get('tasks').filter(task =>
             ((!search.parent && !(typeof(search.parent)==='string')) || task.parent === search.parent )&&
             (!search.title || task.title.toLowerCase().includes(search.title.toLowerCase()))
-        )
+        ).map(mapTaskDbToApiTask)
+
         .orderBy(order,orderDirection)
         .value()
 
@@ -124,9 +125,10 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
                 calendars: [],
             }
             if(!isEmpty(task.parent)){
-                taskobject.parentTask = db.get('tasks').find({id: task.parent}).value() || null
+                taskobject.parentTask = mapTaskDbToApiTask(db.get('tasks').find({id: task.parent}).value()) || null
             }
-            taskobject.childTasks = taskobject.childTasks.concat(db.get('tasks').filter({parent: task.id}).value() || []);
+            taskobject.childTasks = taskobject.childTasks.concat(
+                db.get('tasks').filter({parent: task.id}).map(mapTaskDbToApiTask).value() || []);
 
             result.push(taskobject)
         })
@@ -134,27 +136,36 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
     }
     getTaskById(id: string): TaskObject {
       try{
-        const task = db.get('tasks').find({id: id}).value() || null
+        const task = mapTaskDbToApiTask(db.get('tasks').find({id: id}).value()) || null
         let parentTask: TaskDetail | null = null;
         let childTasks: Array<TaskDetail> = [];
-        childTasks = childTasks.concat(db.get('tasks').filter({parent: id}).value() || []);
+        childTasks = childTasks.concat(db.get('tasks').filter({parent: id}).map(mapTaskDbToApiTask).value() || []);
         if(task && task.parent !== ''){
-          parentTask = db.get('tasks').find({id: task.parent}).value()
+          parentTask = mapTaskDbToApiTask(db.get('tasks').find({id: task.parent}).value())
         }
-        const calendars: Array<Calendar> = task?.calendars?.map((calendarid) => {
-          return db.get('calendars').find({id: calendarid}).value()
-        }).filter(item => item) || [];
 
         const taskObject : TaskObject= {
           task: task,
           parentTask: parentTask,
           childTasks: childTasks,
-          calendars: calendars,
+          calendars: task.calendars,
         }
         return taskObject
       }catch (e){
         throw e
       }
+    }
+    getTaskCalendars(task: TaskDB) : Array<Calendar> {
+      let calendars: Array<Calendar> = task.calendars?.map((calendarid) => {
+        return db.get('calendars').find({id: calendarid}).value()
+      }).filter(Boolean) || [];
+
+      if(task.parent) {
+        const parentTask = db.get('tasks').find({id: task.parent}).value()
+        calendars = calendars.concat(this.getTaskCalendars(parentTask))
+      }
+
+      return calendars;
     }
     addTask (task: TaskDetail): TaskObject{
       try{
@@ -347,13 +358,11 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
     }
 
     getTaskGroupedData(id: string): any {
-        try{
-            //let tree = getDirectChildTasksTree(id)
-            let tree = getChildTasksTree(id)
-            return tree
-        }catch(e){
-            throw e
-        }
+      try{
+        return getChildTasksTree(id)
+      }catch(e){
+          throw e
+      }
     }
 
     getTaskGroupedDataByDate(data: TaskTreeItem): any {
@@ -376,7 +385,7 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
                 worklog: null
             }
             if(!isEmpty(job.task)){
-                jobobject.task = db.get('tasks').find({id: job.task}).value() || null
+                jobobject.task = mapTaskDbToApiTask(db.get('tasks').find({id: job.task}).value()) || null
             }
 
             if(!isEmpty(job.worklog)){
@@ -472,10 +481,53 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
             .value()
         return calendars;
     }
+    getCalendarStatus(calendarid: string): CalendarTime {
+        let workedTime = 0
+
+        const calendar = db.get('calendars').find({id: calendarid}).value()
+        const rootTasksWithCalendar = db.get('tasks').filter((task) => {
+            return Array.isArray(task.calendars) && task.calendars.includes(calendarid)
+        }).value()
+
+        const tasksTrees = rootTasksWithCalendar.map((task) => getChildTasksTree(task.id))
+
+        const getWorkedTime = (taskTree) => {
+            let worktime = 0
+            taskTree.jobs.forEach((job) => {
+                if (job.startDatetime > calendar.startDate && job.startDatetime < calendar.endDate) {
+                    worktime += job.endDatetime ? elapsedTime(
+                        ISOStringToFormatedDate(job.startDatetime),
+                        ISOStringToFormatedDate(job.endDatetime)
+                    )/1000
+                    :
+                    0
+                }
+            })
+            taskTree.childTasks.forEach((child) => {
+                worktime += getWorkedTime(child)
+            })
+
+            return worktime
+        }
+        tasksTrees.forEach((task) => {
+            workedTime += getWorkedTime(task)
+        })
+
+        const { expectedTotalTime, currentExpectedTime } = getCalendarExpectedTime(calendar)
+        return {
+            expectedTotalTime,
+            currentExpectedTime,
+            workedTime,
+        }
+    }
     getCalendarById(id: string): Calendar {
         try{
-            const calendar: Calendar = db.get('calendars').find({id: id}).value() || null
-            return calendar
+            const calendar: CalendarDB = db.get('calendars').find({id: id}).value() || null
+            const status = this.getCalendarStatus(id)
+            return {
+                ...calendar,
+                status,
+            }
         }catch (e){
             throw e
         }
@@ -486,6 +538,7 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
             if (!calendarsTable) {
                 db.set('calendars', []).write()
             }
+            delete calendar.status
             db.get('calendars').push(calendar).write()
             this.setDbLastModified()
             return this.getCalendarById(calendar.id)
@@ -495,7 +548,7 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
     }
     updateCalendar(calendar: Calendar): Calendar {
         try{
-            db.get('calendars').find({id: calendar.id}).assign(calendar).write()
+            db.get('calendars').find({id: calendar.id}).assign(calendar).unset('status').write()
             this.setDbLastModified()
             return this.getCalendarById(calendar.id)
         }catch(e){
@@ -503,18 +556,18 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
         }
     }
     deleteCalendar(id: string): boolean {
-        try{
-            const calendar: Calendar = db.get('calendars').find({id: id}).value()
-            if(calendar){
-                db.get('calendars').remove({id: id}).write()
-                this.setDbLastModified()
-            }else{
-                return false
-            }
-            return true
-        }catch(e){
-            throw e
+      try{
+        const calendar: Calendar = db.get('calendars').find({id: id}).value()
+        if(calendar){
+          db.get('calendars').remove({id: id}).write()
+          this.setDbLastModified()
+        }else{
+          return false
         }
+        return true
+      }catch(e){
+        throw e
+      }
     }
 
     hasDB = (): boolean => {
@@ -631,7 +684,7 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
         const metadata : Array<metadataDB> = data.metadata
         db.set('metadata', metadata).write()
 
-        const tasks : Array<TaskDetail> = data.tasks
+        const tasks : Array<TaskDB> = data.tasks
         db.set('tasks', tasks).write()
 
         const worklogs: Array<Worklog> = data.worklogs
@@ -658,76 +711,76 @@ interface TaskTreeItem {
     childTasks: Array<TaskTreeItem>
 }
 const getTaskTree = (taskid: string, time: number, job: Job = null, childTask: TaskTreeItem = null): TaskTreeItem => {
-    try{
-        let result : TaskTreeItem
-        let root : TaskTreeItem = emptyTaskTree()
-        let task: TaskDetail = db.get('tasks').find({id: taskid}).value()
-        let hasRunningJob = false
-        if(job){
-            if(job.endDatetime === ''){
-                hasRunningJob = true
-            }
-        }else{
-            if(childTask &&   childTask.hasRunningJob === true){
-                hasRunningJob = true
-            }
-        }
-        result = {
-            id: task.id,
-            title: task.title,
-            timeInSeconds: time,
-            hasRunningJob: hasRunningJob,
-            jobs: job ? [job] : [],
-            childTasks: childTask ? [childTask] : []
-        }
-        if(!isEmpty(task.parent)){
-            let parent: TaskTreeItem = getTaskTree(task.parent,time,null,result)
-            return parent
-        }else{
-            root.childTasks.push(result)
-            root.hasRunningJob = result.hasRunningJob
-            return root
-        }
-    }catch(e){
-        throw e
+  try{
+    let result : TaskTreeItem
+    let root : TaskTreeItem = emptyTaskTree()
+    let task: TaskDetail = mapTaskDbToApiTask(db.get('tasks').find({id: taskid}).value())
+    let hasRunningJob = false
+    if(job){
+      if(job.endDatetime === ''){
+          hasRunningJob = true
+      }
+    }else{
+      if(childTask &&   childTask.hasRunningJob === true){
+        hasRunningJob = true
+      }
     }
+    result = {
+      id: task.id,
+      title: task.title,
+      timeInSeconds: time,
+      hasRunningJob: hasRunningJob,
+      jobs: job ? [job] : [],
+      childTasks: childTask ? [childTask] : []
+    }
+    if(!isEmpty(task.parent)){
+      let parent: TaskTreeItem = getTaskTree(task.parent,time,null,result)
+      return parent
+    }else{
+      root.childTasks.push(result)
+      root.hasRunningJob = result.hasRunningJob
+      return root
+    }
+  }catch(e){
+    throw e
+  }
 }
 
 const mergeTaskTrees = (source: TaskTreeItem, target: TaskTreeItem): TaskTreeItem =>{
-    if(!hasChildTasks(target) && hasChildTasks(source)){
-            target.jobs = target.jobs.concat(source.jobs)
-            target.hasRunningJob = source.hasRunningJob || target.hasRunningJob
-            target.childTasks = source.childTasks
-            return target
-    }else if( !hasChildTasks(source) ){
-            target.jobs = target.jobs.concat(source.jobs)
-            target.hasRunningJob = source.hasRunningJob || target.hasRunningJob
-            target.timeInSeconds += source.timeInSeconds
-            return target
-    }else{
-        let commonChilds = itemsPresentInBoth(source,target)
-        let missingChilds = itemsMissingInTarget(source,target)
+  if(!hasChildTasks(target) && hasChildTasks(source)){
+    target.jobs = target.jobs.concat(source.jobs)
+    target.hasRunningJob = source.hasRunningJob || target.hasRunningJob
+    target.childTasks = source.childTasks
+    return target
+  }else if( !hasChildTasks(source) ){
+    target.jobs = target.jobs.concat(source.jobs)
+    target.hasRunningJob = source.hasRunningJob || target.hasRunningJob
+    target.timeInSeconds += source.timeInSeconds
+    return target
+  }else{
+    let commonChilds = itemsPresentInBoth(source,target)
+    let missingChilds = itemsMissingInTarget(source,target)
 
-        target.childTasks.forEach(targetItem => {
-            let inCommon = commonChilds.filter(commonItem => targetItem.id === commonItem[0].id)
-            if(inCommon.length === 1){
-                targetItem = mergeTaskTrees(inCommon[0][0],inCommon[0][1])
-            }else{
-                if(inCommon.length > 0){
-                    console.error("Error: No debería haber más de un item en común", inCommon)
-                }
-            }
-        })
+    target.childTasks.forEach(targetItem => {
+      let inCommon = commonChilds.filter(commonItem => targetItem.id === commonItem[0].id)
+      if(inCommon.length === 1){
+        targetItem = mergeTaskTrees(inCommon[0][0],inCommon[0][1])
+      }else{
+        if(inCommon.length > 0){
+          console.error("Error: No debería haber más de un item en común", inCommon)
+        }
+      }
+    })
 
-        missingChilds.forEach(item => {
-            target.childTasks.push(item)
-        })
+    missingChilds.forEach(item => {
+      target.childTasks.push(item)
+    })
 
-        target.jobs = target.jobs.concat(source.jobs)
-        target.hasRunningJob = source.hasRunningJob || target.hasRunningJob
-        target.timeInSeconds += source.timeInSeconds
-        return target
-    }
+    target.jobs = target.jobs.concat(source.jobs)
+    target.hasRunningJob = source.hasRunningJob || target.hasRunningJob
+    target.timeInSeconds += source.timeInSeconds
+    return target
+  }
 }
 
 const hasChildTasks = (item: TaskTreeItem): boolean => {
@@ -805,15 +858,9 @@ const checkOverlappingJobs = (job: Job, jobs: Array<JobObject>): boolean => {
 }
 
 const getChildTasksTree = (taskid: string): TaskTreeItem => {
-    let childs = db.get('tasks').filter({parent: taskid}).value()
-    let jobs = db.get('jobs').filter({task: taskid}).value()
-    let task = db.get('tasks').find({id: taskid}).value()
-    // let calendar = task.calendar && db.get('calendars').find({ id: task.calendar }).value()
-    // if (calendar) {
-    //     jobs = jobs.filter((job) => {
-    //         return job.startDatetime >= calendar.startDate && job.startDatetime <= calendar.endDate
-    //     })
-    // }
+    const childs = db.get('tasks').filter({parent: taskid}).value()
+    const jobs = db.get('jobs').filter({task: taskid}).value()
+    const task = db.get('tasks').find({id: taskid}).value()
 
     let result = emptyTaskTree()
     result.id = taskid
@@ -841,6 +888,44 @@ const getChildTasksTree = (taskid: string): TaskTreeItem => {
         result.timeInSeconds += childTask.timeInSeconds
     })
     return result
+}
+
+const getCalendarExpectedTime = (values: Calendar): Partial<CalendarTime> => {
+    const times = {
+        expectedTotalTime: 0,
+        currentExpectedTime: 0,
+    }
+    if (!values) return times;
+
+    const today = new Date()
+    const initialTime = new Date(values.workHours[0].startDate)
+    const endTime = new Date(values.workHours[0].endDate)
+    if (!(initialTime && endTime)) return times;
+    while(initialTime <= endTime) {
+        const workhours = values.workHours.filter((range) => {
+            return initialTime >= new Date(range.startDate) &&
+                initialTime <= new Date(range.endDate)
+        })
+        if (workhours.length) {
+            const item = workhours[workhours.length - 1];
+            if (item && !item.isHoliday) {
+                if (initialTime.getDay() === 0) times.expectedTotalTime += item.sunday
+                if (initialTime.getDay() === 1) times.expectedTotalTime += item.monday
+                if (initialTime.getDay() === 2) times.expectedTotalTime += item.tuesday
+                if (initialTime.getDay() === 3) times.expectedTotalTime += item.wednesday
+                if (initialTime.getDay() === 4) times.expectedTotalTime += item.thursday
+                if (initialTime.getDay() === 5) times.expectedTotalTime += item.friday
+                if (initialTime.getDay() === 6) times.expectedTotalTime += item.saturday
+            }
+        }
+        initialTime.setDate(initialTime.getDate() + 1)
+        if (initialTime > today && times.currentExpectedTime === 0) {
+            times.currentExpectedTime = times.expectedTotalTime
+        }
+    }
+    times.currentExpectedTime *= 3600
+    times.expectedTotalTime *= 3600
+    return times
 }
 /*
 const getDirectChildTasksTree = (taskid: string): TaskTreeItem => {
