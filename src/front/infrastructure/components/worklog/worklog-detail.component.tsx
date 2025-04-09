@@ -4,6 +4,7 @@ import { color, common } from '../../../styles/theme'
 import { useParams} from 'react-router-dom'
 import { WorklogObject } from '../../../domain/worklog'
 import { getWorklog } from '../../../application/getWorklog'
+import { JobObject } from 'src/front/domain/job'
 import { deleteWorklog } from '../../../application/deleteWorklog'
 import { Spinner } from '../common/spinner'
 import { FaEdit, FaTrashAlt, FaPlus } from 'react-icons/fa'
@@ -12,6 +13,7 @@ import { Link } from 'react-router-dom'
 import { BlockContainer, BlockHeaderComponent } from '../common/block'
 import { WorklogSequence } from './worklog-sequence.component'
 import { WorklogGrouped } from './worklog-grouped.component'
+import { CalendarWidget } from 'src/front/infrastructure/components/calendar/calendar-widget.component'
 import { SyncStateContext} from '../../../application/contexts/dbSyncContext'
 import { elapsedTime, formatElapsedTime } from '../../../../lib/date.utils'
 
@@ -48,7 +50,7 @@ const WorklogDetailFields = styled.ul`
 `
 const WorklogDetailItem = styled.li`
   display: flex;
-  flex-direction: vertical;
+  flex-direction: row;
   margin: 1rem;
 `
 
@@ -89,6 +91,7 @@ export const WorklogDetailComponent = (props) => {
   const [actions, setActions] = React.useState<Array<any>>([])
   const [isOpened, setOpened] = React.useState(false)
   const [confirmedDelete, setConfirmedDelete ] = React.useState<boolean>(false)
+  const [runningJob, setRunningJob] = React.useState<JobObject>(null)
 
   const handleDelete = () => {
     setOpened(false)
@@ -100,6 +103,11 @@ export const WorklogDetailComponent = (props) => {
   const changeHandler = (worklog: WorklogObject) => {
     setWorklog(worklog)
   }
+
+  React.useEffect(() => {
+    const running = worklog?.childJobs?.find((item) => !item.job.endDatetime) || null
+    setRunningJob(running)
+  }, [worklog])
 
   React.useEffect((): void => {
     let cancelled = false
@@ -249,6 +257,24 @@ export const WorklogDetailComponent = (props) => {
                   }
                   </WorklogDetailValue>
                 </WorklogDetailItem>
+                <WorklogGroupedContainer>
+                  <WorklogGroupedTitle>Calendarios</WorklogGroupedTitle>
+                  <WorklogDetailValue>
+                  {
+                    worklog.calendars.map((calendar) => (
+                      <CalendarWidget
+                        key={calendar.id}
+                        calendar={calendar}
+                        runningJob={
+                          runningJob?.task?.calendars?.find((cal) => cal.id === calendar.id) ?
+                            runningJob.job.startDatetime :
+                            null
+                          }
+                      />
+                    ))
+                  }
+                  </WorklogDetailValue>
+                </WorklogGroupedContainer>
               </WorklogDetailFields>
 
               <WorklogGroupedContainer>

@@ -9,7 +9,7 @@ import { Spinner } from '../common/spinner'
 import { FaEdit, FaTrashAlt, FaPlus } from 'react-icons/fa'
 import { Modal } from '../common/modal'
 import { Link } from 'react-router-dom'
-import { dateToFormattedDate } from '../../../../lib/date.utils'
+import { formatElapsedTime, ISOStringToFormatedDate } from '../../../../lib/date.utils'
 import { BlockContainer, BlockHeaderComponent } from '../common/block'
 import { SyncStateContext} from '../../../application/contexts/dbSyncContext'
 
@@ -44,38 +44,6 @@ const DetailTable = styled.table`
     text-align: center;
   }
 `
-
-const TaskChildrenContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-
-  & a{
-    display: inline-flex;
-    background-color: ${color.orange};
-    ${common.roundedCorners()};
-    padding: 0.5rem;
-  }
-
-  & a:hover {
-    background-color: ${color.lightOrange};
-  }
-`
-
-const TaskTagsContainer = styled.div`
-  display: flex;
-  flex-direction: row;
-  gap: 0.5rem;
-
-  & div{
-    display: inline-flex;
-    background-color: rgba(0,0,0,0.7);
-    color: ${color.white};
-    ${common.roundedCorners()};
-    padding: 0.5rem;
-  }
-`
-
 export interface CalendarProps {
   calendarid: string,
 }
@@ -91,12 +59,30 @@ export const CalendarDetailComponent = (props) => {
   const [actions, setActions] = React.useState<Array<any>>([])
   const [isOpened, setOpened] = React.useState(false)
   const [confirmedDelete, setConfirmedDelete ] = React.useState<boolean>(false)
+  const [ totalTime, setTotalTime] = React.useState<string>(null)
+  const [ currentTime, setCurrentTime] = React.useState<string>(null)
+  const [ workTime, setWorkTime] = React.useState<string>(null)
 
   const handleDelete = () => {
     setOpened(false)
     setLoading(true)
     setConfirmedDelete(true)
   }
+
+  React.useEffect(() => {
+    if (calendar) {
+      setTotalTime(formatElapsedTime(calendar.status.expectedTotalTime))
+      setCurrentTime(formatElapsedTime(calendar.status.currentExpectedTime))
+      const workedTime = formatElapsedTime(calendar.status.workedTime)
+      const workDiff = calendar.status.currentExpectedTime - calendar.status.workedTime
+      const formattedWorkDiff = formatElapsedTime(workDiff)
+      setWorkTime(`${workedTime} (${formattedWorkDiff})`)
+    } else {
+      setTotalTime('-')
+      setCurrentTime('-')
+      setWorkTime('-')
+    }
+  }, [calendar])
 
   React.useEffect(() : void => {
     let cancelled = false
@@ -201,16 +187,16 @@ export const CalendarDetailComponent = (props) => {
                 <DetailValue>{calendar.enabled ? 'Activo' : 'Inactivo'}</DetailValue>
               </DetailItem>
               <DetailItem>
-                <DetailKey>Horas totales:</DetailKey>
-                <DetailValue>{calendar.status.expectedTotalTime / 3600}</DetailValue>
+                <DetailKey>Tiempo total:</DetailKey>
+                <DetailValue>{totalTime}</DetailValue>
               </DetailItem>
               <DetailItem>
-                <DetailKey>Horas actuales:</DetailKey>
-                <DetailValue>{calendar.status.currentExpectedTime / 3600}</DetailValue>
+                <DetailKey>Tiempo hasta hoy:</DetailKey>
+                <DetailValue>{currentTime}</DetailValue>
               </DetailItem>
               <DetailItem>
-                <DetailKey>Horas trabajadas:</DetailKey>
-                <DetailValue>{calendar.status.workedTime / 3600} ({(calendar.status.currentExpectedTime - calendar.status.workedTime) /3600})</DetailValue>
+                <DetailKey>Tiempo trabajado:</DetailKey>
+                <DetailValue>{workTime}</DetailValue>
               </DetailItem>
               <DetailItem>
                 <DetailKey>Horarios:</DetailKey>
@@ -232,8 +218,8 @@ export const CalendarDetailComponent = (props) => {
                     <tbody>
                       { calendar.workHours.map((week, index) => (
                           <tr key={`week_${index}`}>
-                            <td>{week.startDate}</td>
-                            <td>{week.endDate}</td>
+                            <td>{ISOStringToFormatedDate(week.startDate, 'date')}</td>
+                            <td>{ISOStringToFormatedDate(week.endDate, 'date')}</td>
                             <td>{week.monday}</td>
                             <td>{week.tuesday}</td>
                             <td>{week.wednesday}</td>

@@ -63,6 +63,23 @@ export const calendarHandlers = [
     }
   }),
 
+  rest.get(process.env.PUBLIC_URL + '/api/calendars/status/:calendarid',(req,res,ctx) =>{
+    const calendarid = req.params.calendarid || '';
+    const calendarStatus = getTaskerRepository().getCalendarStatus(calendarid)
+
+    if(calendarStatus){
+      return res(
+        ctx.status(200),
+        ctx.json(ApiResponseBuilder(200,calendarStatus,false))
+      )
+    }else{
+      return res(
+        ctx.status(404, 'El calendario no existe'),
+        ctx.json(ApiResponseBuilder(404,{},true,'El calendario no existe'))
+      )
+    }
+  }),
+
   rest.delete(process.env.PUBLIC_URL + '/api/calendars/delete/:calendarid', (req,res,ctx) => {
     try{
       const calendarid = req.params.calendarid || '';

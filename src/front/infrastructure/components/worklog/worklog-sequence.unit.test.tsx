@@ -18,7 +18,8 @@ it.only("Muestra mensaje 'No hay trabajos creados' cuando se muestra un parte si
     }
     const worklogObject : WorklogObject= {
         worklog: worklog,
-        childJobs: []
+        childJobs: [],
+        calendars: []
     }
     render(
         <WorklogSequence 

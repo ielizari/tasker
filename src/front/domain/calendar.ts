@@ -42,6 +42,12 @@ export type CalendarTime = {
   expectedTotalTime: number,
   currentExpectedTime: number,
   workedTime: number,
+  expectedWeekTime: number,
+  currentWeekExpectedTime: number,
+  currentWeekWorkTime: number,
+  expectedMonthTime: number,
+  currentMonthExpectedTime: number,
+  currentMonthWorkTime: number,
 }
 
 export const EventTypes = {

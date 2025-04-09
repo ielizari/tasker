@@ -1,4 +1,5 @@
 import { Job } from './job'
+import { Calendar } from 'src/api/domain/calendar'
 
 export interface WorklogDB {       
     id: string,
@@ -21,4 +22,5 @@ export interface Worklog {
 export interface WorklogObject {
     worklog: Worklog
     childJobs: Array<Job>
+    calendars: Array<Calendar>
 }

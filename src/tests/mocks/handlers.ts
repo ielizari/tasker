@@ -267,7 +267,8 @@ export const handlers = [
 
         const worklogObject : WorklogObject= {
             worklog: worklog,
-            childJobs: childJobs
+            childJobs: childJobs,
+            calendars: []
         }
 
         return res(
@@ -305,7 +306,8 @@ export const handlers = [
         worklog.createdDate = "2000-01-01T01:00:00.000Z"
         const worklogresponse: WorklogObject = {
             worklog: worklog,
-            childJobs: []
+            childJobs: [],
+            calendars: []
         }
         if(worklog.title === 'Parte success'){
             return res(
@@ -325,6 +327,7 @@ export const handlers = [
         const worklogobject: WorklogObject = {
             worklog: null,
             childJobs: [],
+            calendars: [],
         }
         worklogobject.worklog = req.body as Worklog
 
