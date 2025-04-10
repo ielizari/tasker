@@ -3,7 +3,6 @@ import { isEmpty } from 'lodash'
 import { Calendar } from '../../../../domain/calendar'
 import { getTaskerRepository } from '../../../../application/taskerRepository'
 import { ApiResponse, ApiResponseBuilder } from '../../../../domain/api-response'
-import { ISOStringToFormatedDate } from '../../../../../lib/date.utils'
 import { CalendarsFilter } from 'src/front/domain/calendar'
 import { mapApiCalendarToCalendarDb } from '../../../../application/dtos/dbToApiDto'
 

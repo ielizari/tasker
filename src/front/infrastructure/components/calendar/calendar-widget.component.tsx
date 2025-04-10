@@ -1,6 +1,6 @@
 import React from 'react'
 import styled from 'styled-components'
-import { color, common, font } from 'src/front/styles/theme'
+import { color } from 'src/front/styles/theme'
 import { CalendarTime, Calendar } from 'src/front/domain/calendar'
 import { formatElapsedTime, ISOStringToFormatedDate, elapsedTime } from 'src/lib/date.utils'
 import { RunningElapsedTime } from '../worklog/worklog-sequence.component'

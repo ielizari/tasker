@@ -5,7 +5,7 @@ import { addCalendar } from '../../../application/addCalendar'
 import { updateCalendar } from '../../../application/updateCalendar'
 import { getCalendar } from '../../../application/getCalendar'
 import { Link, useParams } from 'react-router-dom'
-import { FaCheck, FaPlus, FaSave, FaTimes, FaTrashAlt} from 'react-icons/fa'
+import { FaPlus, FaSave, FaTrashAlt} from 'react-icons/fa'
 import { Spinner } from '../common/spinner'
 import { BlockContainer, BlockHeaderComponent} from '../common/block'
 import { SyncStateContext} from '../../../application/contexts/dbSyncContext'
@@ -22,16 +22,6 @@ import { IconButton } from '../common/icon-button'
 
 import '../../../../lib/orzkDatepicker/datepicker.css'
 import { mapCalendarApiTocomponent } from '../../../application/dtos/calendarApiToComponent.dto'
-
-const FormCheckboxWrapper = styled.div`
-  // display: flex;
-  // flex-direction: row;
-  // align-items: center;
-  // flex-grow: 2;
-  label {
-    align-items: center;
-  }
-`
 
 const WorkHoursForm = styled.div`
   border: 1px solid grey;

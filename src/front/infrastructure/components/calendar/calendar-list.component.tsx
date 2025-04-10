@@ -1,21 +1,14 @@
 import React from 'react'
-import styled from 'styled-components'
-import { common } from '../../../styles/theme'
 import {
   ListContainer,
   ListItem,
-  ListItemExpand,
   ListItemTitleResult,
-  ListChildContainer,
   ListItemTitleLink
 } from '../common/list'
 import { Calendar, CalendarsFilter } from '../../../domain/calendar'
 import { getCalendarList } from '../../../application/getCalendarList'
-import { FaFilter, FaPlus, FaMinus } from 'react-icons/fa'
-import { IconLink } from '../common/icon-button'
-
+import { FaFilter, FaPlus } from 'react-icons/fa'
 import { Spinner } from '../common/spinner'
-
 import { BlockHeaderComponent, BlockContainer, BlockEmptyComponent } from '../common/block'
 
 const defaultFilter: CalendarsFilter = {
