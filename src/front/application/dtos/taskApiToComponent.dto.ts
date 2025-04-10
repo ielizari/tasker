@@ -1,16 +1,16 @@
-import { TaskDetail} from '../../domain/task'
+import { TaskDetail } from 'src/front/domain/task'
 import { ISOStringToFormatedDate } from '../../../lib/date.utils'
 
 export const mapTaskApiTocomponent = (task: TaskDetail): TaskDetail => {
-    if(!task){
-        return null
-    }
-    const dates = {
-        createdDate: ISOStringToFormatedDate(task.createdDate),
-        limitDate: ISOStringToFormatedDate(task.limitDate),
-    }
-    return {
-        ...task, 
-        ...dates
-    }
+  if(!task){
+    return null
+  }
+  const dates = {
+    createdDate: ISOStringToFormatedDate(task.createdDate),
+    limitDate: ISOStringToFormatedDate(task.limitDate),
+  }
+  return {
+    ...task,
+    ...dates
+  }
 }

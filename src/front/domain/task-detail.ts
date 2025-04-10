@@ -1,33 +1,22 @@
+import { Calendar } from 'src/front/domain/calendar'
 export interface TaskDetail {
-    id: string,
-    parent: string,
-    title: string,
-    description: string,
-    createdDate: string,
-    limitDate: string,
-    author: string,
-    authorId: string,
-    status: string,
-    priority: string,
-    tags: Array<string>
+  id: string,
+  parent: string,
+  title: string,
+  description: string,
+  createdDate: string,
+  limitDate: string,
+  author: string,
+  authorId: string,
+  status: string,
+  priority: string,
+  tags: Array<string>,
+  calendars?: Array<Calendar>
 }
 
 export interface TaskObject {
-    task: TaskDetail,
-    parentTask: TaskDetail | null,
-    childTasks: Array<TaskDetail>
-}
-
-export interface TaskDB {
-    id: string,
-    parent: string,
-    title: string,
-    description: string,
-    createdDate: string,
-    limitDate: string,
-    author: string,
-    authorId: string,
-    status: string,
-    priority: string,
-    tags: Array<string>
+  task: TaskDetail,
+  parentTask: TaskDetail | null,
+  childTasks: Array<TaskDetail>,
+  calendars: Array<Calendar>
 }

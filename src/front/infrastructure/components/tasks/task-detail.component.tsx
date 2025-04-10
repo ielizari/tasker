@@ -44,10 +44,11 @@ const ErrorMessage = styled.div`
 
 const TaskChildrenContainer = styled.div`
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  flex-wrap: wrap;
   gap: 0.5rem;
 
-  & a{
+  & a {
     display: inline-flex;
     background-color: ${color.orange};
     ${common.roundedCorners()};
@@ -158,10 +159,8 @@ export const TaskDetailComponent = (props) => {
               setError(new Error(result.error))
               setTask(null)
             }else{
-              console.log(result.data)
               getTaskGroupedData(taskid).then(
                 result => {
-                  console.log("wadafak",result)
                   setGroupedData(result.data)
                 },
                 error => {
@@ -252,6 +251,22 @@ export const TaskDetailComponent = (props) => {
                     })
                   }
                   </TaskTagsContainer>
+                  :
+                  '-'
+                }
+                </TaskDetailValue>
+              </TaskDetailItem>
+              <TaskDetailItem>
+                <TaskDetailKey>Calendarios:</TaskDetailKey>
+                <TaskDetailValue>
+                {task.calendars?.length ?
+                  <TaskChildrenContainer>
+                  {
+                    task.calendars.map((calendar) => {
+                      return <Link to={`/calendars/${calendar.id}`} key={calendar.title}>{calendar.title}</Link>
+                    })
+                  }
+                  </TaskChildrenContainer>
                   :
                   '-'
                 }

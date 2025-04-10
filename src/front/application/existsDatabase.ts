@@ -10,7 +10,7 @@ export const existsDb = async (): Promise<ApiResponse> => {
                 return result
              },
             (error) => { 
-                console.log(error)
+                console.error('existsdb', error)
                 throw new Error(error)
             }
         )

@@ -6,11 +6,11 @@ import { JobObject } from '../../front/domain/job'
 import { ApiResponseBuilder} from '../../api/domain/api-response'
 
 export const handlers = [
-    rest.post(process.env.PUBLIC_URL + '/api/tasks',(req, res, ctx) => {       
+    rest.post(process.env.PUBLIC_URL + '/api/tasks',(req, res, ctx) => {
         const filters : Partial<TaskDetail> = req.body ? JSON.parse(req.body as string) : {}
-         
-        if(filters.title === 'Hacer la compra'){ 
-            const task: TaskDetail = {            
+
+        if(filters.title === 'Hacer la compra'){
+            const task: TaskDetail = {
                 "id":"1",
                 "parent":"",
                 "title":"Hacer la compra",
@@ -21,15 +21,16 @@ export const handlers = [
                 "authorId": "1",
                 "status": "1",
                 "priority": "3",
-                "tags": ["compra","casa","comida"]            
+                "tags": ["compra","casa","comida"]
             }
             const parentTask = null
             const childTasks = []
-    
+
             const taskObject : TaskObject= {
                 task: task,
                 parentTask: parentTask,
-                childTasks: childTasks
+                childTasks: childTasks,
+                calendars: []
             }
 
             return res(
@@ -41,11 +42,10 @@ export const handlers = [
                 ctx.status(200),
                 ctx.json(ApiResponseBuilder(200,[],false))
             )
-        }else{ 
-            console.log("Imprimiendo todo",filters)
+        }else{
             let result :Array<TaskObject> = [
                 {
-                    task: {            
+                    task: {
                         "id":"1",
                         "parent":"",
                         "title":"Hacer la compra",
@@ -56,10 +56,11 @@ export const handlers = [
                         "authorId": "1",
                         "status": "1",
                         "priority": "3",
-                        "tags": ["compra","casa","comida"]            
+                        "tags": ["compra","casa","comida"],
                     },
                     parentTask: null,
-                    childTasks: []
+                    childTasks: [],
+                    calendars: []
                 },
                 {
                     task: {
@@ -76,10 +77,11 @@ export const handlers = [
                         "tags": ["KYB","PET","ID-167"]
                     },
                     parentTask: null,
-                    childTasks: []
+                    childTasks: [],
+                    calendars: []
                 }
             ]
-            
+
             return res(
                 ctx.status(200),
                 ctx.json(ApiResponseBuilder(200,result,false))
@@ -87,14 +89,14 @@ export const handlers = [
         }
     }),
     // Tarea inexistente
-    rest.get(process.env.PUBLIC_URL + '/api/tasks/1111',(req, res, ctx) => {  
+    rest.get(process.env.PUBLIC_URL + '/api/tasks/1111',(req, res, ctx) => {
         return res(
             ctx.status(404, 'La tarea no existe'),
             ctx.json(ApiResponseBuilder(200,{},true,'La tarea no existe'))
-        )         
+        )
     }),
-    rest.get(process.env.PUBLIC_URL + '/api/tasks/1',(req, res, ctx) => {          
-        const task: TaskDetail = {            
+    rest.get(process.env.PUBLIC_URL + '/api/tasks/1',(req, res, ctx) => {
+        const task: TaskDetail = {
             "id":"1",
             "parent":"",
             "title":"Hacer la compra",
@@ -105,7 +107,7 @@ export const handlers = [
             "authorId": "1",
             "status": "1",
             "priority": "3",
-            "tags": ["compra","casa","comida"]            
+            "tags": ["compra","casa","comida"]
         }
         const parentTask = null
         const childTasks = []
@@ -113,22 +115,24 @@ export const handlers = [
         const taskObject : TaskObject= {
             task: task,
             parentTask: parentTask,
-            childTasks: childTasks
+            childTasks: childTasks,
+            calendars: []
         }
-        
+
         return res(
             ctx.status(200),
             ctx.json(ApiResponseBuilder(200,taskObject,false))
-        )        
+        )
     }),
     rest.post(process.env.PUBLIC_URL + '/api/tasks/add',(req,res,ctx) =>{
-        const task: TaskDetail = req.body as TaskDetail        
-        
+        const task: TaskDetail = req.body as TaskDetail
+
         task.createdDate = "2000-01-01T00:00:00+0200"
         const taskresponse: TaskObject = {
             task: task,
             childTasks: [],
-            parentTask: null
+            parentTask: null,
+            calendars: []
         }
         if(task.description === 'success'){
             return res(
@@ -141,27 +145,28 @@ export const handlers = [
                 ctx.json(ApiResponseBuilder(500,taskresponse,true,'Error al crear la tarea'))
             )
         }
-        
+
     }),
-    
+
     rest.put(process.env.PUBLIC_URL + '/api/tasks/update', (req, res, ctx) => {
-        
+
         const taskobject: TaskObject = {
             task: null,
             childTasks: [],
-            parentTask: null
+            parentTask: null,
+            calendars: []
         }
-        taskobject.task = req.body as TaskDetail                                     
-        
-        return res(                
+        taskobject.task = req.body as TaskDetail
+
+        return res(
             ctx.status(200),
-            ctx.json(ApiResponseBuilder(200,taskobject,false))            
+            ctx.json(ApiResponseBuilder(200,taskobject,false))
         )
-        
+
     }),
 
     rest.delete(process.env.PUBLIC_URL + '/api/tasks/delete/1', (req,res,ctx) => {
-            const task: TaskDetail = {            
+            const task: TaskDetail = {
                 "id":"1",
                 "parent":"",
                 "title":"Hacer la compra",
@@ -172,20 +177,19 @@ export const handlers = [
                 "authorId": "1",
                 "status": "1",
                 "priority": "3",
-                "tags": ["compra","casa","comida"]            
+                "tags": ["compra","casa","comida"]
             }
-            
+
             return res(
                     ctx.status(200),
                     ctx.json(ApiResponseBuilder(200,task,false))
                 )
-            
-        
+
+
     }),
 
-    rest.post(process.env.PUBLIC_URL + '/api/worklogs',(req, res, ctx) => {       
+    rest.post(process.env.PUBLIC_URL + '/api/worklogs',(req, res, ctx) => {
         const filters : WorklogsFilter= req.body ? JSON.parse(req.body as string) : {}
-        console.log(filters)
         if(Object.keys(filters.where).length){
             if(filters.where.title === 'Compra 15-11-20'){
                 return res(
@@ -199,16 +203,15 @@ export const handlers = [
                 )
             }
         }else{
-            console.log("pfffff")
             return res(
                 ctx.status(200),
                 ctx.json(ApiResponseBuilder(200,taskData.worklogs,false))
-            )        
+            )
         }
     }),
 
-    rest.get(process.env.PUBLIC_URL + '/api/worklogs/1',(req, res, ctx) => {     
-        const worklog: Worklog = {            
+    rest.get(process.env.PUBLIC_URL + '/api/worklogs/1',(req, res, ctx) => {
+        const worklog: Worklog = {
             id:"1",
             createdDate: "05/11/2020 08:00",
             startDatetime:"05/11/2020 09:00",
@@ -230,7 +233,7 @@ export const handlers = [
             tags: ["compra","casa","comida"]
         }
         const childJobs: Array<JobObject> = [
-            { 
+            {
                 job: {
                     id:"1",
                     worklog:"1",
@@ -256,7 +259,7 @@ export const handlers = [
                     description:"Manzanas, Plátanos, Mandarinas",
                     type:"Análisis",
                     tags: ["Manzanas", "Plátanos", "Mandarinas"]
-                },            
+                },
                 task: task,
                 worklog: worklog
             }
@@ -264,24 +267,25 @@ export const handlers = [
 
         const worklogObject : WorklogObject= {
             worklog: worklog,
-            childJobs: childJobs
+            childJobs: childJobs,
+            calendars: []
         }
 
         return res(
             ctx.status(200),
             ctx.json(ApiResponseBuilder(200,worklogObject,false))
-        )        
+        )
     }),
 
-    rest.get(process.env.PUBLIC_URL + '/api/worklogs/1111',(req, res, ctx) => {  
+    rest.get(process.env.PUBLIC_URL + '/api/worklogs/1111',(req, res, ctx) => {
         return res(
             ctx.status(404, 'El parte no existe'),
             ctx.json(ApiResponseBuilder(200,{},true,'El parte no existe'))
-        )         
+        )
     }),
 
     rest.delete(process.env.PUBLIC_URL + '/api/worklogs/delete/1', (req,res,ctx) => {
-        const worklog: Worklog = {            
+        const worklog: Worklog = {
             "id":"1",
             "createdDate": "2020-11-05T07:00:00.000Z",
             "startDatetime":"2020-11-05T08:00:00.000Z",
@@ -289,7 +293,7 @@ export const handlers = [
             "title":"Compra 05-11-20",
             "tags": []
         }
-        
+
         return res(
                 ctx.status(200),
                 ctx.json(ApiResponseBuilder(200,worklog,false))
@@ -298,11 +302,12 @@ export const handlers = [
 
     rest.post(process.env.PUBLIC_URL + '/api/worklogs/add',(req,res,ctx) =>{
         const worklog: Worklog = req.body as Worklog
-        
+
         worklog.createdDate = "2000-01-01T01:00:00.000Z"
         const worklogresponse: WorklogObject = {
             worklog: worklog,
-            childJobs: []
+            childJobs: [],
+            calendars: []
         }
         if(worklog.title === 'Parte success'){
             return res(
@@ -314,28 +319,29 @@ export const handlers = [
                 ctx.status(500),
                 ctx.json(ApiResponseBuilder(500,worklog,true,'Error al crear el parte'))
             )
-        }        
+        }
     }),
 
     rest.put(process.env.PUBLIC_URL + '/api/worklogs/update', (req, res, ctx) => {
-        
+
         const worklogobject: WorklogObject = {
             worklog: null,
             childJobs: [],
+            calendars: [],
         }
-        worklogobject.worklog = req.body as Worklog         
-        
-        return res(                
+        worklogobject.worklog = req.body as Worklog
+
+        return res(
             ctx.status(200),
-            ctx.json(ApiResponseBuilder(200,worklogobject,false))            
+            ctx.json(ApiResponseBuilder(200,worklogobject,false))
         )
-        
+
     }),
 
     rest.put(process.env.PUBLIC_URL + '/api/worklogs/close', (req, res, ctx) => {
         try{
             const worklog: Worklog | null = req.body ? req.body as Worklog : null
-                        
+
             return res(
                 ctx.status(200),
                 ctx.json(ApiResponseBuilder(200,worklog,false))
@@ -351,7 +357,7 @@ export const handlers = [
     rest.put(process.env.PUBLIC_URL + '/api/worklogs/reopen', (req, res, ctx) => {
         try{
             const worklog: Worklog | null = req.body ? req.body as Worklog : null
-            
+
             return res(
                 ctx.status(200),
                 ctx.json(ApiResponseBuilder(200,worklog,false))
@@ -365,7 +371,7 @@ export const handlers = [
     }),
 
     rest.get(process.env.PUBLIC_URL + '/api/worklogs/1/grouped',(req,res,ctx) =>{
-        try{            
+        try{
             let result = {
                 title: "root",
                 id: "0",
@@ -410,7 +416,7 @@ export const handlers = [
                 ctx.status(200),
                 ctx.json(ApiResponseBuilder(200,result,false))
             )
-            
+
         }catch(e){
             return res(
                 ctx.status(500),
@@ -419,12 +425,12 @@ export const handlers = [
         }
     }),
     rest.get(process.env.PUBLIC_URL + '/api/worklogs/11111/grouped',(req,res,ctx) =>{
-        try{            
+        try{
             return res(
                 ctx.status(400),
                 ctx.json(ApiResponseBuilder(400,{},true,'Id de parte no válido'))
             )
-            
+
         }catch(e){
             return res(
                 ctx.status(500),
@@ -457,7 +463,7 @@ export const handlers = [
 
     rest.post(process.env.PUBLIC_URL + '/api/db/import', (req,res,ctx) => {
         try{
-            const dbfile = req.body ? req.body as Schema: null 
+            const dbfile = req.body ? req.body as Schema: null
             const db: boolean = getTaskerRepository().importDb(dbfile)
             return res(
                 ctx.status(200),
@@ -487,11 +493,11 @@ export const handlers = [
     }),*/
 
     rest.get(process.env.PUBLIC_URL + '/api/db/synced', (req,res,ctx) => {
-        
+
         return res(
             ctx.status(200),
              ctx.json(ApiResponseBuilder(200,true,false))
         )
-        
+
     })
 ]

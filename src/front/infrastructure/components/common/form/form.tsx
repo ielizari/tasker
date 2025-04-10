@@ -1,7 +1,7 @@
 import React from 'react'
 import styled from 'styled-components'
 import { color, common, font } from '../../../../styles/theme';
-import { Formik, Form, Field, useField, FieldProps } from 'formik'
+import { Formik, Form, Field, FieldArray, useField, FieldProps } from 'formik'
 import { IconButton, IconLink } from '../icon-button'
 import { ModalWithComponent } from '../modal'
 import Select, {Option, ReactSelectProps} from 'react-select'
@@ -19,16 +19,36 @@ export const FormActionBarWrapper = styled(Form)`
 
 export const FormWrapper = styled(Form)`
     display: flex;
-    flex-direction: column;    
+    flex-direction: column;
     color: ${color.black};
     margin: 1rem;
 `
-export const FormItemWrapper = styled.div`
+export const StyledFieldArray = styled.div<{
+  direction?:string,
+  fullwidth?:boolean,
+  border?:boolean,
+}>`
     display: flex;
-    width: 100%;
-    justify-content: center;
-    flex-direction: column;
-    margin: 0.5rem;
+    flex-direction: ${props => props.direction || 'column'};
+    border: 1px ${props => props.border ? 'solid' : 'none'} ${color.grey};
+    padding: 0.5rem;
+    margin: 0.3rem;
+    input {
+      max-width: ${props => props.fullwidth ? 'auto' : '4rem'};
+      padding: 0.5rem;
+      border-style: solid;
+      border-width: 1px;
+       border-color: ${color.grey};
+      ${common.roundedCorners()};
+    }
+`
+
+export const FormItemWrapper = styled.div`
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  margin: 0.5rem;
+  flex-grow: 1;
 `
 export const FormItemWrapperInline = styled.div`
     display: flex;
@@ -36,6 +56,7 @@ export const FormItemWrapperInline = styled.div`
     justify-content: center;
     flex-direction: row;
     margin: 0.5rem;
+    align-items: center;
 `
 // const HiddenCheckbox = styled.input.attrs({ type: 'checkbox' })`
 //   border: 0;
@@ -78,7 +99,7 @@ export const FormInputWithIconWrapper = styled.div`
     border-color: ${color.grey};
     border-style: solid;
     ${common.roundedCorners()};
-    
+
     & > input {
         width: 100%;
         border-style: none !important;
@@ -94,7 +115,7 @@ export const FormInputIcon = styled.span`
     transition: background-color .3s;
     color: ${color.darkGrey} !important;
     background-color: ${color.lightGrey};
-    ${common.roundedCornersLeft()}  
+    ${common.roundedCornersLeft()}
     cursor: pointer;
 
     :hover {
@@ -110,7 +131,7 @@ export const FormSelectIcon = styled.span`
     transition: background-color .3s;
     color: ${color.white} !important;
     background-color: #3333f1;
-    ${common.roundedCornersLeft()}  
+    ${common.roundedCornersLeft()}
     cursor: pointer;
 
     :hover {
@@ -120,7 +141,7 @@ export const FormSelectIcon = styled.span`
 
 export const FormTextInput :React.FC<any> = ({label, ...props}) => {
     const [field, meta] = useField(props)
-   
+
     return (
         <FormItemWrapper>
             {label && <label htmlFor={props.id || props.name}>{label}</label>}
@@ -132,54 +153,76 @@ export const FormTextInput :React.FC<any> = ({label, ...props}) => {
     )
 }
 
-export const FormSelectFromComponent : React.FC<any> = ({label, buttonLabel, selectedLabel, component, resultHandler, ...props}) => {
+export const FormNumberInput :React.FC<any> = ({label, ...props}) => {
+    const [field, meta] = useField(props)
+
+    return (
+        <FormItemWrapper>
+            {label && <label htmlFor={props.id || props.name}>{label}</label>}
+            <Field {...field} {...props} aria-label={props.id || props.name}/>
+            {meta.touched && meta.error ? (
+                <div aria-label={'validate_' + (props.id || props.name)} className="form-item-error">{meta.error}</div>
+            ): null}
+        </FormItemWrapper>
+    )
+}
+
+export const FormSelectFromComponent : React.FC<any> = ({
+  label,
+  buttonLabel,
+  selectedLabel,
+  component,
+  resultHandler,
+  formValues,
+  ...props
+}) => {
     const [field, meta, {setValue, setTouched}] = useField(props)
     const [isOpened, setIsOpened] = React.useState<boolean>(false)
     const [selectLabel, setSelectLabel] = React.useState<string>(props.selectedLabel || '')
 
     React.useEffect(()=> {
-        setSelectLabel(selectedLabel)
+      setSelectLabel(selectedLabel)
     },[selectedLabel])
 
     const hideWidget = () => {
-        setIsOpened(false)
+      setIsOpened(false)
     }
     const showWidget = () => {
-        setIsOpened(true)
+      setIsOpened(true)
     }
     const selectResultHandler = (result: any) => {
-        let processed = resultHandler(result)
-        setValue(processed.value)
-        setSelectLabel(processed.label)
-        setTouched(true)
-        setIsOpened(false)
+      let processed = resultHandler(result, formValues)
+      setValue(processed.value)
+      setSelectLabel(processed.label)
+      setTouched(true)
+      setIsOpened(false)
     }
     return (
-        <FormItemWrapper>
-            <ModalWithComponent
-                isOpened={isOpened} 
-                onClose={hideWidget}
-                Component={component}
-                resultHandler={selectResultHandler}
-                />
-            <label htmlFor={props.id || props.name} >{label}</label>
-            <input type="hidden" name={props.id} />
-            <FormInputWithIconWrapper >                
-                <FormSelectIcon onClick={showWidget}>{buttonLabel}</FormSelectIcon>
-                <Field type="hidden" {...field} {...props} />
-                <input 
-                    type="text" 
-                    id={"select_label_"+props.id}
-                    name={"select_label_"+props.id}
-                    value={selectLabel}
-                    aria-label={"select_label_"+props.id}
-                    readOnly
-                />
-            </FormInputWithIconWrapper>
-            {meta.touched && meta.error ? (
-                <div aria-label={'validate_' + (props.id || props.name)} className="form-item-error">{meta.error}</div>
-            ): null}
-        </FormItemWrapper>
+      <FormItemWrapper>
+        <ModalWithComponent
+          isOpened={isOpened}
+          onClose={hideWidget}
+          Component={component}
+          resultHandler={selectResultHandler}
+        />
+        <label htmlFor={props.id || props.name} >{label}</label>
+        <input type="hidden" name={props.id} />
+        <FormInputWithIconWrapper >
+          <FormSelectIcon onClick={showWidget}>{buttonLabel}</FormSelectIcon>
+          <Field type="hidden" {...field} {...props} />
+          <input
+            type="text"
+            id={"select_label_"+props.id}
+            name={"select_label_"+props.id}
+            value={selectLabel}
+            aria-label={"select_label_"+props.id}
+            readOnly
+          />
+        </FormInputWithIconWrapper>
+        {meta.touched && meta.error ? (
+          <div aria-label={'validate_' + (props.id || props.name)} className="form-item-error">{meta.error}</div>
+        ): null}
+      </FormItemWrapper>
     )
 }
 
@@ -189,10 +232,10 @@ export const FormDateInput :React.FC<any> = ({label, minDate, maxDate, ...props}
 
     const showDp = () => {
         dp.show()
-    }    
+    }
     const handleChange = React.useCallback(() => {
         setValue(dp.getFullDateString() || '')
-        setTouched(true)        
+        setTouched(true)
     },[setValue,setTouched,dp])
 
     React.useEffect(()=>{
@@ -203,25 +246,22 @@ export const FormDateInput :React.FC<any> = ({label, minDate, maxDate, ...props}
 
     React.useEffect(()=> {
         let options : any = {
-            lang: 'es'
-        }
-        if(minDate){
-            options.minDate = minDate
-        }
-        if(maxDate){
-            options.maxDate = maxDate
+          lang: 'es',
+          ...(props.mode && { mode: props.mode}),
+          ...(minDate && { minDate: minDate}),
+          ...(maxDate && { maxDate: maxDate}),
         }
         let picker : Datepicker = new Datepicker(props.id,label,options)
         setDp(picker)
-    },[label,minDate,maxDate,props.id])
-    
+    },[label, minDate, maxDate, props.id, props.mode])
+
     return (
         <FormItemWrapper>
             <label htmlFor={props.id || props.name} >{label}</label>
-            <FormInputWithIconWrapper >                
+            <FormInputWithIconWrapper >
                 <FormInputIcon onClick={showDp}><FaCalendar/></FormInputIcon>
-                <Field 
-                    {...field} 
+                <Field
+                    {...field}
                     {...props}
                     aria-label={props.id || props.name}
                 />
@@ -233,107 +273,106 @@ export const FormDateInput :React.FC<any> = ({label, minDate, maxDate, ...props}
     )
 }
 
-export const FormSelect: React.FC<ReactSelectProps & FieldProps> = ({ label, selOptions, ...props }) => {
-    const [field, meta, {setValue}] = useField(props); 
-    const [options, setOptions] = React.useState(selOptions || [])
+export const FormSelect: React.FC<ReactSelectProps & FieldProps> = ({ label, selOptions, handleSelect, ...props }) => {
+  const [field, meta, {setValue}] = useField(props);
+  const [options, setOptions] = React.useState(selOptions || [])
 
 
-    React.useEffect(() => {
-        setOptions(selOptions)
-    },[selOptions])
+  React.useEffect(() => {
+    setOptions(selOptions)
+  },[selOptions])
 
-    const customStyles = {
-        option: (provided, state) => ({
-            ...provided,
-          }),
-        control: (provided, state) => ({
-            ...provided,
-            width: '100%',
-            borderColor: `${color.grey}`,
-            minHeight: '0',
-            font: `${font.base()}`,
-            padding: '0'
-        }),
-        singleValue: (provided, state) => {
-            const opacity = state.isDisabled ? 0.5 : 1;
-            const transition = 'opacity 300ms';
-            const fontSize = '0.75rem'
-            const padding = '0.5rem'
-        
-            return { ...provided, opacity, transition, fontSize, padding };
-        },
-        valueContainer: (provided, state) => ({
-            ...provided,
-            padding: '1px'
-        }),
-        dropdownIndicator: (provided, state) => ({
-            ...provided,
-            padding: '1px 8px'
-        })
-        
-    }
-    
-    return ( 
-        <FormItemWrapper data-testid={props.id}>
-            <label htmlFor={props.id || props.name}>{label}</label>
-            <Select
-                options={selOptions}
-                name={field.name}
-                styles={customStyles}
-                value={options ? options.find(option => option.value === field.value) : ''}
-                onChange={(option: Option) => {setValue(option.value)}}
-                onBlur={field.onBlur}
-                aria-label={field.name}
-            />             
-            {meta.touched && meta.error ? ( 
-                <div aria-label={'validate_' + (props.id || props.name)} className="form-item-error">{meta.error}</div> 
-            ) : null} 
-        </FormItemWrapper>
-    ); 
+  const customStyles = {
+    option: (provided, state) => ({
+      ...provided,
+      }),
+    control: (provided, state) => ({
+      ...provided,
+      width: '100%',
+      borderColor: `${color.grey}`,
+      minHeight: '0',
+      font: `${font.base()}`,
+      padding: '0'
+    }),
+    singleValue: (provided, state) => {
+      const opacity = state.isDisabled ? 0.5 : 1;
+      const transition = 'opacity 300ms';
+      const fontSize = '0.75rem'
+      const padding = '0.5rem'
+
+      return { ...provided, opacity, transition, fontSize, padding };
+    },
+    valueContainer: (provided, state) => ({
+      ...provided,
+      padding: '1px'
+  }),
+    dropdownIndicator: (provided, state) => ({
+      ...provided,
+      padding: '1px 8px'
+    })
+  }
+
+  return (
+    <FormItemWrapper data-testid={props.id}>
+      <label htmlFor={props.id || props.name}>{label}</label>
+      <Select
+        options={selOptions}
+        name={field.name}
+        styles={customStyles}
+        value={options ? options.find(option => option.value === field.value) : ''}
+        onChange={(option: Option) => {handleSelect(option); setValue(option.value)}}
+        onBlur={field.onBlur}
+        aria-label={field.name}
+      />
+      {meta.touched && meta.error ? (
+        <div aria-label={'validate_' + (props.id || props.name)} className="form-item-error">{meta.error}</div>
+      ) : null}
+    </FormItemWrapper>
+  );
   };
 
     export const FormCheckbox :React.FC<any> = ({label, ...props}) => {
-        const [field, meta] = useField(props)
-    
-        return (
-            <FormItemWrapperInline>
-                <label>      
-                    <Field type="checkbox" {...field} {...props} aria-label={props.id || props.name}/>
-                    {label && <label htmlFor={props.id || props.name}>{label}</label>}
-                </label>  
-                {meta.touched && meta.error ? (
-                    <div aria-label={'validate_' + (props.id || props.name)} className="form-item-error">{meta.error}</div>
-                ): null}
-            </FormItemWrapperInline>
-        )
+      const [field, meta] = useField(props)
+
+      return (
+        <FormItemWrapperInline>
+          <label>
+              <Field type="checkbox" {...field} {...props} aria-label={props.id || props.name}/>
+              {label && <label htmlFor={props.id || props.name}>{label}</label>}
+          </label>
+          {meta.touched && meta.error ? (
+              <div aria-label={'validate_' + (props.id || props.name)} className="form-item-error">{meta.error}</div>
+          ): null}
+        </FormItemWrapperInline>
+      )
     }
 
   export const FormFileupload: React.FC<any> = ({label, ...props}) => {
-      const [field, meta,{setValue}] = useField(props)
-      
-        return(
-            <FormItemWrapper>
-                {label && <label htmlFor={props.id || props.name}>{label}</label>}            
-                <input 
-                    {...props}
-                    name={field.name}
-                    type="file" 
-                    onChange={(event)=>{
-                        setValue(event.currentTarget.files[0])
-                    }}
-                    key={props.key}      
-                    aria-label={props.id || props.name} />
-                {meta.touched && meta.error ? (
-                    <div aria-label={'validate_' + (props.id || props.name)} className="form-item-error">{meta.error}</div>
-                ): null}
-            </FormItemWrapper>
-        )
+    const [field, meta,{setValue}] = useField(props)
+
+    return(
+      <FormItemWrapper>
+        {label && <label htmlFor={props.id || props.name}>{label}</label>}
+        <input
+          {...props}
+          name={field.name}
+          type="file"
+          onChange={(event)=>{
+              setValue(event.currentTarget.files[0])
+          }}
+          key={props.key}
+          aria-label={props.id || props.name} />
+        {meta.touched && meta.error ? (
+          <div aria-label={'validate_' + (props.id || props.name)} className="form-item-error">{meta.error}</div>
+        ): null}
+      </FormItemWrapper>
+    )
   }
   export interface TaskFilterForm {
       search: string
       minDate: Date
       maxDate: Date
-      orderBy: string      
+      orderBy: string
   }
 
   export interface FormItemType {
@@ -359,7 +398,7 @@ export const FormSelect: React.FC<ReactSelectProps & FieldProps> = ({ label, sel
   }
 
   export interface FormSelectType extends FormItemType{
-        selectOptions: any      
+        selectOptions: any
   }
   export interface FormButtonType extends FormItemType{
         className: string
@@ -371,47 +410,229 @@ export const FormBuilder: React.FC<any> = (props) => {
       const [items, setItems] = React.useState(props.formItems || null)
       const [view, setView ] = React.useState(props.formView || null)
 
-      React.useEffect(() => {     
+      React.useEffect(() => {
         setItems(props.formItems)
         setView(props.formView)
       },[props.formItems,props.formView])
 
+      const renderFields = (item, path = '', itemIndex?) => {
+        const currentPath = path ? `${path}.${item.id}` : item.id;
+        if(item.type === 'group') {
+          return (
+            <StyledFieldArray
+              key={`group-container_${currentPath}`}
+              direction={item.direction}
+              fullwidth={item.fullwidth}
+              border={item.border}>
+              {
+                item.items.map((subitem, index) => (renderFields(subitem, path)))
+              }
+            </StyledFieldArray>
+          )
+        } else if(item.type === 'fieldset') {
+          return (
+            <div key={`fieldset-container_${currentPath}`}>
+              {item.label && (<div>{item.label}</div>)}
+              <FieldArray
+                key={currentPath}
+                name={currentPath}
+                >
+                  {({ insert, remove, push}) => (
+                    <div>
+                      <StyledFieldArray
+                        direction={item.direction}
+                        fullwidth={item.fullwidth}
+                        border={item.border}>
+                        {
+                          item.items.map((subitem, index) => (renderFields(subitem, currentPath, index)))
+                        }
+                      </StyledFieldArray>
+                      <button
+                        onClick={() => push(item)}>
+                        Nuevo
+                      </button>
+                    </div>
+                  )}
+              </FieldArray>
+            </div>
+            )
+
+        }else if(item.type === 'text'){
+          return(
+            <FormTextInput
+              id={currentPath}
+              name={currentPath}
+              key={currentPath}
+              type="text"
+              label={item.label}
+              placeholder={item.placeholder}
+            />
+          )
+        }else if (item.type === 'number'){
+          return(
+            <FormNumberInput
+              id={currentPath}
+              name={currentPath}
+              key={currentPath}
+              type="number"
+              label={item.label}
+              placeholder={item.placeholder}
+            />
+          )
+        }else if(item.type === 'date'){
+          return (
+            <FormDateInput
+              label={item.label}
+              name={currentPath}
+              key={currentPath}
+              type="text"
+              id={currentPath}
+              mode={item.mode}
+              />
+          )
+        }else if(item.type === 'select'){
+          return (
+            <FormSelect
+              label={item.label}
+              selOptions={item.selOptions}
+              id={currentPath}
+              name={currentPath}
+              key={currentPath}
+            />
+          )
+        }else if (item.type === 'checkbox'){
+          return (
+            <FormCheckbox
+              label={item.label}
+              name={currentPath}
+              id={currentPath}
+              key={currentPath}
+            />
+          )
+        }else if(item.type === 'selectFromComponent'){
+          return (
+            <FormSelectFromComponent
+              label={item.label}
+              id={currentPath}
+              name={currentPath}
+              key={currentPath}
+              selectedLabel={item.selectedLabel}
+              component={item.component}
+              buttonLabel={item.buttonLabel}
+              resultHandler={item.resultHandler}
+            />
+          )
+        }else if(item.type === 'file'){
+          return(
+            <FormFileupload
+              label={item.label}
+              id={currentPath}
+              name={currentPath}
+              key={currentPath}
+              onChange={item.onChange}
+            />
+          )
+        } else if(item.type === 'hidden'){
+          return(
+            <input
+              type='hidden'
+              name={currentPath}
+              key={currentPath}
+              value={item.value}
+            />
+          )
+        } else if(item.type === 'button'){
+          return(
+            <IconButton
+              key={currentPath}
+              text={item.label}
+              icon={item.icon}
+              onClick={item.handler}
+            />
+          )
+        } else if(item.type === 'buttons'){
+          return (
+            <FormButtons key="form_buttons">
+            {
+              item.buttons.map((button) => {
+                if(button.type === 'submit'){
+                  return (
+                    <IconButton
+                      key={button.id}
+                      text={button.label}
+                      icon={button.icon}
+                      type="submit"
+                      className={button.className}
+                    />
+                  )
+                }else if(button.type === 'link'){
+                  return (
+                    <IconLink
+                      key={button.id}
+                      text={button.label}
+                      icon={button.icon}
+                      route={button.route}
+                      className={button.className}
+                    />
+                  )
+                }else{
+                  return (
+                    <IconButton
+                      key={button.id}
+                      text={button.label}
+                      icon={button.icon}
+                      onClick={button.onClick}
+                      type="button"
+                      className={button.className}
+                    />
+                  )
+                }
+              })
+            }
+            </FormButtons>
+          )
+        }else{
+          return (<></>)
+        }
+      }
+
       return (
           <>
           {view === 'actionBar' ?
-            
+
             <Formik
                 enableReinitialize
-                initialValues={props.initValues}               
+                initialValues={props.initValues}
                 validate = {props.validation}
                 onSubmit = {(values,{setSubmitting, resetForm}) => {
-                    props.onSubmit(values,{setSubmitting, resetForm})                    
-                }}            
+                    props.onSubmit(values,{setSubmitting, resetForm})
+                }}
             >
                 {(props) =>  {
-                    return (                           
+                    return (
                         <FormActionBarWrapper role="form">
                             {
                                 items.map((item) => {
-                                    if(item.type === 'text'){                                        
+                                    if(item.type === 'text'){
                                         return(
-                                            <FormTextInput 
+                                            <FormTextInput
                                                 name={item.id}
                                                 id={item.id}
                                                 key={item.id}
                                                 type="text"
-                                                placeholder={item.placeholder}                           
+                                                placeholder={item.placeholder}
                                             />
                                         )
                                     }else if(item.type === 'date'){
                                         return (
-                                            <FormDateInput 
+                                            <FormDateInput
                                                 label={item.label}
                                                 name={item.id}
                                                 key={item.id}
                                                 type="text"
-                                                id={item.id}                                                                        
-                                            />   
+                                                id={item.id}
+                                                mode={item.mode}
+                                            />
                                         )
                                     }else if(item.type === 'select'){
                                         return (
@@ -420,12 +641,12 @@ export const FormBuilder: React.FC<any> = (props) => {
                                                 selOptions={item.selOptions}
                                                 name={item.id}
                                                 id={item.id}
-                                                key={item.id}        
-                                            />   
+                                                key={item.id}
+                                            />
                                         )
                                     }else if (item.type === 'checkbox'){
                                         return (
-                                            <FormCheckbox 
+                                            <FormCheckbox
                                                 label={item.label}
                                                 name={item.id}
                                                 id={item.id}
@@ -439,10 +660,10 @@ export const FormBuilder: React.FC<any> = (props) => {
                                                 id={item.id}
                                                 name={item.id}
                                                 key={item.id}
-                                                onChange={item.onChange}                                      
+                                                onChange={item.onChange}
                                             />
                                         )
-                                    
+
                                     }else if(item.type === 'submit'){
                                         return (
                                             <IconButton
@@ -458,157 +679,29 @@ export const FormBuilder: React.FC<any> = (props) => {
                                     }
                                 })
                             }
-                        </FormActionBarWrapper>                        
+                        </FormActionBarWrapper>
                     )
                 }}
-            </Formik>  
+            </Formik>
             :
             <Formik
                 enableReinitialize
-                initialValues={props.initValues}               
+                initialValues={props.initValues}
                 validate = {props.validation}
                 onSubmit = {(values,{setSubmitting, resetForm}) => {
                     props.onSubmit(values,{setSubmitting, resetForm})
-                }}            
+                }}
             >
-                {props =>  {
-                    return (                           
+                {() =>  {
+                    return (
                         <FormWrapper role="form">
                             {
-                                items.map((item) => {
-                                    if(item.type === 'text'){                                        
-                                        return(
-                                            <FormTextInput 
-                                                id={item.id}
-                                                name={item.id}
-                                                key={item.id}
-                                                type="text"
-                                                label={item.label}
-                                                placeholder={item.placeholder}                           
-                                            />
-                                        )                                    
-                                    }else if(item.type === 'date'){
-                                            return (
-                                                <FormDateInput
-                                                        label={item.label}
-                                                        name={item.id}
-                                                        key={item.id}
-                                                        type="text"
-                                                        id={item.id}                                                                        
-                                                    />   
-                                            )
-                                    }else if(item.type === 'select'){
-                                        return (
-                                            <FormSelect
-                                                label={item.label}
-                                                selOptions={item.selOptions}
-                                                id={item.id}
-                                                name={item.id}
-                                                key={item.id}        
-                                            />   
-                                        )
-                                    }else if (item.type === 'checkbox'){
-                                        return (
-                                            <FormCheckbox 
-                                                label={item.label}
-                                                name={item.id}
-                                                id={item.id}
-                                                key={item.id}
-                                            />
-                                        )
-                                    }else if(item.type === 'selectFromComponent'){
-                                        return (
-                                            <FormSelectFromComponent
-                                                label={item.label}
-                                                id={item.id}
-                                                name={item.id}
-                                                key={item.id}
-                                                selectedLabel={item.selectedLabel}
-                                                component={item.component}
-                                                buttonLabel={item.buttonLabel}
-                                                resultHandler={item.resultHandler}
-                                            />
-                                        )
-                                    }else if(item.type === 'file'){
-                                        return(
-                                            
-                                            <FormFileupload
-                                                label={item.label}
-                                                id={item.id}
-                                                name={item.id}
-                                                key={item.id}
-                                                onChange={item.onChange}
-                                            />
-                                        )
-                                    }else if(item.type === 'hidden'){
-                                        return(
-                                            <input 
-                                                type='hidden'
-                                                name={item.id}
-                                                key={item.id}
-                                                value={item.value}
-                                            />
-                                        )
-                                    }else if(item.type === 'button'){
-                                        return(
-                                            <IconButton 
-                                                key={item.id}
-                                                text={item.label}
-                                                icon={item.icon}
-                                                onClick={item.handler}
-                                            />
-                                        )
-                                    }else if(item.type === 'buttons'){
-                                        return (
-                                            <FormButtons key="form_buttons">
-                                            {
-                                                item.buttons.map((button) => {
-                                                    if(button.type === 'submit'){
-                                                        return (
-                                                            <IconButton
-                                                                    key={button.id}
-                                                                    text={button.label}
-                                                                    icon={button.icon}
-                                                                    type="submit"
-                                                                    className={button.className}
-                                                                />
-                                                        )
-                                                    }else if(button.type === 'link'){
-                                                        return (
-                                                            <IconLink 
-                                                                key={button.id}
-                                                                text={button.label}
-                                                                icon={button.icon}
-                                                                route={button.route}
-                                                                className={button.className}
-                                                            />
-                                                        )
-                                                    }else{
-                                                        return (
-                                                            <IconButton 
-                                                                key={button.id}
-                                                                text={button.label}
-                                                                icon={button.icon}
-                                                                onClick={button.onClick}
-                                                                type="button"
-                                                                className={button.className}
-                                                            />
-                                                        )
-                                                    }
-                                                })
-                                            }
-                                            </FormButtons>
-                                        )
-                                    }else{
-                                        return (<></>)
-                                    }
-                                    
-                                })
+                                items.map((item) => renderFields(item))
                             }
-                        </FormWrapper>                        
+                        </FormWrapper>
                     )
                 }}
-            </Formik>  
+            </Formik>
           }
           </>
       )

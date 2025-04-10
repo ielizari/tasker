@@ -31,13 +31,13 @@ const SequenceTable = styled.table`
     width: 100%;
     color: ${color.veryDarkGrey};
     ${font.base()};
-    
+
     & thead > tr {
         border-style: solid;
         border-width: 1px;
         border-color: ${color.veryDarkGrey};
         background-color: ${color.tableHeaderBackground};
-        color: ${color.tableHeaderColor};        
+        color: ${color.tableHeaderColor};
     }
     & tbody > tr {
         border-style: solid;
@@ -52,9 +52,9 @@ const SequenceTable = styled.table`
 
     & th { font-weight: bold; }
     & th, td {
-        padding: 1rem; 
-        vertical-align: middle;        
-    }  
+        padding: 1rem;
+        vertical-align: middle;
+    }
 
     & td:nth-child(4n), th:nth-child(4n) {
         width: 25%;
@@ -92,13 +92,13 @@ interface Day {
 export const RunningElapsedTime = (props: {start, initialSeconds?}) => {
     const [start,setStart] = React.useState(props.start)
     const [initialSeconds, setInitialSeconds] = React.useState<number>(0)
-    const [diff, setDiff] = React.useState(null) 
+    const [diff, setDiff] = React.useState(null)
 
     React.useEffect(() => {
         setStart(props.start)
     },[props.start])
 
-    React.useEffect(() => {        
+    React.useEffect(() => {
         if(props.initialSeconds){
             setInitialSeconds(props.initialSeconds*1000)
         }else{
@@ -107,21 +107,21 @@ export const RunningElapsedTime = (props: {start, initialSeconds?}) => {
     },[props.initialSeconds])
 
     React.useEffect(() => {
-        const interval = setInterval(() => {   
-            setDiff(formatElapsedTime(
-                elapsedTime(
-                    ISOStringToFormatedDate(start,'datetime','dmy/','hms'),
-                    ISOStringToFormatedDate(new Date().toISOString(),'datetime','dmy/','hms')
-                ) + initialSeconds
-            ))
-        }, 500);
-        return () => clearInterval(interval);
-      }, [initialSeconds,start]);   
-    
+      const interval = setInterval(() => {
+        setDiff(formatElapsedTime(
+          elapsedTime(
+            ISOStringToFormatedDate(start,'datetime','dmy/','hms'),
+            ISOStringToFormatedDate(new Date().toISOString(),'datetime','dmy/','hms')
+          ) + initialSeconds
+        ))
+      }, 500);
+      return () => clearInterval(interval);
+    }, [initialSeconds,start]);
+
     return(
-        <RunningTimer>
-            {diff}
-        </RunningTimer>
+      <RunningTimer>
+        {diff}
+      </RunningTimer>
     )
 }
 
@@ -147,11 +147,11 @@ export const WorklogSequence = (props: {worklog: WorklogObject, worklogChangeHan
     },[props.worklog])
 
     React.useEffect(() => {
-        
+
         let res : Array<JobObject | Pause | Day> = []
-    
+
         if(worklogObj){
-    
+
             let sortedJobs = worklogObj.childJobs.sort((a,b) => {
                 if(a.job.startDatetime > b.job.startDatetime){
                     return 1
@@ -161,7 +161,7 @@ export const WorklogSequence = (props: {worklog: WorklogObject, worklogChangeHan
                     return 0
                 }
             })
-        
+
             let actualDate: Date
             for (let i=0; i< sortedJobs.length; i++){
                 if(res.length === 0){
@@ -192,7 +192,7 @@ export const WorklogSequence = (props: {worklog: WorklogObject, worklogChangeHan
                             res.push(newDay)
                         }
                     }
-                        
+
                 }
                 res.push(sortedJobs[i])
                 if(i+1 < sortedJobs.length  && sortedJobs[i].job.endDatetime < sortedJobs[i+1].job.startDatetime){
@@ -201,16 +201,16 @@ export const WorklogSequence = (props: {worklog: WorklogObject, worklogChangeHan
                         endDatetime: sortedJobs[i+1].job.startDatetime
                     }
                     res.push(pause)
-                }else if(i+1 >= sortedJobs.length && sortedJobs[i].job.endDatetime !== '' && (worklogObj.worklog.endDatetime === '' || worklogObj.worklog.endDatetime > sortedJobs[i].job.endDatetime)){                
+                }else if(i+1 >= sortedJobs.length && sortedJobs[i].job.endDatetime !== '' && (worklogObj.worklog.endDatetime === '' || worklogObj.worklog.endDatetime > sortedJobs[i].job.endDatetime)){
                     let pause : Pause = {
                         startDatetime: sortedJobs[i].job.endDatetime,
                         endDatetime: formattedDateToISOString(worklogObj.worklog.endDatetime)
-                    }                
+                    }
                     res.push(pause)
-                }       
+                }
             }
         }
-        
+
         setSequence(res)
     },[worklogObj])
 
@@ -219,10 +219,10 @@ export const WorklogSequence = (props: {worklog: WorklogObject, worklogChangeHan
             setEditJob(job)
         }else{
             setEditJob(null)
-        }    
+        }
         setJobView(true)
     }
-    const returnJobHandler = () => {        
+    const returnJobHandler = () => {
         setJobView(false)
     }
 
@@ -287,7 +287,7 @@ export const WorklogSequence = (props: {worklog: WorklogObject, worklogChangeHan
                             },
                             error => {
                                 console.log(error)
-            
+
                             }
                         )
                     }else{
@@ -298,7 +298,7 @@ export const WorklogSequence = (props: {worklog: WorklogObject, worklogChangeHan
                     console.log(error)
 
                 }
-            )            
+            )
         }
     }
 
@@ -387,7 +387,7 @@ export const WorklogSequence = (props: {worklog: WorklogObject, worklogChangeHan
                 cancel={returnJobHandler}
             />
             :
-            <SequenceContainer>            
+            <SequenceContainer>
                 <SequenceTable>
                     <thead>
                         <tr>
@@ -399,7 +399,7 @@ export const WorklogSequence = (props: {worklog: WorklogObject, worklogChangeHan
                         </tr>
                     </thead>
                     <tbody>
-                    {worklogObj.childJobs.length > 0 && sequence.length > 0 ?  
+                    {worklogObj.childJobs.length > 0 && sequence.length > 0 ?
                         sequence.map((child: JobObject | Pause | Day) =>{
                             if(isPause(child)){
                                 return (
@@ -407,18 +407,18 @@ export const WorklogSequence = (props: {worklog: WorklogObject, worklogChangeHan
                                         <td>{ISOStringToFormatedDate(child.startDatetime, 'time')}</td>
                                         <td>{ISOStringToFormatedDate(child.endDatetime, 'time')}</td>
                                         <td>
-                                            {child.endDatetime ? 
+                                            {child.endDatetime ?
                                             formatElapsedTime(elapsedTime(ISOStringToFormatedDate(child.startDatetime), ISOStringToFormatedDate(child.endDatetime)))
-                                            : 
+                                            :
                                             <RunningElapsedTime start={child.startDatetime}/>
-                                            }                                        
+                                            }
                                         </td>
                                         <td></td>
                                         <td>Pausa</td>
                                     </PauseRow>
                                 )
-                            }else if(isDay(child)){       
-                                return(                         
+                            }else if(isDay(child)){
+                                return(
                                     <DayRow key={`day_${child.date}`}>
                                         <td colSpan={5}>{child.date}</td>
                                     </DayRow>
@@ -429,11 +429,11 @@ export const WorklogSequence = (props: {worklog: WorklogObject, worklogChangeHan
                                         <td>{ISOStringToFormatedDate(child.job.startDatetime, 'time')}</td>
                                         <td>{ISOStringToFormatedDate(child.job.endDatetime, 'time')}</td>
                                         <td>
-                                            {child.job.endDatetime ? 
+                                            {child.job.endDatetime ?
                                             formatElapsedTime(elapsedTime(ISOStringToFormatedDate(child.job.startDatetime), ISOStringToFormatedDate(child.job.endDatetime)))
-                                            : 
+                                            :
                                             <RunningElapsedTime start={child.job.startDatetime}/>
-                                            }                                        
+                                            }
                                         </td>
                                         <td>{child.task && child.task.title}</td>
                                         <td>{child.job.title}</td>
@@ -446,22 +446,22 @@ export const WorklogSequence = (props: {worklog: WorklogObject, worklogChangeHan
                     }
                     </tbody>
                 </SequenceTable>
-                
+
                 <ButtonSequenceContainer>
                     <IconButton
                         onClick={addJobHandler}
                         text="Añadir trabajo"
                         type="button"
-                        icon={FaPlus}            
-                    /> 
-                    
-                    {worklogObj.worklog.endDatetime === '' &&           
+                        icon={FaPlus}
+                    />
+
+                    {worklogObj.worklog.endDatetime === '' &&
                         (!pausedJob ?
                             <IconButton
                                 onClick={pauseJobHandler}
                                 text="Pausar trabajo"
                                 type="button"
-                                icon={FaPause}            
+                                icon={FaPause}
                             />
                             :
                             <>
@@ -469,16 +469,16 @@ export const WorklogSequence = (props: {worklog: WorklogObject, worklogChangeHan
                                     onClick={repeatJobHandler}
                                     text="Reanudar trabajo"
                                     type="button"
-                                    icon={FaRedoAlt}            
+                                    icon={FaRedoAlt}
                                 />
                                 <IconButton
                                     onClick={resumeJobHandler}
                                     text="Reanudar trabajo sin pausa"
                                     type="button"
-                                    icon={FaPlay}            
+                                    icon={FaPlay}
                                 />
                             </>
-                            
+
                         )
                     }
                     {worklogObj.worklog.endDatetime === '' ?
@@ -486,14 +486,14 @@ export const WorklogSequence = (props: {worklog: WorklogObject, worklogChangeHan
                             onClick={finishWorklogHandler}
                             text="Cerrar parte"
                             type="button"
-                            icon={FaStop}            
+                            icon={FaStop}
                         />
                         :
                         <IconButton
                             onClick={reopenWorklogHandler}
                             text="Reabrir parte"
                             type="button"
-                            icon={FaPlay}            
+                            icon={FaPlay}
                         />
                     }
                 </ButtonSequenceContainer>

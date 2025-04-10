@@ -32,7 +32,7 @@ export const StatsTotalSpentTimeComponent = (props: {title: String, task: TaskDe
                     setSpentTime(formatElapsedTimeFromSeconds(result.data.timeInSeconds))
                 },
                 error => {
-                    console.log("EEEError",error)
+                    console.log("Error",error)
                 }
             )
     },[task])

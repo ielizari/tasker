@@ -38,7 +38,7 @@ export const GlobalStyle = createGlobalStyle`
                   transform: rotate(359deg);
         }
       }
-    input[type=text], select, select-items {
+    input[type=text], input[type=number], select, select-items {
         padding: 0.5rem;
         ${common.roundedCorners()}
         border-style: solid;

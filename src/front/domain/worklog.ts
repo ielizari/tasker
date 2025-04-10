@@ -1,4 +1,5 @@
 import {Job, JobObject} from './job'
+import { Calendar } from './calendar'
 
 export interface Worklog {    
     id: string,
@@ -12,6 +13,7 @@ export interface Worklog {
 export interface WorklogObject {
     worklog: Worklog
     childJobs: Array<JobObject>
+    calendars: Array<Calendar>
 }
 
 interface OrderObject {

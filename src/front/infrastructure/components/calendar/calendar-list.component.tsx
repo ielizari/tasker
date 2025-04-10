@@ -1,39 +1,68 @@
 import React from 'react'
-import { FaPlus, FaFilter } from 'react-icons/fa'
-import { BlockContainer, BlockHeaderComponent, BlockEmptyComponent} from '../common/block'
+import styled from 'styled-components'
+import { common } from '../../../styles/theme'
 import {
   ListContainer,
   ListItem,
-  ListItemTitleLink,
+  ListItemExpand,
+  ListItemTitleResult,
+  ListChildContainer,
+  ListItemTitleLink
 } from '../common/list'
-import { Spinner } from '../common/spinner'
-import { getWorklogList} from '../../../application/getWorklogList'
-import { Worklog, WorklogsFilter } from '../../../domain/worklog'
+import { Calendar, CalendarsFilter } from '../../../domain/calendar'
+import { getCalendarList } from '../../../application/getCalendarList'
+import { FaFilter, FaPlus, FaMinus } from 'react-icons/fa'
+import { IconLink } from '../common/icon-button'
 
-const defaultFilter: WorklogsFilter = {
+import { Spinner } from '../common/spinner'
+
+import { BlockHeaderComponent, BlockContainer, BlockEmptyComponent } from '../common/block'
+
+const defaultFilter: CalendarsFilter = {
   where: {},
   order: {
-    orderByFields:['startDatetime'],
+    orderByFields:['id'],
     orderDirections:['desc']
   }
 }
 
-const WorklogListItem = (props: {worklog: Worklog } ) => {
+const CalendarListItem = (props: {calendar: Calendar, resultHandler? } ) => {
   return(
     <ListItem>
-      <ListItemTitleLink to={`/worklogs/${props.worklog.id}`}>
-        {props.worklog.title}
-      </ListItemTitleLink>
+      {props.resultHandler ?
+        <ListItemTitleResult
+          onClick={() => props.resultHandler(props.calendar)}
+        >
+          {props.calendar.title}
+        </ListItemTitleResult>
+        :
+        <ListItemTitleLink to={`/calendars/${props.calendar.id}`}>
+          {props.calendar.title}
+        </ListItemTitleLink>
+      }
+      
     </ListItem>
   )
 }
 
-export const WorklogListComponent = ( props ) => {
-  const [worklogs, setWorklogs] = React.useState<Array<any>>([])
+const CalendarListWidget = (props: {calendars: Array<Calendar>, resultHandler?}) => {
+  return (
+    <>
+    {
+      props.calendars.map((item: Calendar) => (
+        <CalendarListItem key={item.id} calendar={item} resultHandler={props.resultHandler}/>
+      ))
+    }
+    </>
+  )
+}
+
+export const CalendarListComponent = (props) => {
+  const [calendars, setCalendars] = React.useState<Array<Calendar>>([])
   const [error, setError] = React.useState<Error | null>(null)
   const [loading, setLoading] = React.useState<boolean>(false)
   const [actions, setActions] = React.useState<Array<any>>([])
-  const [filters, setFilters ] = React.useState<WorklogsFilter>(props.filter || defaultFilter)
+  const [filters, setFilters ] = React.useState<CalendarsFilter>(props.filter || defaultFilter)
 
   React.useEffect((): void => {
     let cancelled = false
@@ -41,8 +70,8 @@ export const WorklogListComponent = ( props ) => {
     let actionItems = [
       {
         icon: FaPlus,
-        text: 'Nuevo parte',
-        route: `/worklogs/new`,
+        text: 'Nuevo calendario',
+        route: `/calendars/new`,
         type: 'link'
       },
       {
@@ -85,15 +114,15 @@ export const WorklogListComponent = ( props ) => {
 
     ]
     setActions(actionItems)
-    getWorklogList(filters)
+    getCalendarList(filters)
       .then(
         (result) => {
           if(!cancelled){
             if(result.hasError){
               setError(new Error(result.error));
-              setWorklogs([])
+              setCalendars([])
             }else{
-              setWorklogs(result.data);
+              setCalendars(result.data);
               setError(null);
             }
 
@@ -110,7 +139,7 @@ export const WorklogListComponent = ( props ) => {
   },[filters])
 
   const searchHandler = (values) => {
-    const filter: WorklogsFilter = {where: {}, order: {orderByFields: ['startDatetime'], orderDirections: ['desc']}}
+    const filter: CalendarsFilter = {where: {}, order: {orderByFields: ['startDatetime'], orderDirections: ['desc']}}
     if(values.actionBarSearch){
       filter.where.title = values.actionBarSearch
     }
@@ -125,25 +154,21 @@ export const WorklogListComponent = ( props ) => {
   return (
     <BlockContainer>
       <BlockHeaderComponent
-        title='Partes de trabajo'
+        title='Calendarios'
         actions={actions}
       />
       {loading && <Spinner />}
-      {worklogs.length ?
-        (error!==null ?
-          <div>Error: {error.message?error.message:'unknown error'}</div>
+      <ListContainer>
+        {calendars.length ?
+          (error!==null ?
+            <div>Error: {error.message?error.message:'unknown error'}</div>
+            :
+            <CalendarListWidget calendars={calendars} resultHandler={props.resultHandler} />
+          )
           :
-          <ListContainer>
-          {
-            worklogs.map((item: Worklog) => (
-              <WorklogListItem key={item.id} worklog={item} />
-            ))
-          }
-          </ListContainer>
-        )
-        :
-        <BlockEmptyComponent />
-      }
+          <BlockEmptyComponent />
+        }
+      </ListContainer>
     </BlockContainer>
   )
 }
