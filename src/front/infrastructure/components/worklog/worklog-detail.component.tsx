@@ -257,24 +257,28 @@ export const WorklogDetailComponent = (props) => {
                   }
                   </WorklogDetailValue>
                 </WorklogDetailItem>
-                <WorklogGroupedContainer>
-                  <WorklogGroupedTitle>Calendarios</WorklogGroupedTitle>
-                  <WorklogDetailValue>
-                  {
-                    worklog.calendars.map((calendar) => (
-                      <CalendarWidget
-                        key={calendar.id}
-                        calendar={calendar}
-                        runningJob={
-                          runningJob?.task?.calendars?.find((cal) => cal.id === calendar.id) ?
-                            runningJob.job.startDatetime :
-                            null
-                          }
-                      />
-                    ))
-                  }
-                  </WorklogDetailValue>
-                </WorklogGroupedContainer>
+                { worklog.calendars?.length ?
+                  <>
+                    <WorklogGroupedContainer>
+                      <WorklogGroupedTitle>Calendarios</WorklogGroupedTitle>
+                      <WorklogDetailValue>
+                      {
+                        worklog.calendars.map((calendar) => (
+                          <CalendarWidget
+                            key={calendar.id}
+                            calendar={calendar}
+                            runningJob={
+                              runningJob?.task?.calendars?.find((cal) => cal.id === calendar.id) ?
+                                runningJob.job.startDatetime :
+                                null
+                              }
+                          />
+                        ))
+                      }
+                      </WorklogDetailValue>
+                    </WorklogGroupedContainer>
+                  </> : <></>
+                }
               </WorklogDetailFields>
 
               <WorklogGroupedContainer>

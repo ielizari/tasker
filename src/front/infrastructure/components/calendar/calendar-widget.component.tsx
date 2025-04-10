@@ -16,8 +16,8 @@ const CalendarTitle = styled.div`
 `
 
 const StatusContainer = styled.div`
-  display: flex;
-  flex-direction: row;
+  display: inline-grid;
+  grid-template-columns: 1fr 1fr 1fr;
   gap: 0.7rem;
   margin-left: 0.5rem;
 `
@@ -48,43 +48,6 @@ const getRunningJobTime = (runningJob: string): number => {
 export const CalendarWidget = (props: {calendar: Calendar, runningJob: string}) => {
   const [ calendar, setCalendar ] = React.useState<Calendar>(null)
   const [ status, setStatus ] = React.useState<CalendarTime>(null)
-  const [ totalTime, setTotalTime] = React.useState<string>(null)
-  const [ currentTime, setCurrentTime] = React.useState<string>(null)
-  const [ workTime, setWorkTime] = React.useState<string>(null)
-  const [ workDiff, setWorkDiff] = React.useState<string>(null)
-  const [ currentWeekTime, setCurrentWeekTime] = React.useState<string>(null)
-  const [ currentWeekDiff, setCurrentWeekDiff] = React.useState<string>(null)
-  const [ runningJobTime, setRunningJobTime ] = React.useState<number>(0)
-
-  React.useEffect(() => {
-    const {
-      expectedTotalTime,
-      currentExpectedTime,
-      workedTime,
-      currentWeekExpectedTime,
-      currentWeekWorkTime,
-    } = status || {}
-
-    const formatTotalTime = expectedTotalTime ? formatElapsedTime(expectedTotalTime) : '-'
-    const formatCurrentTime = currentExpectedTime ? formatElapsedTime(currentExpectedTime) : '-'
-    const formatWorkTime = workedTime ? formatElapsedTime(workedTime) : '-'
-    const workDiff = workedTime - currentExpectedTime
-    const formatWorkDiff = formatElapsedTime(workDiff)
-
-    const formatWeekTime = currentWeekExpectedTime ? formatElapsedTime(currentWeekExpectedTime) : '-'
-    const weekWorkDiff = currentWeekWorkTime - currentWeekExpectedTime
-    const formatWeekWorkDiff = formatElapsedTime(weekWorkDiff)
-
-    setTotalTime(formatTotalTime)
-    setCurrentTime(formatCurrentTime)
-    setWorkTime(formatWorkTime)
-    setWorkDiff(formatWorkDiff)
-    setCurrentWeekTime(formatWeekTime)
-    setCurrentWeekDiff(formatWeekWorkDiff)
-    setRunningJobTime(getRunningJobTime(props.runningJob))
-  }, [status, props.runningJob])
-
-
 
   React.useEffect(() => {
     setCalendar(props.calendar)
@@ -94,11 +57,6 @@ export const CalendarWidget = (props: {calendar: Calendar, runningJob: string}) 
   return (
     <CalendarWidgetContainer>
       <CalendarTitle>{calendar?.title || '-'}</CalendarTitle>
-      {/* <div>Tiempo total:</div>
-      <div>{totalTime}</div>
-      <div>Tiempo actual</div>
-      <div>{currentTime}</div>
-      <div>Tiempo trabajado</div> */}
       <CalendarStatusItem
         title='Total:'
         expected={status?.currentExpectedTime}
