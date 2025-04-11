@@ -487,85 +487,85 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
         }
     }
     getCalendars(filter: Partial<CalendarsFilter> = {}): Array<Calendar>  {
-        const search = JSON.parse(filter as string)
-        const calendars = db.get('calendars').filter(search.where)
-            //.orderBy(order,orderDirection)
-            .value()
-        return calendars;
+      const search = JSON.parse(filter as string)
+      const calendars = db.get('calendars').filter(search.where)
+        //.orderBy(order,orderDirection)
+        .value()
+      return calendars;
     }
     getCalendarStatus(calendarid: string): CalendarTime {
-        let workedTime = 0
-        let currentWeekWorkTime = 0
-        let currentMonthWorkTime = 0
+      let workedTime = 0
+      let currentWeekWorkTime = 0
+      let currentMonthWorkTime = 0
 
-        const calendar = db.get('calendars').find({id: calendarid}).value()
-        const rootTasksWithCalendar = db.get('tasks').filter((task) => {
-            return Array.isArray(task.calendars) && task.calendars.includes(calendarid)
-        }).value()
+      const calendar = db.get('calendars').find({id: calendarid}).value()
+      const rootTasksWithCalendar = db.get('tasks').filter((task) => {
+        return Array.isArray(task.calendars) && task.calendars.includes(calendarid)
+      }).value()
 
-        const tasksTrees = rootTasksWithCalendar.map((task) => getChildTasksTree(task.id))
-        const { weekStart, weekEnd } = getCurrentWeekRange()
-        const weekStartIso = weekStart.toISOString()
-        const weekEndIso = weekEnd.toISOString()
-        const { monthStart, monthEnd } = getCurrentMonthRange()
-        const monthStartIso = monthStart.toISOString()
-        const monthEndIso = monthEnd.toISOString()
+      const tasksTrees = rootTasksWithCalendar.map((task) => getChildTasksTree(task.id))
+      const { weekStart, weekEnd } = getCurrentWeekRange()
+      const weekStartIso = weekStart.toISOString()
+      const weekEndIso = weekEnd.toISOString()
+      const { monthStart, monthEnd } = getCurrentMonthRange()
+      const monthStartIso = monthStart.toISOString()
+      const monthEndIso = monthEnd.toISOString()
 
-        const getWorkedTime = (taskTree) => {
-            let worktime = 0
-            let weekWorkTime = 0
-            let monthWorkTime = 0
-            taskTree.jobs.forEach((job) => {
-                if (job.startDatetime > calendar.startDate && job.startDatetime < calendar.endDate) {
-                    const jobtime = job.endDatetime ? elapsedTime(
-                        ISOStringToFormatedDate(job.startDatetime),
-                        ISOStringToFormatedDate(job.endDatetime)
-                    ) : 0
-                    worktime += jobtime
-                    if (job.startDatetime >= weekStartIso && job.startDatetime <= weekEndIso) {
-                        weekWorkTime += jobtime
-                    }
-                    if (job.startDatetime >= monthStartIso && job.startDatetime <= monthEndIso) {
-                        monthWorkTime += jobtime
-                    }
-                }
-            })
-            taskTree.childTasks.forEach((child) => {
-                const { worktime: childWorkTime, weekWorkTime: childWeekWorkTime, monthWorkTime: childMonthWorkTime} = getWorkedTime(child)
-                worktime += childWorkTime
-                weekWorkTime += childWeekWorkTime
-                monthWorkTime += childMonthWorkTime
-            })
-
-            return { worktime, weekWorkTime, monthWorkTime }
-        }
-        tasksTrees.forEach((task) => {
-            const { worktime, weekWorkTime, monthWorkTime} = getWorkedTime(task)
-            workedTime += worktime
-            currentWeekWorkTime += weekWorkTime
-            currentMonthWorkTime += monthWorkTime
+      const getWorkedTime = (taskTree) => {
+        let worktime = 0
+        let weekWorkTime = 0
+        let monthWorkTime = 0
+        taskTree.jobs.forEach((job) => {
+          if (job.startDatetime > calendar.startDate && job.startDatetime < calendar.endDate) {
+            const jobtime = job.endDatetime ? elapsedTime(
+              ISOStringToFormatedDate(job.startDatetime),
+              ISOStringToFormatedDate(job.endDatetime)
+            ) : 0
+            worktime += jobtime
+            if (job.startDatetime >= weekStartIso && job.startDatetime <= weekEndIso) {
+              weekWorkTime += jobtime
+            }
+            if (job.startDatetime >= monthStartIso && job.startDatetime <= monthEndIso) {
+              monthWorkTime += jobtime
+            }
+          }
+        })
+        taskTree.childTasks.forEach((child) => {
+          const { worktime: childWorkTime, weekWorkTime: childWeekWorkTime, monthWorkTime: childMonthWorkTime} = getWorkedTime(child)
+          worktime += childWorkTime
+          weekWorkTime += childWeekWorkTime
+          monthWorkTime += childMonthWorkTime
         })
 
-        const {
-            expectedTotalTime,
-            currentExpectedTime,
-            expectedWeekTime,
-            currentWeekExpectedTime,
-            expectedMonthTime,
-            currentMonthExpectedTime,
-        } = getCalendarExpectedTime(calendar)
+        return { worktime, weekWorkTime, monthWorkTime }
+      }
+      tasksTrees.forEach((task) => {
+        const { worktime, weekWorkTime, monthWorkTime} = getWorkedTime(task)
+        workedTime += worktime
+        currentWeekWorkTime += weekWorkTime
+        currentMonthWorkTime += monthWorkTime
+      })
 
-        return {
-            expectedTotalTime,
-            currentExpectedTime,
-            workedTime,
-            expectedWeekTime,
-            currentWeekExpectedTime,
-            currentWeekWorkTime,
-            expectedMonthTime,
-            currentMonthExpectedTime,
-            currentMonthWorkTime,
-        }
+      const {
+        expectedTotalTime,
+        currentExpectedTime,
+        expectedWeekTime,
+        currentWeekExpectedTime,
+        expectedMonthTime,
+        currentMonthExpectedTime,
+      } = getCalendarExpectedTime(calendar)
+
+      return {
+        expectedTotalTime,
+        currentExpectedTime,
+        workedTime,
+        expectedWeekTime,
+        currentWeekExpectedTime,
+        currentWeekWorkTime,
+        expectedMonthTime,
+        currentMonthExpectedTime,
+        currentMonthWorkTime,
+      }
     }
     getCalendarById(id: string): Calendar {
         try{
@@ -955,8 +955,7 @@ const getCurrentWeekRange = () => {
     const weekStartDiff = today.getDay() === 0 ? 7 : today.getDay() - 1
     weekStart.setDate(weekStart.getDate() - weekStartDiff)
     weekStart.setHours(0,0,0,0)
-    const weekEndDiff = 7 - today.getDay()
-    weekEnd.setDate(weekStart.getDate() + weekEndDiff)
+    weekEnd.setDate(weekStart.getDate() + 7)
     weekEnd.setHours(0,0,0,0)
 
     return { weekStart, weekEnd }
@@ -970,58 +969,59 @@ const getCurrentMonthRange = () => {
     return { monthStart, monthEnd }
 }
 const getCalendarExpectedTime = (values: Calendar): Partial<CalendarTime> => {
-    const times = {
-        expectedTotalTime: 0,
-        currentExpectedTime: 0,
-        expectedWeekTime: 0,
-        currentWeekExpectedTime: 0,
-        expectedMonthTime: 0,
-        currentMonthExpectedTime: 0,
-    }
-    if (!values) return times;
+  const times = {
+    expectedTotalTime: 0,
+    currentExpectedTime: 0,
+    expectedWeekTime: 0,
+    currentWeekExpectedTime: 0,
+    expectedMonthTime: 0,
+    currentMonthExpectedTime: 0,
+  }
+  if (!values) return times;
 
-    const today = new Date()
-    const { weekStart, weekEnd } = getCurrentWeekRange()
-    const { monthStart, monthEnd } = getCurrentMonthRange()
-    const initialTime = new Date(values.workHours[0].startDate)
-    const endTime = new Date(values.workHours[0].endDate)
-    if (!(initialTime && endTime)) return times;
-    while(initialTime <= endTime) {
-        const workhours = values.workHours.filter((range) => {
-            return initialTime >= new Date(range.startDate) &&
-                initialTime <= new Date(range.endDate)
-        })
-        if (workhours.length) {
-            const item = workhours[workhours.length - 1];
-            if (item && !item.isHoliday) {
-                const dayTime = getDayTime(initialTime, item)
-                times.expectedTotalTime += dayTime
-                if (initialTime >= weekStart && initialTime <= weekEnd) {
-                    times.expectedWeekTime += dayTime
-                }
-                if (initialTime >= monthStart && initialTime <= monthEnd) {
-                    times.expectedMonthTime += dayTime
-                }
-            }
+  const today = new Date()
+  const { weekStart, weekEnd } = getCurrentWeekRange()
+  const { monthStart, monthEnd } = getCurrentMonthRange()
+  const initialTime = new Date(values.workHours[0].startDate)
+  const endTime = new Date(values.workHours[0].endDate)
+  if (!(initialTime && endTime)) return times;
+  while(initialTime <= endTime) {
+    const workhours = values.workHours.filter((range) => {
+      return initialTime >= new Date(range.startDate) &&
+        initialTime <= new Date(range.endDate)
+    })
+    if (workhours.length) {
+      const item = workhours[workhours.length - 1];
+      if (item && !item.isHoliday) {
+        const dayTime = getDayTime(initialTime, item)
+        times.expectedTotalTime += dayTime
+        if (initialTime >= weekStart && initialTime <= weekEnd) {
+          console.log(initialTime, dayTime, weekEnd)
+          times.expectedWeekTime += dayTime
         }
-        initialTime.setDate(initialTime.getDate() + 1)
-        if (initialTime > today && times.currentExpectedTime === 0) {
-            times.currentExpectedTime = times.expectedTotalTime
+        if (initialTime >= monthStart && initialTime <= monthEnd) {
+          times.expectedMonthTime += dayTime
         }
-        if (initialTime > today && times.currentWeekExpectedTime === 0) {
-            times.currentWeekExpectedTime = times.expectedWeekTime
-        }
-        if (initialTime > today && times.currentMonthExpectedTime === 0) {
-            times.currentMonthExpectedTime = times.expectedMonthTime
-        }
+      }
     }
-    times.currentExpectedTime *= 3600000
-    times.expectedTotalTime *= 3600000
-    times.expectedWeekTime *= 3600000
-    times.currentWeekExpectedTime *= 3600000
-    times.expectedMonthTime *= 3600000
-    times.currentMonthExpectedTime *= 3600000
-    return times
+    initialTime.setDate(initialTime.getDate() + 1)
+    if (initialTime > today && times.currentExpectedTime === 0) {
+        times.currentExpectedTime = times.expectedTotalTime
+    }
+    if (initialTime > today && times.currentWeekExpectedTime === 0) {
+        times.currentWeekExpectedTime = times.expectedWeekTime
+    }
+    if (initialTime > today && times.currentMonthExpectedTime === 0) {
+        times.currentMonthExpectedTime = times.expectedMonthTime
+    }
+  }
+  times.currentExpectedTime *= 3600000
+  times.expectedTotalTime *= 3600000
+  times.expectedWeekTime *= 3600000
+  times.currentWeekExpectedTime *= 3600000
+  times.expectedMonthTime *= 3600000
+  times.currentMonthExpectedTime *= 3600000
+  return times
 }
 /*
 const getDirectChildTasksTree = (taskid: string): TaskTreeItem => {

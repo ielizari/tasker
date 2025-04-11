@@ -54,6 +54,12 @@ const WorklogDetailItem = styled.li`
   margin: 1rem;
 `
 
+const WorklogCalendarsContainer = styled.li`
+  display: flex;
+  flex-direction: column;
+  margin: 1rem;
+`
+
 const ErrorMessage = styled.div`
   background-color: ${color.lightRed};
   padding: 1rem;
@@ -258,26 +264,24 @@ export const WorklogDetailComponent = (props) => {
                   </WorklogDetailValue>
                 </WorklogDetailItem>
                 { worklog.calendars?.length ?
-                  <>
-                    <WorklogGroupedContainer>
-                      <WorklogGroupedTitle>Calendarios</WorklogGroupedTitle>
-                      <WorklogDetailValue>
-                      {
-                        worklog.calendars.map((calendar) => (
-                          <CalendarWidget
-                            key={calendar.id}
-                            calendar={calendar}
-                            runningJob={
-                              runningJob?.task?.calendars?.find((cal) => cal.id === calendar.id) ?
-                                runningJob.job.startDatetime :
-                                null
-                              }
-                          />
-                        ))
-                      }
-                      </WorklogDetailValue>
-                    </WorklogGroupedContainer>
-                  </> : <></>
+                  <WorklogCalendarsContainer>
+                    <WorklogGroupedTitle>Calendarios (beta)</WorklogGroupedTitle>
+                    <WorklogDetailValue>
+                    {
+                      worklog.calendars.map((calendar) => (
+                        <CalendarWidget
+                          key={calendar.id}
+                          calendar={calendar}
+                          runningJob={
+                            runningJob?.task?.calendars?.find((cal) => cal.id === calendar.id) ?
+                              runningJob.job.startDatetime :
+                              null
+                            }
+                        />
+                      ))
+                    }
+                    </WorklogDetailValue>
+                  </WorklogCalendarsContainer> : <></>
                 }
               </WorklogDetailFields>
 
