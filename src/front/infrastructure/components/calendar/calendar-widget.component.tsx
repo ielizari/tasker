@@ -35,7 +35,7 @@ const StatusDiff = styled.span<{
 }>`
   display: flex;
   flex-direction: row;
-  color: ${props => props.negative ? color.lightRed : color.lightGreen}
+  color: ${props => props.negative ? color.lightRed : color.green}
 `;
 
 const getRunningJobTime = (runningJob: string): number => {
@@ -79,33 +79,42 @@ export const CalendarWidget = (props: {calendar: Calendar, runningJob: string}) 
   )
 }
 
+const MemoizedRunningElapsedTime = React.memo(RunningElapsedTime)
+
 export const CalendarStatusItem = (props: { title: string, expected: number, current: number, runningJob: string}) => {
-  const [currentTime, setCurrentTime] = React.useState<string>('-')
+  const [currentFormattedTime, setCurrentFormattedTime] = React.useState<string>('-')
   const [diffTime, setDiffTime] = React.useState<string>('-')
-  const [runningJobTime, setRunningJobTime] = React.useState<number>(0)
+  const [negativeDiff, setNegativeDiff] = React.useState<boolean>(false)
+
+  const diffHasChangedSign = (isPositive: boolean): void => {
+    setNegativeDiff(!isPositive)
+  }
 
   React.useEffect(() => {
+    const jobTime = getRunningJobTime(props.runningJob)
     const current = formatElapsedTime(props.current)
-    const diff = formatElapsedTime(props.current - props.expected)
-    setCurrentTime(current)
+    const diffSeconds = props.current - props.expected + jobTime
+    const diff = formatElapsedTime(diffSeconds)
+    setCurrentFormattedTime(current)
     setDiffTime(diff)
-    setRunningJobTime(getRunningJobTime(props.runningJob))
-
+    setNegativeDiff(diffSeconds < 0)
   }, [props])
+
   return (
     <StatusContainer>
       <StatusTitle>{props.title}</StatusTitle>
       <StatusValue>
       {props.runningJob ?
-        <RunningElapsedTime start={props.runningJob} initialSeconds={props.current/1000}/> :
-        currentTime
+        <MemoizedRunningElapsedTime start={props.runningJob} initialSeconds={props.current/1000}/> :
+        currentFormattedTime
       }
       </StatusValue>
-      <StatusDiff negative={props.expected >= props.current + runningJobTime}>(
+      <StatusDiff negative={negativeDiff}>(
       {props.runningJob ?
-        <RunningElapsedTime
+        <MemoizedRunningElapsedTime
           start={props.runningJob}
-          initialSeconds={(props.expected - props.current)/1000 * (props.expected >= props.current ? -1 : 1)}/> :
+          signChangeHandler={diffHasChangedSign}
+          initialSeconds={(props.current - props.expected)/1000}/> :
         diffTime
       })
       </StatusDiff>

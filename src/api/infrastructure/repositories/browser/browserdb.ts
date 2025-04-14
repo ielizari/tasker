@@ -996,7 +996,6 @@ const getCalendarExpectedTime = (values: Calendar): Partial<CalendarTime> => {
         const dayTime = getDayTime(initialTime, item)
         times.expectedTotalTime += dayTime
         if (initialTime >= weekStart && initialTime <= weekEnd) {
-          console.log(initialTime, dayTime, weekEnd)
           times.expectedWeekTime += dayTime
         }
         if (initialTime >= monthStart && initialTime <= monthEnd) {

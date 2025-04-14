@@ -5,6 +5,7 @@ import { dateToFormattedDate, elapsedTime, formatElapsedTime, formattedDateToDat
 
 import { WorklogObject } from '../../../domain/worklog'
 import { Job, JobObject } from '../../../domain/job'
+import { TaskDetail } from '../../../domain/task'
 import { IconButton } from '../common/icon-button'
 import { FaPlus, FaStop, FaPause, FaPlay, FaRedoAlt } from 'react-icons/fa'
 import { JobNewComponent } from '../job/job-new.component'
@@ -89,41 +90,66 @@ interface Day {
     date: string
 }
 
-export const RunningElapsedTime = (props: {start, initialSeconds?}) => {
-    const [start,setStart] = React.useState(props.start)
-    const [initialSeconds, setInitialSeconds] = React.useState<number>(0)
+export const RunningElapsedTime = (props: {start, initialSeconds?, signChangeHandler?}) => {
     const [diff, setDiff] = React.useState(null)
 
-    React.useEffect(() => {
-        setStart(props.start)
-    },[props.start])
+    const hasSignChanged = (prev, current) => {
+        return prev*current < 0
+    }
+    const mustNotifySignChange = React.useRef(Boolean(props.signChangeHandler))
 
-    React.useEffect(() => {
-        if(props.initialSeconds){
-            setInitialSeconds(props.initialSeconds*1000)
-        }else{
-            setInitialSeconds(0)
-        }
-    },[props.initialSeconds])
+    const start = React.useMemo(() => {
+        return ISOStringToFormatedDate(props.start,'datetime','dmy/','hms')
+    }, [props.start])
+
+    const initialTime = React.useMemo(() => {
+        return elapsedTime(
+            start,
+            ISOStringToFormatedDate(new Date().toISOString(),'datetime','dmy/','hms')
+        ) + ((props.initialSeconds || 0) *1000)
+    }, [start, props.initialSeconds])
 
     React.useEffect(() => {
       const interval = setInterval(() => {
-        setDiff(formatElapsedTime(
-          elapsedTime(
-            ISOStringToFormatedDate(start,'datetime','dmy/','hms'),
+        const elapsed = elapsedTime(
+            start,
             ISOStringToFormatedDate(new Date().toISOString(),'datetime','dmy/','hms')
-          ) + initialSeconds
-        ))
-      }, 500);
+        ) + ((props.initialSeconds || 0) *1000)
+        if (props.signChangeHandler) {
+            if (mustNotifySignChange.current && hasSignChanged(initialTime, elapsed)) {
+                mustNotifySignChange.current = false
+                props.signChangeHandler(elapsed >= 0)
+            }
+        }
+        setDiff(elapsed)
+      }, 1000);
       return () => clearInterval(interval);
-    }, [initialSeconds,start]);
+    }, [props, start, initialTime]);
 
     return(
       <RunningTimer>
-        {diff}
+        {formatElapsedTime(diff)}
       </RunningTimer>
     )
 }
+
+const MemoizedRunningElapsedTime = React.memo(RunningElapsedTime)
+
+const JobRow = React.memo(({ job, task, onClickHandler }: { job: Job, task: TaskDetail, onClickHandler: (job?: Job) => void }) => (
+    <tr onClick={() => onClickHandler(job)}>
+        <td>{ISOStringToFormatedDate(job.startDatetime, 'time')}</td>
+        <td>{ISOStringToFormatedDate(job.endDatetime, 'time')}</td>
+        <td>
+            {job.endDatetime ?
+                formatElapsedTime(elapsedTime(ISOStringToFormatedDate(job.startDatetime), ISOStringToFormatedDate(job.endDatetime)))
+                :
+                <MemoizedRunningElapsedTime start={job.startDatetime}/>
+            }
+        </td>
+        <td>{task && task.title}</td>
+        <td>{job.title}</td>
+    </tr>
+))
 
 export const WorklogSequence = (props: {worklog: WorklogObject, worklogChangeHandler?}) => {
     const syncCtx = React.useContext(SyncStateContext)
@@ -410,7 +436,7 @@ export const WorklogSequence = (props: {worklog: WorklogObject, worklogChangeHan
                                             {child.endDatetime ?
                                             formatElapsedTime(elapsedTime(ISOStringToFormatedDate(child.startDatetime), ISOStringToFormatedDate(child.endDatetime)))
                                             :
-                                            <RunningElapsedTime start={child.startDatetime}/>
+                                            <MemoizedRunningElapsedTime start={child.startDatetime}/>
                                             }
                                         </td>
                                         <td></td>
@@ -425,19 +451,12 @@ export const WorklogSequence = (props: {worklog: WorklogObject, worklogChangeHan
                                 )
                             }else{
                                 return (
-                                    <tr key={child.job.id} onClick={() => addJobHandler(child.job)}>
-                                        <td>{ISOStringToFormatedDate(child.job.startDatetime, 'time')}</td>
-                                        <td>{ISOStringToFormatedDate(child.job.endDatetime, 'time')}</td>
-                                        <td>
-                                            {child.job.endDatetime ?
-                                            formatElapsedTime(elapsedTime(ISOStringToFormatedDate(child.job.startDatetime), ISOStringToFormatedDate(child.job.endDatetime)))
-                                            :
-                                            <RunningElapsedTime start={child.job.startDatetime}/>
-                                            }
-                                        </td>
-                                        <td>{child.task && child.task.title}</td>
-                                        <td>{child.job.title}</td>
-                                    </tr>
+                                    <JobRow
+                                        key={`job_${child.job.id}`}
+                                        job={child.job}
+                                        task={child.task}
+                                        onClickHandler={addJobHandler}
+                                    />
                                 )
                             }
                         })

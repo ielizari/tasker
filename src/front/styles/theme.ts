@@ -96,6 +96,7 @@ export const color = {
   yellow: '#FFCC70',
   black: '#000000',
   grey: '#999999',
+  green: '#3b9c55',
   darkGrey: '#9b9b9b',
   veryDarkGrey: '#585858',
   white: '#FFFFFF',
