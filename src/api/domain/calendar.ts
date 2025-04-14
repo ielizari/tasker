@@ -22,14 +22,21 @@ export interface CalendarDB {
 export type CalendarWeek = {
   startDate: string,
   endDate: string,
-  isHoliday: boolean,
+  nonWorking: CalendarNonWorkingTypes,
   sunday: number,
   monday: number,
   tuesday: number,
   wednesday: number,
   thursday: number,
   friday: number,
-  saturday: number
+  saturday: number,
+  title?: string
+}
+
+export enum CalendarNonWorkingTypes {
+  HOLIDAY = 'holiday',
+  ELIGIBLE_HOLIDAY = 'eligible_holiday',
+  SICK_DAY = 'sick_day',
 }
 
 export type CalendarDay = {

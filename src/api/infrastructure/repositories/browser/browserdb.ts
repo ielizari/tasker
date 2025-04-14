@@ -4,7 +4,7 @@ import LocalStorage from 'lowdb/adapters/LocalStorage'
 import { TaskDetail, TaskObject, TaskDB } from 'src/api/domain/task'
 import { WorklogObject, Worklog, WorklogDB} from 'src/api/domain/worklog'
 import { Job, JobObject } from 'src/api/domain/job'
-import { Calendar, CalendarDB, CalendarTime } from 'src/api/domain/calendar'
+import { Calendar, CalendarDB, CalendarTime, CalendarNonWorkingTypes } from 'src/api/domain/calendar'
 import { mapWorklogToApiWorklog, mapApiWorklogToWorklogDb, mapApiTaskToTaskDb, mapTaskDbToApiTask } from 'src/api/application/dtos/dbToApiDto'
 
 import { TaskerRepository, setTaskerRepository, FileDownload,  WorklogsFilter, OrderObject  } from 'src/api/application/taskerRepository'
@@ -992,7 +992,7 @@ const getCalendarExpectedTime = (values: Calendar): Partial<CalendarTime> => {
     })
     if (workhours.length) {
       const item = workhours[workhours.length - 1];
-      if (item && !item.isHoliday) {
+      if (item && !Object.values(CalendarNonWorkingTypes).includes(item.nonWorking)) {
         const dayTime = getDayTime(initialTime, item)
         times.expectedTotalTime += dayTime
         if (initialTime >= weekStart && initialTime <= weekEnd) {

@@ -117,3 +117,8 @@ export const padNumber = (num: number): string => {
   return res
 }
 
+export const getDaysDifferenceBetweenDates = (start: Date, end: Date): number => {
+  const millisecondsDiff = end.getTime() - start.getTime()
+  return Math.floor(millisecondsDiff / (24 * 60 * 60 * 1000))
+}
+

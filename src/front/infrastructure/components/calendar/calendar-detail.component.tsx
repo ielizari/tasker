@@ -2,14 +2,14 @@ import React from 'react'
 import styled from 'styled-components'
 import { color } from '../../../styles/theme'
 import { useParams} from 'react-router-dom'
-import { Calendar } from '../../../domain/calendar'
+import { Calendar, CalendarNonWorkingTypes } from '../../../domain/calendar'
 import { getCalendar } from '../../../application/getCalendar'
 import { deleteCalendar } from '../../../application/deleteCalendar'
 import { Spinner } from '../common/spinner'
 import { FaEdit, FaTrashAlt } from 'react-icons/fa'
 import { Modal } from '../common/modal'
 import { Link } from 'react-router-dom'
-import { formatElapsedTime, ISOStringToFormatedDate } from '../../../../lib/date.utils'
+import { formatElapsedTime, ISOStringToFormatedDate, getDaysDifferenceBetweenDates } from '../../../../lib/date.utils'
 import { BlockContainer, BlockHeaderComponent } from '../common/block'
 import { SyncStateContext} from '../../../application/contexts/dbSyncContext'
 
@@ -39,10 +39,35 @@ const ErrorMessage = styled.div`
 `;
 
 const DetailTable = styled.table`
+  thead {
+    td {
+      font-weight: bold;
+    }
+  }
+  tr {
+    border-style: solid;
+    border-width: 1px 0;
+    border-color: ${color.lightGrey};
+
+    &:nth-child(even) {
+      background-color: ${color.lightGrey};
+    }
+  }
   td {
-    padding: 0 1rem;
+    padding: 0.3rem 1rem;
     text-align: center;
   }
+`
+const WeekHoursContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  margin: 1rem;
+`
+
+const WeekHoursTitle = styled.div`
+  font-weight: bold;
+  color: ${color.black};
+  padding: 0.5rem 0;
 `
 export interface CalendarProps {
   calendarid: string,
@@ -62,6 +87,7 @@ export const CalendarDetailComponent = (props) => {
   const [ totalTime, setTotalTime] = React.useState<string>(null)
   const [ currentTime, setCurrentTime] = React.useState<string>(null)
   const [ workTime, setWorkTime] = React.useState<string>(null)
+  const [ takenEligibleHolidays, setTakenEligibleHolidays] = React.useState<number>(0)
 
   const handleDelete = () => {
     setOpened(false)
@@ -71,6 +97,12 @@ export const CalendarDetailComponent = (props) => {
 
   React.useEffect(() => {
     if (calendar) {
+      const takenEligibleHolidays = calendar.workHours?.reduce((total, item) => {
+        return total += item.nonWorking ===  CalendarNonWorkingTypes.ELIGIBLE_HOLIDAY ?
+          getDaysDifferenceBetweenDates(new Date(item.startDate), new Date(item.endDate)) + 1
+          : 0
+      }, 0)
+      setTakenEligibleHolidays(takenEligibleHolidays)
       setTotalTime(formatElapsedTime(calendar.status.expectedTotalTime))
       setCurrentTime(formatElapsedTime(calendar.status.currentExpectedTime))
       const workedTime = formatElapsedTime(calendar.status.workedTime)
@@ -187,6 +219,10 @@ export const CalendarDetailComponent = (props) => {
                 <DetailValue>{calendar.enabled ? 'Activo' : 'Inactivo'}</DetailValue>
               </DetailItem>
               <DetailItem>
+                <DetailKey>Vacaciones elegibles:</DetailKey>
+                <DetailValue>{calendar.eligibleHolidays} ({takenEligibleHolidays} disfrutadas)</DetailValue>
+              </DetailItem>
+              <DetailItem>
                 <DetailKey>Tiempo total:</DetailKey>
                 <DetailValue>{totalTime}</DetailValue>
               </DetailItem>
@@ -198,42 +234,42 @@ export const CalendarDetailComponent = (props) => {
                 <DetailKey>Tiempo trabajado:</DetailKey>
                 <DetailValue>{workTime}</DetailValue>
               </DetailItem>
-              <DetailItem>
-                <DetailKey>Horarios:</DetailKey>
-                <DetailValue>
-                  <DetailTable>
-                    <thead>
-                      <tr>
-                        <td>Inicio</td>
-                        <td>Fin</td>
-                        <td>Lunes</td>
-                        <td>Martes</td>
-                        <td>Miércoles</td>
-                        <td>Jueves</td>
-                        <td>Viernes</td>
-                        <td>Sábado</td>
-                        <td>Domingo</td>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      { calendar.workHours.map((week, index) => (
-                          <tr key={`week_${index}`}>
-                            <td>{ISOStringToFormatedDate(week.startDate, 'date')}</td>
-                            <td>{ISOStringToFormatedDate(week.endDate, 'date')}</td>
-                            <td>{week.monday}</td>
-                            <td>{week.tuesday}</td>
-                            <td>{week.wednesday}</td>
-                            <td>{week.thursday}</td>
-                            <td>{week.friday}</td>
-                            <td>{week.saturday}</td>
-                            <td>{week.sunday}</td>
-                          </tr>
-                        ))
-                      }
-                    </tbody>
-                  </DetailTable>
-                </DetailValue>
-              </DetailItem>
+              <WeekHoursContainer>
+                <WeekHoursTitle>Horarios:</WeekHoursTitle>
+                <DetailTable>
+                  <thead>
+                    <tr>
+                      <td>Título</td>
+                      <td>Inicio</td>
+                      <td>Fin</td>
+                      <td>Lunes</td>
+                      <td>Martes</td>
+                      <td>Miércoles</td>
+                      <td>Jueves</td>
+                      <td>Viernes</td>
+                      <td>Sábado</td>
+                      <td>Domingo</td>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    { calendar.workHours.map((week, index) => (
+                        <tr key={`week_${index}`}>
+                          <td>{week.title || ''}</td>
+                          <td>{ISOStringToFormatedDate(week.startDate, 'date')}</td>
+                          <td>{ISOStringToFormatedDate(week.endDate, 'date')}</td>
+                          <td>{week.monday}</td>
+                          <td>{week.tuesday}</td>
+                          <td>{week.wednesday}</td>
+                          <td>{week.thursday}</td>
+                          <td>{week.friday}</td>
+                          <td>{week.saturday}</td>
+                          <td>{week.sunday}</td>
+                        </tr>
+                      ))
+                    }
+                  </tbody>
+                </DetailTable>
+              </WeekHoursContainer>
             </DetailContainer>
           :
             <div></div>

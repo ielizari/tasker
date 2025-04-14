@@ -277,7 +277,10 @@ export const FormSelect: React.FC<ReactSelectProps & FieldProps> = ({ label, sel
   const [field, meta, {setValue}] = useField(props);
   const [options, setOptions] = React.useState(selOptions || [])
 
-
+  const handleChange = (option: Option) => {
+    if (handleSelect) handleSelect(option);
+    setValue(option.value)
+  }
   React.useEffect(() => {
     setOptions(selOptions)
   },[selOptions])
@@ -320,7 +323,7 @@ export const FormSelect: React.FC<ReactSelectProps & FieldProps> = ({ label, sel
         name={field.name}
         styles={customStyles}
         value={options ? options.find(option => option.value === field.value) : ''}
-        onChange={(option: Option) => {handleSelect(option); setValue(option.value)}}
+        onChange={handleChange}
         onBlur={field.onBlur}
         aria-label={field.name}
       />

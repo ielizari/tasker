@@ -12,14 +12,21 @@ export type Calendar = {
 export type CalendarWeek = {
   startDate: string,
   endDate: string,
-  isHoliday: boolean,
+  nonWorking: CalendarNonWorkingTypes,
   sunday: number,
   monday: number,
   tuesday: number,
   wednesday: number,
   thursday: number,
   friday: number,
-  saturday: number
+  saturday: number,
+  title?: string,
+}
+
+export enum CalendarNonWorkingTypes {
+  HOLIDAY = 'holiday',
+  ELIGIBLE_HOLIDAY = 'eligible_holiday',
+  SICK_DAY = 'sick_day',
 }
 
 export type CalendarDay = {
@@ -74,3 +81,21 @@ export interface CalendarsFilter {
   where?: Partial<Calendar>
   order?: OrderObject
 }
+
+export const NonWorkingOptions = [
+  {
+    label: '',
+    value: ''
+  },
+  {
+    label: "Vacaciones obligatorias",
+    value: CalendarNonWorkingTypes.HOLIDAY
+  },
+  {
+    label: "Vacaciones elegibles",
+    value: CalendarNonWorkingTypes.ELIGIBLE_HOLIDAY
+  },
+  { label: "Baja",
+    value: CalendarNonWorkingTypes.SICK_DAY
+  },
+]

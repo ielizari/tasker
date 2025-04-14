@@ -1,6 +1,6 @@
  import React from 'react'
 import styled from 'styled-components'
-import { Calendar, CalendarWeek } from '../../../domain/calendar'
+import { Calendar, CalendarWeek, NonWorkingOptions } from '../../../domain/calendar'
 import { addCalendar } from '../../../application/addCalendar'
 import { updateCalendar } from '../../../application/updateCalendar'
 import { getCalendar } from '../../../application/getCalendar'
@@ -17,6 +17,7 @@ import {
   FormCheckbox,
   FormDateInput,
   FormButtons,
+  FormSelect,
 } from '../common/form/form'
 import { IconButton } from '../common/icon-button'
 
@@ -54,7 +55,7 @@ const getWorkHoursItem = (): CalendarWeek => {
   return {
     startDate: '',
     endDate: '',
-    isHoliday: false,
+    nonWorking: null,
     sunday: 0,
     monday: 0,
     tuesday: 0,
@@ -62,6 +63,7 @@ const getWorkHoursItem = (): CalendarWeek => {
     thursday: 0,
     friday: 0,
     saturday: 0,
+    title: '',
   }
 }
 
@@ -268,6 +270,11 @@ export const CalendarNewComponent = (props) => {
                       <div>
                         {values.workHours.map((week, index) => (
                           <WorkHoursItem key={index}>
+                             <FormTextInput
+                                name={`workHours[${index}].title`}
+                                label='Título'
+                                type='text'
+                              />
                             <div className='week-hours__dates'>
                               <FormDateInput
                                 id={`workHours[${index}].startDate`}
@@ -281,11 +288,11 @@ export const CalendarNewComponent = (props) => {
                                 label="Fecha de fin"
                                 type="text"
                               />
-                              <FormCheckbox
-                                id={`workHours[${index}].isHoliday`}
-                                name={`workHours[${index}].isHoliday`}
-                                label="Vacaciones"
-                                type="checkbox"
+                              <FormSelect
+                                label='No laborable'
+                                selOptions={NonWorkingOptions}
+                                id={`workHours[${index}].nonWorking`}
+                                name={`workHours[${index}].nonWorking`}
                               />
                             </div>
                             <div className='week-hours__days'>
