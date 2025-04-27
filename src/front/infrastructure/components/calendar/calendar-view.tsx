@@ -7,8 +7,6 @@ import { CalendarDayJobs, CalendarNonWorkingTypes, CalendarWeek } from 'src/api/
 import { Job } from 'src/front/domain/job'
 import { elapsedTime, formatElapsedTime, formatElapsedTimeFromSeconds, ISOStringToFormatedDate } from 'src/lib/date.utils'
 import { ModalWithComponent } from '../common/modal'
-import { range } from 'lodash'
-import { time } from 'console'
 
 const CalendarHeader = styled.div`
   display: flex;
