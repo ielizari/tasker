@@ -37,7 +37,22 @@ export const calendarHandlers = [
       )
     }
   }),
+  rest.get(process.env.PUBLIC_URL + '/api/calendars/days/:calendarid',(req, res, ctx) => {
+    const calendarid = req.params.calendarid || '';
+    const calendar = getTaskerRepository().getCalendarJobsByDay(calendarid)
 
+    if(calendar){
+      return res(
+        ctx.status(200),
+        ctx.json(ApiResponseBuilder(200,calendar,false))
+      )
+    }else{
+      return res(
+        ctx.status(404, 'El calendario no existe'),
+        ctx.json(ApiResponseBuilder(404,{},true,'El calendario no existe'))
+      )
+    }
+  }),
   rest.post(process.env.PUBLIC_URL + '/api/calendars/add',(req,res,ctx) =>{
     try{
       const calendar: Calendar | null = req.body ? req.body as Calendar : null

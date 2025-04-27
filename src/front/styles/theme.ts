@@ -122,6 +122,14 @@ export const color = {
 
   buttonBackground: '#6fcb46',
   buttonBackgroundHighlight: '#7ed956',
+
+  calendarDayNormal: '#fff',
+  calendarDayHoliday: 'red',
+  calendarDayEligibleHoliday: 'green',
+  calendarDaySick: 'blue',
+  calendarDayNoHours: 'grey',
+  calendarDayUnknown: 'yellow',
+  calendarDaySelected: 'pink',
 };
 
 const radius = {

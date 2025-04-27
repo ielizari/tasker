@@ -1,3 +1,4 @@
+import { Job } from './job'
 export interface Calendar {
   id: string,
   title: string,
@@ -55,4 +56,10 @@ export type CalendarTime = {
   expectedMonthTime: number,
   currentMonthExpectedTime: number,
   currentMonthWorkTime: number,
+}
+
+export type CalendarDayJobs = {
+  date: string,
+  jobs: Array<Job>,
+  schedule: CalendarWeek,
 }

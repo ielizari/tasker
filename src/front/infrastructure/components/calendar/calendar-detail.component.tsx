@@ -12,6 +12,7 @@ import { Link } from 'react-router-dom'
 import { formatElapsedTime, ISOStringToFormatedDate, getDaysDifferenceBetweenDates } from '../../../../lib/date.utils'
 import { BlockContainer, BlockHeaderComponent } from '../common/block'
 import { SyncStateContext} from '../../../application/contexts/dbSyncContext'
+import { CalendarView } from './calendar-view'
 
 const DetailContainer = styled.ul`
 `;
@@ -234,6 +235,7 @@ export const CalendarDetailComponent = (props) => {
                 <DetailKey>Tiempo trabajado:</DetailKey>
                 <DetailValue>{workTime}</DetailValue>
               </DetailItem>
+              <CalendarView calendar={calendar}/>
               <WeekHoursContainer>
                 <WeekHoursTitle>Horarios:</WeekHoursTitle>
                 <DetailTable>

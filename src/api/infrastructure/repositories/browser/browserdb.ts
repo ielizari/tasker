@@ -4,7 +4,7 @@ import LocalStorage from 'lowdb/adapters/LocalStorage'
 import { TaskDetail, TaskObject, TaskDB } from 'src/api/domain/task'
 import { WorklogObject, Worklog, WorklogDB} from 'src/api/domain/worklog'
 import { Job, JobObject } from 'src/api/domain/job'
-import { Calendar, CalendarDB, CalendarTime, CalendarNonWorkingTypes } from 'src/api/domain/calendar'
+import { Calendar, CalendarDB, CalendarTime, CalendarNonWorkingTypes, CalendarDayJobs } from 'src/api/domain/calendar'
 import { mapWorklogToApiWorklog, mapApiWorklogToWorklogDb, mapApiTaskToTaskDb, mapTaskDbToApiTask } from 'src/api/application/dtos/dbToApiDto'
 
 import { TaskerRepository, setTaskerRepository, FileDownload,  WorklogsFilter, OrderObject  } from 'src/api/application/taskerRepository'
@@ -578,6 +578,54 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
         }catch (e){
             throw e
         }
+    }
+    getTaskParentChain(taskid: string) {
+        const chain = []
+        const task = db.get('tasks').find({id: taskid}).value()
+        if (task) chain.push(taskid)
+        return task?.parent ? chain.concat(this.getTaskParentChain(task.parent)) : chain
+    }
+    getCalendarDayWorkhours(calendarid: string, date: string) {
+        const calendar = db.get('calendars').find({id: calendarid}).value()
+        const time = new Date(date)
+        const workhours = calendar.workHours.reduce((schedule, current) => {
+            const isTimeInRange = time >= new Date(current.startDate) && time <= new Date(current.endDate)
+            if (!isTimeInRange) return schedule;
+            if (current.nonWorking === CalendarNonWorkingTypes.SICK_DAY) return current;
+            if (current.nonWorking === CalendarNonWorkingTypes.ELIGIBLE_HOLIDAY) return current;
+            if (current.nonWorking === CalendarNonWorkingTypes.HOLIDAY) return current;
+            if (!schedule) return current;
+            return schedule;
+        }, null)
+        return workhours
+    }
+    getCalendarJobsByDay(calendarid: string): Array<CalendarDayJobs> {
+        const calendar = db.get('calendars').find({id: calendarid}).value()
+        const tasks = db.get('tasks').filter((task) => task.calendars?.includes(calendar.id)).value()
+        const jobs = db.get('jobs').filter((job) => {
+            const chain = this.getTaskParentChain(job.task)
+            const belongsToCalendarTask = Boolean(tasks.find((task) => chain.includes(task.id)))
+            const isInCalendarRange = job.startDatetime > calendar.startDate && job.startDatetime < calendar.endDate
+            return belongsToCalendarTask && isInCalendarRange
+        }).value()
+
+        const startDate = new Date(calendar.startDate)
+        const endDate = new Date(calendar.endDate)
+        const days = []
+
+
+        while(startDate < endDate) {
+            const nextDay = new Date(startDate.getTime() + 24*60*60*1000).toISOString()
+            const currentDay = startDate.toISOString()
+            const currentDayWorkhours = this.getCalendarDayWorkhours(calendarid, currentDay)
+            days.push({
+                date: currentDay,
+                schedule: currentDayWorkhours,
+                jobs: jobs.filter((job) => job.startDatetime >= currentDay && job.endDatetime < nextDay)
+            })
+            startDate.setDate(startDate.getDate() + 1)
+        }
+        return days
     }
     addCalendar(calendar: Calendar): Calendar {
         try{
