@@ -22,16 +22,11 @@ export const mapTaskDbToApiTask = (task: TaskDB): TaskDetail => {
   if(!task){
     return null
   }
-  const dates = {
-    createdDate: ISOStringToFormatedDate(task.createdDate),
-    limitDate: ISOStringToFormatedDate(task.limitDate),
-  }
 
   const calendars = getTaskerRepository().getTaskCalendars(task)
 
   return {
     ...task,
-    ...dates,
     calendars,
   }
 }
