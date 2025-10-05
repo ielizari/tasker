@@ -64,6 +64,7 @@ const getWorkHoursItem = (): CalendarWeek => {
     friday: 0,
     saturday: 0,
     title: '',
+    priority: 1,
   }
 }
 
@@ -293,6 +294,12 @@ export const CalendarNewComponent = (props) => {
                                 selOptions={NonWorkingOptions}
                                 id={`workHours[${index}].nonWorking`}
                                 name={`workHours[${index}].nonWorking`}
+                              />
+                              <FormNumberInput 
+                                id={`workHours[${index}].priority`}
+                                name={`workHours[${index}].priority`}
+                                label="Prioridad"
+                                type="number"
                               />
                             </div>
                             <div className='week-hours__days'>

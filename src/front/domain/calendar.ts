@@ -21,6 +21,7 @@ export type CalendarWeek = {
   friday: number,
   saturday: number,
   title?: string,
+  priority: number,
 }
 
 export enum CalendarNonWorkingTypes {

@@ -13,6 +13,7 @@ export const mapCalendarApiTocomponent = (calendar: Calendar): Calendar => {
     workHours: calendar.workHours.map((week) => {
       return {
         ...week,
+        priority: week.priority || 1,
         startDate: ISOStringToFormatedDate(week.startDate),
         endDate: ISOStringToFormatedDate(week.endDate),
       }

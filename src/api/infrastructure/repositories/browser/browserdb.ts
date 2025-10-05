@@ -595,6 +595,7 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
             if (current.nonWorking === CalendarNonWorkingTypes.ELIGIBLE_HOLIDAY) return current;
             if (current.nonWorking === CalendarNonWorkingTypes.HOLIDAY) return current;
             if (!schedule) return current;
+            if (!schedule.nonWorking && current.priority > schedule.priority) return current;
             return schedule;
         }, null)
         return workhours
