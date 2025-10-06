@@ -62,6 +62,8 @@ export interface TaskerRepository{
   getCalendarById(id: string): Calendar
   getCalendarStatus(calendarid: string): CalendarTime
   getCalendarJobsByDay(calendarid: string): Array<CalendarDayJobs>
+  getCalendarExpectedTime (calendar: Calendar): Partial<CalendarTime>
+  getCalendarDayWorkhours(calendarid: string, date: string)
   addCalendar(calendar: Calendar): Calendar
   updateCalendar(calendar: Calendar): Calendar
   deleteCalendar(id: string): boolean

@@ -553,7 +553,7 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
         currentWeekExpectedTime,
         expectedMonthTime,
         currentMonthExpectedTime,
-      } = getCalendarExpectedTime(calendar)
+      } = this.getCalendarExpectedTime(calendar)
 
       return {
         expectedTotalTime,
@@ -628,6 +628,61 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
         }
         return days
     }
+    getCalendarExpectedTime = (values: Calendar): Partial<CalendarTime> => {
+        const times = {
+            expectedTotalTime: 0,
+            currentExpectedTime: 0,
+            expectedWeekTime: 0,
+            currentWeekExpectedTime: 0,
+            expectedMonthTime: 0,
+            currentMonthExpectedTime: 0,
+        }
+        if (!values) return times;
+
+        const today = new Date()
+        const { weekStart, weekEnd } = getCurrentWeekRange()
+        const { monthStart, monthEnd } = getCurrentMonthRange()
+        const initialTime = new Date(values.workHours[0].startDate)
+        const endTime = new Date(values.workHours[0].endDate)
+        if (!(initialTime && endTime)) return times;
+        while(initialTime <= endTime) {
+            const workhours = values.workHours.filter((range) => {
+            return initialTime >= new Date(range.startDate) &&
+                initialTime <= new Date(range.endDate)
+            })
+            if (workhours.length) {
+            //const item = workhours[workhours.length - 1];
+            const item = this.getCalendarDayWorkhours(values.id, initialTime.toISOString())
+            if (item && !Object.values(CalendarNonWorkingTypes).includes(item.nonWorking)) {
+                const dayTime = getDayTime(initialTime, item)
+                times.expectedTotalTime += dayTime
+                if (initialTime >= weekStart && initialTime <= weekEnd) {
+                times.expectedWeekTime += dayTime
+                }
+                if (initialTime >= monthStart && initialTime <= monthEnd) {
+                times.expectedMonthTime += dayTime
+                }
+            }
+            }
+            initialTime.setDate(initialTime.getDate() + 1)
+            if (initialTime > today && times.currentExpectedTime === 0) {
+                times.currentExpectedTime = times.expectedTotalTime
+            }
+            if (initialTime > today && times.currentWeekExpectedTime === 0) {
+                times.currentWeekExpectedTime = times.expectedWeekTime
+            }
+            if (initialTime > today && times.currentMonthExpectedTime === 0) {
+                times.currentMonthExpectedTime = times.expectedMonthTime
+            }
+        }
+        times.currentExpectedTime *= 3600000
+        times.expectedTotalTime *= 3600000
+        times.expectedWeekTime *= 3600000
+        times.currentWeekExpectedTime *= 3600000
+        times.expectedMonthTime *= 3600000
+        times.currentMonthExpectedTime *= 3600000
+        return times
+        }
     addCalendar(calendar: Calendar): Calendar {
         try{
             const calendarsTable = db.get('calendars').value()
@@ -1017,60 +1072,7 @@ const getCurrentMonthRange = () => {
 
     return { monthStart, monthEnd }
 }
-const getCalendarExpectedTime = (values: Calendar): Partial<CalendarTime> => {
-  const times = {
-    expectedTotalTime: 0,
-    currentExpectedTime: 0,
-    expectedWeekTime: 0,
-    currentWeekExpectedTime: 0,
-    expectedMonthTime: 0,
-    currentMonthExpectedTime: 0,
-  }
-  if (!values) return times;
 
-  const today = new Date()
-  const { weekStart, weekEnd } = getCurrentWeekRange()
-  const { monthStart, monthEnd } = getCurrentMonthRange()
-  const initialTime = new Date(values.workHours[0].startDate)
-  const endTime = new Date(values.workHours[0].endDate)
-  if (!(initialTime && endTime)) return times;
-  while(initialTime <= endTime) {
-    const workhours = values.workHours.filter((range) => {
-      return initialTime >= new Date(range.startDate) &&
-        initialTime <= new Date(range.endDate)
-    })
-    if (workhours.length) {
-      const item = workhours[workhours.length - 1];
-      if (item && !Object.values(CalendarNonWorkingTypes).includes(item.nonWorking)) {
-        const dayTime = getDayTime(initialTime, item)
-        times.expectedTotalTime += dayTime
-        if (initialTime >= weekStart && initialTime <= weekEnd) {
-          times.expectedWeekTime += dayTime
-        }
-        if (initialTime >= monthStart && initialTime <= monthEnd) {
-          times.expectedMonthTime += dayTime
-        }
-      }
-    }
-    initialTime.setDate(initialTime.getDate() + 1)
-    if (initialTime > today && times.currentExpectedTime === 0) {
-        times.currentExpectedTime = times.expectedTotalTime
-    }
-    if (initialTime > today && times.currentWeekExpectedTime === 0) {
-        times.currentWeekExpectedTime = times.expectedWeekTime
-    }
-    if (initialTime > today && times.currentMonthExpectedTime === 0) {
-        times.currentMonthExpectedTime = times.expectedMonthTime
-    }
-  }
-  times.currentExpectedTime *= 3600000
-  times.expectedTotalTime *= 3600000
-  times.expectedWeekTime *= 3600000
-  times.currentWeekExpectedTime *= 3600000
-  times.expectedMonthTime *= 3600000
-  times.currentMonthExpectedTime *= 3600000
-  return times
-}
 /*
 const getDirectChildTasksTree = (taskid: string): TaskTreeItem => {
     let childs = db.get('tasks').filter({parent: taskid}).value()
