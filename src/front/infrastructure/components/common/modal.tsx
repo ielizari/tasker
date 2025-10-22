@@ -29,6 +29,8 @@ const DialogContent = styled.div`
   ${common.shadow()};
   width: 50%;
   background-color: ${color.white};
+  max-height: 90dvh;
+  overflow-y: auto;
 `
 
 const DialogHeader = styled.div`

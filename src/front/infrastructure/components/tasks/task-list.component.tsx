@@ -59,9 +59,15 @@ const TaskListItem = (props: {item: TaskObject, resultHandler? } ) => {
           ({props.item.childTasks.length})
         </ListItemExpand>
         {props.resultHandler ?
-          <ListItemTitleResult onClick={() => props.resultHandler(props.item.task)}>{props.item.task.title}</ListItemTitleResult>
+          <ListItemTitleResult 
+            onClick={() => props.resultHandler(props.item.task)}>
+              {props.item.task.title}
+          </ListItemTitleResult>
           :
-          <ListItemTitleLink to={`/tasks/${props.item.task.id}`}>{props.item.task.title}</ListItemTitleLink>
+          <ListItemTitleLink to={`/tasks/${props.item.task.id}`}>
+            {props.item.parentTaskChain?.map((parentTask) => parentTask.title ).join(' / ')}
+            {props.item.task.title}
+          </ListItemTitleLink>
         }
       </ListItem>
       {showChildren &&
@@ -93,10 +99,9 @@ export const TaskListComponent = (props) => {
 
   const searchHandler = (values) => {
     const filter: Partial<TaskDetail> = {
-      parent: ''
-    }
-    if(values.actionBarSearch){
-      filter.title = values.actionBarSearch
+      parent: '',
+      ...(values.actionBarSearch && { title: values.actionBarSearch}),
+      ...(values.orderItems && { sorting: values.orderItems})
     }
     setFilters(filter)
   }

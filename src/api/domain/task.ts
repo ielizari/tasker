@@ -22,6 +22,7 @@ export interface TaskDB extends Omit<TaskDetail, 'calendars'> {
 export interface TaskObject {
     task: TaskDetail,
     parentTask: TaskDetail | null,
+    parentTaskChain?: Array<TaskItem>,
     childTasks: Array<TaskDetail>,
     calendars: Array<Calendar>,
 }

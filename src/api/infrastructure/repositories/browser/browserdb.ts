@@ -1,7 +1,7 @@
 import lowdb from 'lowdb'
 import LocalStorage from 'lowdb/adapters/LocalStorage'
 
-import { TaskDetail, TaskObject, TaskDB } from 'src/api/domain/task'
+import { TaskDetail, TaskObject, TaskDB, TaskItem } from 'src/api/domain/task'
 import { WorklogObject, Worklog, WorklogDB} from 'src/api/domain/worklog'
 import { Job, JobObject } from 'src/api/domain/job'
 import { Calendar, CalendarDB, CalendarTime, CalendarNonWorkingTypes, CalendarDayJobs } from 'src/api/domain/calendar'
@@ -106,21 +106,51 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
         }
     }
 
-    getTasks(filter: Partial<TaskDetail> = {}, order = [], orderDirection = []): Array<TaskObject>  {
-        let search = JSON.parse(filter as string)
-        const tasks: Array<TaskDetail> = db.get('tasks').filter(task =>
-            ((!search.parent && !(typeof(search.parent)==='string')) || task.parent === search.parent )&&
-            (!search.title || task.title.toLowerCase().includes(search.title.toLowerCase()))
-        ).map(mapTaskDbToApiTask)
-
-        .orderBy(order,orderDirection)
-        .value()
+    getTasks(filter: Partial<TaskDetail> = {}, order?: string ): Array<TaskObject>  {
+        if (order === 'activityDesc') {
+            return this.getRecentActivityTaks()
+        }
+        const tasks: Array<TaskDetail> = db.get('tasks')
+            .filter(task =>
+                ((!filter.parent && !(typeof(filter.parent)==='string')) || task.parent === filter.parent )&&
+                (!filter.title || task.title.toLowerCase().includes(filter.title.toLowerCase()))
+            )
+            .map(mapTaskDbToApiTask)
+            .orderBy(order)
+            .value()
 
         const result : Array<TaskObject>= []
         tasks.forEach((task: TaskDetail) => {
             let taskobject: TaskObject = {
                 task: task,
                 parentTask: null,
+                childTasks: [],
+                calendars: [],
+            }
+            if(!isEmpty(task.parent)){
+                taskobject.parentTask = mapTaskDbToApiTask(db.get('tasks').find({id: task.parent}).value()) || null
+            }
+            taskobject.childTasks = taskobject.childTasks.concat(
+                db.get('tasks').filter({parent: task.id}).map(mapTaskDbToApiTask).value() || []);
+
+            result.push(taskobject)
+        })
+        return result
+    }
+    getRecentActivityTaks(limit?: number): Array<TaskObject> {
+        const jobs: Array<Job> =  db.get('jobs')
+            .orderBy(['startDatetime'], ['desc'])
+            .uniqBy('task')
+            .take(limit || 20)
+            .value()
+        const result : Array<TaskObject> = []
+        jobs.forEach((job: Job) => {
+            const task = mapTaskDbToApiTask(db.get('tasks').find({id: job.task}).value()) || null
+            const parentTaskChain = this.getTaskParentChain(job.task).map((taskid) => this.getTaskItemById(taskid))
+            let taskobject: TaskObject = {
+                task: task,
+                parentTask: null,
+                parentTaskChain,
                 childTasks: [],
                 calendars: [],
             }
@@ -154,6 +184,13 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
       }catch (e){
         throw e
       }
+    }
+    getTaskItemById(id: string): TaskItem {
+        const task = db.get('tasks').find({id: id}).value() || null
+        return {
+            id,
+            title: task.title,            
+        }
     }
     getTaskCalendars(task: TaskDB) : Array<Calendar> {
       let calendars: Array<Calendar> = task.calendars?.map((calendarid) => {
@@ -381,14 +418,14 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
 
     }
 
-    getJobs(filter: Partial<Job> = {}): Array<JobObject>  {
+    getJobs(filter: Partial<Job> = {}, sorting?: string): Array<JobObject>  {
         let search = {}
         if(typeof filter === 'string'){
             search = JSON.parse(filter as string)
         }else{
             search = filter
         }
-        const jobs = db.get('jobs').filter(search).value()
+        const jobs = db.get('jobs').filter(search).orderBy(sorting).value()
         const result : Array<JobObject>= []
         jobs.forEach((job: Job) => {
             let jobobject: JobObject = {

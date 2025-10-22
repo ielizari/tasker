@@ -15,7 +15,6 @@ export const ListContainer = styled.div`
 export const ListItem = styled.div`
     display: flex;
     flex-direction: row;
-    align-items: center;    
     background-color: ${color.lightGrey};
     color: ${color.black}; 
     border-width: 0 1px 1px 1px !important;
@@ -37,10 +36,10 @@ export const ListItemTitleResult = styled.div`
 export const ListItemExpand = styled.div`
     display: inline-flex;
     padding: 1rem;
+    flex-direction: row;
     cursor: pointer;
     justify-content: center;
     align-items: center;
-    border-width: 0 !important;
     gap: 0.3rem;
     background-color: ${color.blockTitleBackground};
     color: ${color.white};

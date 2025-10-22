@@ -7,8 +7,8 @@ import { ISOStringToFormatedDate } from 'src/lib/date.utils'
 
 export const taskHandlers = [
   rest.post(process.env.PUBLIC_URL + '/api/tasks',(req, res, ctx) => {
-    const filters = req.body ? req.body as Partial<TaskDetail> : {}
-    const tasks: Array<TaskObject> = getTaskerRepository().getTasks(filters)
+    const { sorting, ...filters } = JSON.parse(req.body as string) || {}
+    const tasks: Array<TaskObject> = getTaskerRepository().getTasks(filters, sorting)
 
     const response : ApiResponse = {
       status: 200,

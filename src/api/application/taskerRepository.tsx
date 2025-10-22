@@ -35,7 +35,8 @@ export interface TaskerRepository{
   setDbLastExported(date: string): boolean
   isDbSynced(): boolean
 
-  getTasks(filter?: Partial<TaskDetail>, order?: Array<string>, orderDirection?: Array<string>): Array<TaskObject>
+  getTasks(filter?: Partial<TaskDetail>, sorting?: string): Array<TaskObject>
+  getRecentActivityTaks(limit: number): Array<TaskObject>
   addTask(task: TaskDetail): TaskObject
   getTaskById(id: string): TaskObject
   getTaskCalendars(task: TaskDB): Array<Calendar>
@@ -52,7 +53,7 @@ export interface TaskerRepository{
   reopenWorklog(worklog: Worklog): WorklogObject
   getWorklogGroupedData(worklogid: string): any
 
-  getJobs(filter?: Partial<Job>): Array<JobObject>
+  getJobs(filter?: Partial<Job>, sorting?: string): Array<JobObject>
   addJob(job:Job): JobObject
   getJobById(id: string): JobObject
   deleteJob(id: string): boolean
