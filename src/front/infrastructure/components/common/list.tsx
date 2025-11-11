@@ -2,57 +2,73 @@ import styled from 'styled-components'
 import { color } from '../../../styles/theme'
 import { Link } from 'react-router-dom'
 
-export const ListContainer = styled.div`
-    display: flex;
-    flex-direction: column;
-    margin: 1rem;    
-    border-width: 1px 0 0 0;
-    border-color: ${color.black};
-    border-style: solid;
-    }
+export const ListContainer = styled.div<{withChildren?:boolean}>`
+  display: grid;
+  grid-template-columns: ${props => props.withChildren ? 'min-content auto' : 'auto'};
+  row-gap: 1px;
+  background-color: ${color.black};
+  margin: 1rem;    
+  border-width: 1px;
+  border-color: ${color.black};
+  border-style: solid;
+  }
 `
 
 export const ListItem = styled.div`
-    display: flex;
-    flex-direction: row;
-    background-color: ${color.lightGrey};
-    color: ${color.black}; 
-    border-width: 0 1px 1px 1px !important;
-    border-color: ${color.black};
-    border-style: solid;
-    
+  display: flex;
+  flex-direction: row;
+  background-color: ${color.lightGrey};
+  color: ${color.black};    
 `
 
-export const ListItemTitleLink = styled(Link)`
-    width: 100%;
-    padding: 1rem;
+export const ListItemContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  background-color: ${color.lightGrey};
+`
+
+export const ListItemBreadcrumbs = styled.div`
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+  padding-left: 1rem;
+`
+
+export const ListItemBreadcrumbLink = styled(Link)`
+  font-size: 0.8rem;
+  :hover {
+    text-decoration: underline;
+  }
+`
+
+export const ListItemTitleLink = styled(Link)<{$breadcrumbs?: boolean}>`
+  width: 100%;
+  padding: ${props => props.$breadcrumbs ? '0.5rem' : '1rem'};
 `
 export const ListItemTitleResult = styled.div`
-    width: 100%;
-    padding: 1rem;
-    cursor: pointer;
+  width: 100%;
+  padding: 1rem;
+  cursor: pointer;
 `
 
-export const ListItemExpand = styled.div`
-    display: inline-flex;
-    padding: 1rem;
-    flex-direction: row;
-    cursor: pointer;
-    justify-content: center;
-    align-items: center;
-    gap: 0.3rem;
-    background-color: ${color.blockTitleBackground};
-    color: ${color.white};
+export const ListItemExpand = styled.div<{expanded?: boolean}>`
+  display: inline-flex;
+  padding: 0.7rem;
+  flex-direction: row;
+  cursor: pointer;
+  justify-content: center;
+  align-items: ${props => props.expanded ? 'top' : 'center'};
+  gap: 0.3rem;
+  background-color: ${color.blockTitleBackground};
+  color: ${color.white};
 `
 export const ListChildContainer = styled.div`
-    display: flex;
-    flex-direction: column;
-    padding-left: 1rem;
-    border-style: solid;
-    border-width: 0 0 1px 0;
-    border-color: ${color.black};
-    & div:last-child{
-        border-width: 0 1px 0 1px !important;
-    }
-    
+  display: grid;
+  grid-template-columns: min-content auto;
+  row-gap: 1px;
+  background-color: ${color.black};
+  
+  border-style: solid;
+  border-width: 1px 0 0 1px;
+  border-color: ${color.black};    
 `

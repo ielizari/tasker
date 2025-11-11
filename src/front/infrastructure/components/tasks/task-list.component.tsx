@@ -3,13 +3,15 @@ import styled from 'styled-components'
 import { common } from '../../../styles/theme'
 import {
   ListContainer,
-  ListItem,
   ListItemExpand,
+  ListItemContainer,
+  ListItemBreadcrumbs,
+  ListItemBreadcrumbLink,
   ListItemTitleResult,
   ListChildContainer,
   ListItemTitleLink
 } from '../common/list'
-import { TaskObject, TaskDetail } from '../../../domain/task'
+import { TaskObject, TaskDetail, TaskItem } from '../../../domain/task'
 import { getTaskList } from '../../../application/getTaskList'
 import { FaFilter, FaPlus, FaMinus } from 'react-icons/fa'
 import { IconLink } from '../common/icon-button'
@@ -21,6 +23,20 @@ import { BlockHeaderComponent, BlockContainer, BlockEmptyComponent } from '../co
 const AddTaskButton = styled(IconLink)`
   ${common.blockButton()};
 `
+const TaskItemBreadcrumbs = (props: {breadcrumbs: Array<TaskItem>}) => {
+  return (
+    <ListItemBreadcrumbs>
+      {
+        props.breadcrumbs?.length && props.breadcrumbs?.slice(1)?.reverse().map((task, index) => (
+          <>
+            {index > 0 && index < props.breadcrumbs.length && ' > '}
+            <ListItemBreadcrumbLink to={`tasks/${task.id}`}>{task.title}</ListItemBreadcrumbLink>
+          </>
+        ))
+      }
+    </ListItemBreadcrumbs>
+  )
+}
 
 const TaskListItem = (props: {item: TaskObject, resultHandler? } ) => {
   const [showChildren, setShowChildren] = React.useState<boolean>(false)
@@ -49,8 +65,8 @@ const TaskListItem = (props: {item: TaskObject, resultHandler? } ) => {
   return(
     <>
       {loading && <Spinner />}
-      <ListItem>
-        <ListItemExpand onClick={loadChildren}>
+      <>
+        <ListItemExpand expanded={showChildren} onClick={loadChildren}>
           {showChildren ?
             <FaMinus />
             :
@@ -58,23 +74,30 @@ const TaskListItem = (props: {item: TaskObject, resultHandler? } ) => {
           }
           ({props.item.childTasks.length})
         </ListItemExpand>
-        {props.resultHandler ?
-          <ListItemTitleResult 
-            onClick={() => props.resultHandler(props.item.task)}>
+        <ListItemContainer>
+          <TaskItemBreadcrumbs 
+            breadcrumbs={props.item.parentTaskChain}
+          />
+          {props.resultHandler ?
+            <ListItemTitleResult 
+              onClick={() => props.resultHandler(props.item.task)}>
+                {props.item.task.title}
+            </ListItemTitleResult>
+            :
+            <ListItemTitleLink 
+              to={`/tasks/${props.item.task.id}`}
+              $breadcrumbs={props.item.parentTaskChain?.length>1}
+            >
               {props.item.task.title}
-          </ListItemTitleResult>
-          :
-          <ListItemTitleLink to={`/tasks/${props.item.task.id}`}>
-            {props.item.parentTaskChain?.map((parentTask) => parentTask.title ).join(' / ')}
-            {props.item.task.title}
-          </ListItemTitleLink>
-        }
-      </ListItem>
-      {showChildren &&
-        <ListChildContainer>
-          <TaskListWidget tasks={childrenTasks} resultHandler={props.resultHandler}/>
-        </ListChildContainer>
-      }
+            </ListItemTitleLink>
+          }
+          {showChildren &&
+            <ListChildContainer>
+              <TaskListWidget tasks={childrenTasks} resultHandler={props.resultHandler}/>
+            </ListChildContainer>
+          }
+        </ListItemContainer>
+      </>      
     </>
   )
 }
@@ -191,7 +214,7 @@ export const TaskListComponent = (props) => {
     />
     {loading && <Spinner />}
 
-    <ListContainer>
+    <ListContainer withChildren={true}>
     {tasks.length ?
       (error!==null ?
         <div>Error: {error.message?error.message:'unknown error'}</div>
