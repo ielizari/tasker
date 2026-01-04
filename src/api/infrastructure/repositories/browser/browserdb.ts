@@ -297,7 +297,9 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
             const uniqueCalendars = new Set<string>()
             childJobs.forEach((job) => {
                 job.task.calendars.forEach((calendar) => {
-                    uniqueCalendars.add(calendar.id)
+                    if (job.job.startDatetime >= calendar.startDate && job.job.startDatetime <= calendar.endDate) {
+                        uniqueCalendars.add(calendar.id)
+                    }
                 })
             })
             uniqueCalendars.forEach((calendarid) => {
@@ -441,17 +443,6 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
                 jobobject.worklog = db.get('worklogs').find({id: job.worklog}).value() || null
             }
             result.push(jobobject)
-            // result.push({
-            //     id: job.id || '',
-            //     task: job.task || '',
-            //     worklog: job.worklog || '',
-            //     title: job.title || '',
-            //     description: job.description || '',
-            //     startDatetime: job.startDatetime || '',
-            //     endDatetime: job.endDatetime || '',
-            //     type: job.type || '',
-            //     tags: job.tags || []
-            // })
         })
         return result
     }
@@ -682,24 +673,23 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
         const initialTime = new Date(values.workHours[0].startDate)
         const endTime = new Date(values.workHours[0].endDate)
         if (!(initialTime && endTime)) return times;
-        while(initialTime <= endTime) {
+        while(initialTime <= today && initialTime <= endTime) {
             const workhours = values.workHours.filter((range) => {
-            return initialTime >= new Date(range.startDate) &&
-                initialTime <= new Date(range.endDate)
+                return initialTime >= new Date(range.startDate) &&
+                    initialTime <= new Date(range.endDate)
             })
             if (workhours.length) {
-            //const item = workhours[workhours.length - 1];
-            const item = this.getCalendarDayWorkhours(values.id, initialTime.toISOString())
-            if (item && !Object.values(CalendarNonWorkingTypes).includes(item.nonWorking)) {
-                const dayTime = getDayTime(initialTime, item)
-                times.expectedTotalTime += dayTime
-                if (initialTime >= weekStart && initialTime <= weekEnd) {
-                times.expectedWeekTime += dayTime
+                const item = this.getCalendarDayWorkhours(values.id, initialTime.toISOString())
+                if (item && !Object.values(CalendarNonWorkingTypes).includes(item.nonWorking)) {
+                    const dayTime = getDayTime(initialTime, item)
+                    times.expectedTotalTime += dayTime
+                    if (initialTime >= weekStart && initialTime <= weekEnd) {
+                    times.expectedWeekTime += dayTime
+                    }
+                    if (initialTime >= monthStart && initialTime <= monthEnd) {
+                    times.expectedMonthTime += dayTime
+                    }
                 }
-                if (initialTime >= monthStart && initialTime <= monthEnd) {
-                times.expectedMonthTime += dayTime
-                }
-            }
             }
             initialTime.setDate(initialTime.getDate() + 1)
             if (initialTime > today && times.currentExpectedTime === 0) {
@@ -712,6 +702,7 @@ export class LowdbLocalstorageRepository implements TaskerRepository {
                 times.currentMonthExpectedTime = times.expectedMonthTime
             }
         }
+        console.log(times)
         times.currentExpectedTime *= 3600000
         times.expectedTotalTime *= 3600000
         times.expectedWeekTime *= 3600000
@@ -1090,13 +1081,13 @@ const getDayTime = (date, workhours) => {
 }
 
 const getCurrentWeekRange = () => {
+    const day = 7*24*60*60*1000
     const today = new Date()
     const weekStart = new Date()
-    const weekEnd = new Date()
     const weekStartDiff = today.getDay() === 0 ? 7 : today.getDay() - 1
     weekStart.setDate(weekStart.getDate() - weekStartDiff)
     weekStart.setHours(0,0,0,0)
-    weekEnd.setDate(weekStart.getDate() + 7)
+    const weekEnd = new Date(weekStart.getTime() + day)
     weekEnd.setHours(0,0,0,0)
 
     return { weekStart, weekEnd }
